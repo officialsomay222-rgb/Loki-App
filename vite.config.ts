@@ -15,7 +15,7 @@ export default defineConfig(({mode}) => {
         manifest: {
           name: 'Loki Prime X',
           short_name: 'Loki X',
-          description: 'Advanced AI Chat Interface',
+          description: 'Advanced AI Chat Interface - Awakened Intelligence',
           theme_color: '#08080c',
           background_color: '#08080c',
           display: 'standalone',
@@ -24,16 +24,38 @@ export default defineConfig(({mode}) => {
           id: '/',
           icons: [
             {
-              src: 'https://i.ibb.co/BVMjG8h1/Ai-Art-1738993587834.jpg',
+              src: 'https://i.ibb.co/5XjVRg3S/Picsart-26-03-07-20-42-18-789.png',
               sizes: '192x192',
-              type: 'image/jpeg',
+              type: 'image/png',
               purpose: 'any maskable'
             },
             {
-              src: 'https://i.ibb.co/BVMjG8h1/Ai-Art-1738993587834.jpg',
+              src: 'https://i.ibb.co/5XjVRg3S/Picsart-26-03-07-20-42-18-789.png',
               sizes: '512x512',
-              type: 'image/jpeg',
+              type: 'image/png',
               purpose: 'any maskable'
+            },
+            {
+              src: 'https://i.ibb.co/5XjVRg3S/Picsart-26-03-07-20-42-18-789.png',
+              sizes: '1024x1024',
+              type: 'image/png',
+              purpose: 'any maskable'
+            }
+          ],
+          screenshots: [
+            {
+              src: 'https://i.ibb.co/5XjVRg3S/Picsart-26-03-07-20-42-18-789.png',
+              sizes: '1024x1024',
+              type: 'image/png',
+              form_factor: 'wide',
+              label: 'Loki Prime X Interface'
+            },
+            {
+              src: 'https://i.ibb.co/5XjVRg3S/Picsart-26-03-07-20-42-18-789.png',
+              sizes: '1024x1024',
+              type: 'image/png',
+              form_factor: 'narrow',
+              label: 'Loki Prime X Mobile'
             }
           ]
         },

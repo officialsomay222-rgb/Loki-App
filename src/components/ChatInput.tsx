@@ -44,8 +44,8 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       inputRef.current.style.height = 'auto';
       const scrollHeight = inputRef.current.scrollHeight;
       inputRef.current.style.height = `${Math.min(scrollHeight, 150)}px`;
-      // Show scrollbar only if content exceeds roughly 2 lines (around 50px)
-      inputRef.current.style.overflowY = scrollHeight > 50 ? 'auto' : 'hidden';
+      // Show scrollbar only if content exceeds roughly 2 lines (approx 72px)
+      inputRef.current.style.overflowY = scrollHeight > 80 ? 'auto' : 'hidden';
     }
   };
 
