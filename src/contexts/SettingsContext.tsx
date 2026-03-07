@@ -1,0 +1,222 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+export type Theme = 'light' | 'dark';
+export type BgStyle = 'default' | 'nebula' | 'cyber-grid';
+export type ModelMode = 'pro' | 'fast' | 'happy';
+export type BubbleStyle = 'glass' | 'solid';
+export type FontSize = 'small' | 'medium' | 'large';
+export type FontStyle = 'sans' | 'serif' | 'mono';
+export type ResponseLength = 'short' | 'balanced' | 'detailed';
+export type AccentColor = 'cyan' | 'violet' | 'emerald' | 'rose';
+export type MessageDensity = 'compact' | 'comfortable';
+
+interface SettingsState {
+  theme: Theme;
+  bgStyle: BgStyle;
+  commanderName: string;
+  modelMode: ModelMode;
+  systemInstruction: string;
+  temperature: number;
+  topP: number;
+  topK: number;
+  isAwakened: boolean;
+  enterToSend: boolean;
+  bubbleStyle: BubbleStyle;
+  fontSize: FontSize;
+  fontStyle: FontStyle;
+  soundEnabled: boolean;
+  messageAnimation: boolean;
+  autoScroll: boolean;
+  typingSpeed: number;
+  showAvatars: boolean;
+  responseLength: ResponseLength;
+  accentColor: AccentColor;
+  messageDensity: MessageDensity;
+  setTheme: (theme: Theme) => void;
+  setBgStyle: (bg: BgStyle) => void;
+  setCommanderName: (name: string) => void;
+  setModelMode: (mode: ModelMode) => void;
+  setSystemInstruction: (instruction: string) => void;
+  setTemperature: (temp: number) => void;
+  setTopP: (topP: number) => void;
+  setTopK: (topK: number) => void;
+  setIsAwakened: (awakened: boolean) => void;
+  setEnterToSend: (enterToSend: boolean) => void;
+  setBubbleStyle: (style: BubbleStyle) => void;
+  setFontSize: (size: FontSize) => void;
+  setFontStyle: (style: FontStyle) => void;
+  setSoundEnabled: (enabled: boolean) => void;
+  setMessageAnimation: (enabled: boolean) => void;
+  setAutoScroll: (enabled: boolean) => void;
+  setTypingSpeed: (speed: number) => void;
+  setShowAvatars: (show: boolean) => void;
+  setResponseLength: (length: ResponseLength) => void;
+  setAccentColor: (color: AccentColor) => void;
+  setMessageDensity: (density: MessageDensity) => void;
+  resetSettings: () => void;
+}
+
+const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setCommanderName' | 'setModelMode' | 'setSystemInstruction' | 'setTemperature' | 'setTopP' | 'setTopK' | 'setIsAwakened' | 'setEnterToSend' | 'setBubbleStyle' | 'setFontSize' | 'setFontStyle' | 'setSoundEnabled' | 'setMessageAnimation' | 'setAutoScroll' | 'setTypingSpeed' | 'setShowAvatars' | 'setResponseLength' | 'setAccentColor' | 'setMessageDensity' | 'resetSettings'> = {
+  theme: 'dark',
+  bgStyle: 'nebula',
+  commanderName: 'Commander',
+  modelMode: 'pro',
+  systemInstruction: 'You are Loki Prime X, an advanced, highly intelligent, and analytical AI. Provide detailed, step-by-step reasoning.',
+  temperature: 0.7,
+  topP: 0.95,
+  topK: 64,
+  isAwakened: false,
+  enterToSend: false,
+  bubbleStyle: 'glass',
+  fontSize: 'medium',
+  fontStyle: 'sans',
+  soundEnabled: true,
+  messageAnimation: true,
+  autoScroll: true,
+  typingSpeed: 30,
+  showAvatars: true,
+  responseLength: 'balanced',
+  accentColor: 'cyan',
+  messageDensity: 'comfortable',
+};
+
+const SettingsContext = createContext<SettingsState | undefined>(undefined);
+
+export const SettingsProvider = ({ children }: { children: ReactNode }) => {
+  const [theme, setTheme] = useState<Theme>(defaultSettings.theme);
+  const [bgStyle, setBgStyle] = useState<BgStyle>(defaultSettings.bgStyle);
+  const [commanderName, setCommanderName] = useState(defaultSettings.commanderName);
+  const [modelMode, setModelMode] = useState<ModelMode>(defaultSettings.modelMode);
+  const [systemInstruction, setSystemInstruction] = useState(defaultSettings.systemInstruction);
+  const [temperature, setTemperature] = useState(defaultSettings.temperature);
+  const [topP, setTopP] = useState(defaultSettings.topP);
+  const [topK, setTopK] = useState(defaultSettings.topK);
+  const [isAwakened, setIsAwakened] = useState(defaultSettings.isAwakened);
+  const [enterToSend, setEnterToSend] = useState(defaultSettings.enterToSend);
+  const [bubbleStyle, setBubbleStyle] = useState<BubbleStyle>(defaultSettings.bubbleStyle);
+  const [fontSize, setFontSize] = useState<FontSize>(defaultSettings.fontSize);
+  const [fontStyle, setFontStyle] = useState<FontStyle>(defaultSettings.fontStyle);
+  const [soundEnabled, setSoundEnabled] = useState(defaultSettings.soundEnabled);
+  const [messageAnimation, setMessageAnimation] = useState(defaultSettings.messageAnimation);
+  const [autoScroll, setAutoScroll] = useState(defaultSettings.autoScroll);
+  const [typingSpeed, setTypingSpeed] = useState(defaultSettings.typingSpeed);
+  const [showAvatars, setShowAvatars] = useState(defaultSettings.showAvatars);
+  const [responseLength, setResponseLength] = useState<ResponseLength>(defaultSettings.responseLength);
+  const [accentColor, setAccentColor] = useState<AccentColor>(defaultSettings.accentColor);
+  const [messageDensity, setMessageDensity] = useState<MessageDensity>(defaultSettings.messageDensity);
+
+  const resetSettings = () => {
+    setTheme(defaultSettings.theme);
+    setBgStyle(defaultSettings.bgStyle);
+    setCommanderName(defaultSettings.commanderName);
+    setModelMode(defaultSettings.modelMode);
+    setSystemInstruction(defaultSettings.systemInstruction);
+    setTemperature(defaultSettings.temperature);
+    setTopP(defaultSettings.topP);
+    setTopK(defaultSettings.topK);
+    setEnterToSend(defaultSettings.enterToSend);
+    setBubbleStyle(defaultSettings.bubbleStyle);
+    setFontSize(defaultSettings.fontSize);
+    setFontStyle(defaultSettings.fontStyle);
+    setSoundEnabled(defaultSettings.soundEnabled);
+    setMessageAnimation(defaultSettings.messageAnimation);
+    setAutoScroll(defaultSettings.autoScroll);
+    setTypingSpeed(defaultSettings.typingSpeed);
+    setShowAvatars(defaultSettings.showAvatars);
+    setResponseLength(defaultSettings.responseLength);
+    setAccentColor(defaultSettings.accentColor);
+    setMessageDensity(defaultSettings.messageDensity);
+  };
+
+  useEffect(() => {
+    const loadSetting = <T,>(key: string, setter: (val: T) => void, parser?: (val: string) => T) => {
+      const saved = localStorage.getItem(`loki_${key}`);
+      if (saved) {
+        try {
+          setter(parser ? parser(saved) : saved as unknown as T);
+        } catch (e) {
+          console.error(`Failed to parse setting ${key}`, e);
+        }
+      }
+    };
+
+    loadSetting('theme', setTheme as any);
+    loadSetting('bgStyle', setBgStyle as any);
+    loadSetting('commanderName', setCommanderName);
+    loadSetting('modelMode', setModelMode as any);
+    loadSetting('systemInstruction', setSystemInstruction);
+    loadSetting('temperature', setTemperature, parseFloat);
+    loadSetting('topP', setTopP, parseFloat);
+    loadSetting('topK', setTopK, parseInt);
+    loadSetting('enterToSend', setEnterToSend, (val) => val === 'true');
+    loadSetting('bubbleStyle', setBubbleStyle as any);
+    loadSetting('fontSize', setFontSize as any);
+    loadSetting('fontStyle', setFontStyle as any);
+    loadSetting('soundEnabled', setSoundEnabled, (val) => val === 'true');
+    loadSetting('messageAnimation', setMessageAnimation, (val) => val === 'true');
+    loadSetting('autoScroll', setAutoScroll, (val) => val === 'true');
+    loadSetting('typingSpeed', setTypingSpeed, parseInt);
+    loadSetting('showAvatars', setShowAvatars, (val) => val === 'true');
+    loadSetting('responseLength', setResponseLength as any);
+    loadSetting('accentColor', setAccentColor as any);
+    loadSetting('messageDensity', setMessageDensity as any);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('loki_theme', theme);
+    localStorage.setItem('loki_bgStyle', bgStyle);
+    localStorage.setItem('loki_commanderName', commanderName);
+    localStorage.setItem('loki_modelMode', modelMode);
+    localStorage.setItem('loki_systemInstruction', systemInstruction);
+    localStorage.setItem('loki_temperature', temperature.toString());
+    localStorage.setItem('loki_topP', topP.toString());
+    localStorage.setItem('loki_topK', topK.toString());
+    localStorage.setItem('loki_enterToSend', enterToSend.toString());
+    localStorage.setItem('loki_bubbleStyle', bubbleStyle);
+    localStorage.setItem('loki_fontSize', fontSize);
+    localStorage.setItem('loki_fontStyle', fontStyle);
+    localStorage.setItem('loki_soundEnabled', soundEnabled.toString());
+    localStorage.setItem('loki_messageAnimation', messageAnimation.toString());
+    localStorage.setItem('loki_autoScroll', autoScroll.toString());
+    localStorage.setItem('loki_typingSpeed', typingSpeed.toString());
+    localStorage.setItem('loki_showAvatars', showAvatars.toString());
+    localStorage.setItem('loki_responseLength', responseLength);
+    localStorage.setItem('loki_accentColor', accentColor);
+    localStorage.setItem('loki_messageDensity', messageDensity);
+
+    if (isAwakened) {
+      document.documentElement.classList.add('dark', 'awakened-mode-active');
+      document.body.classList.add('awakened-mode-active');
+      document.body.style.backgroundColor = '#050508';
+      document.documentElement.style.backgroundColor = '#050508';
+    } else if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('awakened-mode-active');
+      document.body.classList.remove('awakened-mode-active');
+      document.body.style.backgroundColor = '#08080c';
+      document.documentElement.style.backgroundColor = '#08080c';
+    } else {
+      document.documentElement.classList.remove('dark', 'awakened-mode-active');
+      document.body.classList.remove('awakened-mode-active');
+      document.body.style.backgroundColor = '#f8fafc';
+      document.documentElement.style.backgroundColor = '#f8fafc';
+    }
+  }, [theme, bgStyle, commanderName, modelMode, systemInstruction, temperature, topP, topK, isAwakened]);
+
+  return (
+    <SettingsContext.Provider value={{
+      theme, bgStyle, commanderName, modelMode, systemInstruction, temperature, topP, topK, isAwakened, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity,
+      setTheme, setBgStyle, setCommanderName, setModelMode, setSystemInstruction, setTemperature, setTopP, setTopK, setIsAwakened, setEnterToSend, setBubbleStyle, setFontSize, setFontStyle, setSoundEnabled, setMessageAnimation, setAutoScroll, setTypingSpeed, setShowAvatars, setResponseLength, setAccentColor, setMessageDensity, resetSettings
+    }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+};
+
+export const useSettings = () => {
+  const context = useContext(SettingsContext);
+  if (context === undefined) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
+};
