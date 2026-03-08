@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
-import { GoogleGenAI } from '@google/genai';
 import { useSettings } from './SettingsContext';
 
 export type Message = {
@@ -25,28 +24,18 @@ interface ChatState {
   deleteSession: (id: string) => void;
   clearAllSessions: () => void;
   setCurrentSessionId: (id: string) => void;
-  sendMessage: (text: string) => void;
+  sendMessage: (text: string, isImageMode?: boolean) => void;
   stopGeneration: () => void;
   renameSession: (id: string, title: string) => void;
 }
 
 const ChatContext = createContext<ChatState | undefined>(undefined);
 
-const getAiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("GEMINI_API_KEY is missing!");
-    return null;
-  }
-  return new GoogleGenAI({ apiKey });
-};
-
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const sessionsRef = useRef(sessions);
-  const chatInstanceRef = useRef<any>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   
   const { commanderName, modelMode, systemInstruction, temperature, topP, topK } = useSettings();
@@ -93,32 +82,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       case 'happy': modeInstruction = `Be extremely cheerful, enthusiastic, and positive! `; break;
       case 'pro': modeInstruction = `Provide detailed, step-by-step reasoning. `; break;
     }
-    return `Address the user as ${commanderName}. ${modeInstruction} ${systemInstruction}`;
+    return `Address the user as ${commanderName}. You MUST respond ONLY in Hinglish. NEVER output any internal thoughts, reasoning, or monologues. Do NOT use <thought> or <think> tags. Provide ONLY the final response. ${modeInstruction} ${systemInstruction}`;
   };
 
   useEffect(() => {
     if (currentSessionId) {
-      const session = sessionsRef.current.find(s => s.id === currentSessionId);
-      if (session) {
-        const history = session.messages.map(m => ({
-          role: m.role,
-          parts: [{ text: m.content }]
-        }));
-
-        const ai = getAiClient();
-        if (ai) {
-          chatInstanceRef.current = ai.chats.create({
-            model: 'gemini-3-flash-preview',
-            history: history,
-            config: {
-              systemInstruction: getFullSystemInstruction(),
-              temperature,
-              topP,
-              topK
-            }
-          });
-        }
-      }
+      // No longer need to initialize chatInstanceRef
     }
   }, [currentSessionId, modelMode, commanderName, systemInstruction, temperature, topP, topK]);
 
@@ -131,19 +100,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     };
     setSessions(prev => [newSession, ...prev]);
     setCurrentSessionId(newSession.id);
-    
-    const ai = getAiClient();
-    if (ai) {
-      chatInstanceRef.current = ai.chats.create({
-        model: 'gemini-3-flash-preview',
-        config: {
-          systemInstruction: getFullSystemInstruction(),
-          temperature,
-          topP,
-          topK
-        }
-      });
-    }
   };
 
   const deleteSession = (id: string) => {
@@ -176,7 +132,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, isImageMode?: boolean) => {
     if (!text.trim() || !currentSessionId || isLoading) return;
 
     const userMessage: Message = {
@@ -204,24 +160,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }));
 
     setIsLoading(true);
-    abortControllerRef.current = new AbortController();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
     try {
-      if (!chatInstanceRef.current) {
-        const ai = getAiClient();
-        if (ai) {
-          chatInstanceRef.current = ai.chats.create({
-            model: 'gemini-3-flash-preview',
-            config: { 
-              systemInstruction: getFullSystemInstruction(),
-              temperature,
-              topP,
-              topK
-            }
-          });
-        }
-      }
-
       setSessions(prev => prev.map(s => {
         if (s.id === currentSessionId) {
           const updatedMessages = s.messages.map(m => m.id === userMessage.id ? { ...m, status: 'sent' as const } : m);
@@ -246,36 +189,57 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         return s;
       }));
 
-      // NOTE: The @google/genai SDK doesn't natively support abort signals in the same way as fetch,
-      // but we can simulate stopping by breaking the loop if aborted.
-      const responseStream = await chatInstanceRef.current.sendMessageStream({
-        message: userMessage.content
+      const currentSession = sessionsRef.current.find(s => s.id === currentSessionId);
+      const history = currentSession?.messages.map(m => ({
+        role: m.role,
+        parts: [{ text: m.content }]
+      })) || [];
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: userMessage.content,
+          history: history,
+          mode: isImageMode ? 'image' : modelMode,
+          systemInstruction: getFullSystemInstruction(),
+          temperature,
+          topP,
+          topK
+        }),
+        signal: controller.signal
       });
 
-      let fullResponse = '';
-      for await (const chunk of responseStream) {
-        if (abortControllerRef.current?.signal.aborted) {
-          break;
-        }
-        const text = chunk.text || '';
-        fullResponse += text;
-        
-        setSessions(prev => prev.map(s => {
-          if (s.id === currentSessionId) {
-            const updatedMessages = [...s.messages];
-            const lastMsgIndex = updatedMessages.findIndex(m => m.id === modelMessageId);
-            if (lastMsgIndex !== -1) {
-              updatedMessages[lastMsgIndex] = {
-                ...updatedMessages[lastMsgIndex],
-                content: fullResponse
-              };
-            }
-            return { ...s, messages: updatedMessages };
-          }
-          return s;
-        }));
+      clearTimeout(timeoutId);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch response');
       }
+
+      // Cleaning function to strip out <thought> or <think> tags before rendering
+      let cleanResponse = data.response || '';
+      cleanResponse = cleanResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim();
+
+      setSessions(prev => prev.map(s => {
+        if (s.id === currentSessionId) {
+          const updatedMessages = [...s.messages];
+          const lastMsgIndex = updatedMessages.findIndex(m => m.id === modelMessageId);
+          if (lastMsgIndex !== -1) {
+            updatedMessages[lastMsgIndex] = {
+              ...updatedMessages[lastMsgIndex],
+              content: cleanResponse
+            };
+          }
+          return { ...s, messages: updatedMessages };
+        }
+        return s;
+      }));
+
     } catch (error: any) {
+      clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
         console.log('Generation stopped by user');
       } else {
@@ -288,7 +252,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
               messages: [...updatedMessages, {
                 id: Date.now().toString(),
                 role: 'model',
-                content: 'SYSTEM ERROR: Connection to core interrupted. Please try again.',
+                content: `SYSTEM ERROR: ${error.message || 'Connection to core interrupted. Please try again.'}`,
                 timestamp: new Date()
               }]
             };

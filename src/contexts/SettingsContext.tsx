@@ -61,7 +61,7 @@ const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setComma
   bgStyle: 'nebula',
   commanderName: 'Commander',
   modelMode: 'pro',
-  systemInstruction: 'You are Loki Prime X, an advanced, highly intelligent, and analytical AI. Provide detailed, step-by-step reasoning.',
+  systemInstruction: 'You are Loki Prime X, an advanced, highly intelligent, and analytical AI. You MUST respond ONLY in Hinglish. NEVER output any internal thoughts, reasoning, or monologues. Do NOT use <thought> or <think> tags. Provide ONLY the final response.',
   temperature: 0.7,
   topP: 0.95,
   topK: 64,

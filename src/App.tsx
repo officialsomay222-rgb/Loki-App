@@ -27,6 +27,15 @@ import {
   Volume2
 } from 'lucide-react';
 
+declare global {
+  interface Window {
+    aistudio?: {
+      hasSelectedApiKey: () => Promise<boolean>;
+      openSelectKey: () => Promise<void>;
+    };
+  }
+}
+
 const InfinityLogo = memo(({ className = "" }: { className?: string }) => (
   <svg className={`w-full h-full will-change-transform ${className}`} viewBox="0 0 200 100" style={{ animation: 'float3d 5s infinite ease-in-out', contain: 'paint' }}>
     <defs>
@@ -172,8 +181,8 @@ export default function App() {
     }
   }, [currentSession?.messages.length, currentSessionId, autoScroll]);
 
-  const handleSendMessage = async (text: string) => {
-    await sendMessage(text);
+  const handleSendMessage = async (text: string, isImageMode?: boolean) => {
+    await sendMessage(text, isImageMode);
     if (window.innerWidth >= 768) {
       setTimeout(() => {
         inputRef.current?.focus();
@@ -278,9 +287,12 @@ export default function App() {
         copiedId={copiedId}
         onCopy={copyToClipboard}
         formatDate={formatDate}
+        bubbleStyle={bubbleStyle}
+        fontSize={fontSize}
+        messageAnimation={messageAnimation}
       />
     ));
-  }, [currentSession?.messages, isAwakened, commanderName, copiedId]);
+  }, [currentSession?.messages, isAwakened, commanderName, copiedId, bubbleStyle, fontSize, messageAnimation]);
 
   if (isBooting) {
     return (
@@ -860,6 +872,7 @@ export default function App() {
               onDeleteSession={handleDeleteSession}
               currentSessionId={currentSessionId}
               onStopGeneration={stopGeneration}
+              enterToSend={enterToSend}
             />
           </div>
         </div>

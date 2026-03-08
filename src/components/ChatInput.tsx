@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, memo, forwardRef } from 'react';
-import { Plus, Mic, Send, Loader2, Trash2, Square } from 'lucide-react';
+import { Plus, Mic, Send, Loader2, Trash2, Square, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 
 interface ChatInputProps {
@@ -7,10 +7,11 @@ interface ChatInputProps {
   isLoading: boolean;
   modelMode: string;
   setModelMode: (mode: string) => void;
-  onSendMessage: (text: string) => void;
+  onSendMessage: (text: string, isImageMode?: boolean) => void;
   onDeleteSession: (e: React.MouseEvent, id: string) => void;
   currentSessionId: string | null;
   onStopGeneration?: () => void;
+  enterToSend: boolean;
 }
 
 export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
@@ -21,13 +22,14 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
   onSendMessage,
   onDeleteSession,
   currentSessionId,
-  onStopGeneration
+  onStopGeneration,
+  enterToSend
 }, ref) => {
   const [input, setInput] = useState('');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [isImageMode, setIsImageMode] = useState(false);
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = (ref as React.MutableRefObject<HTMLTextAreaElement>) || internalRef;
-  const { enterToSend } = useSettings();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -63,7 +65,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return;
-    onSendMessage(input.trim());
+    onSendMessage(input.trim(), isImageMode);
     setInput('');
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
@@ -94,7 +96,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="AWAITING COMMAND SEQUENCE..."
+              placeholder={isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
               className="w-full max-h-[120px] sm:max-h-[150px] min-h-[40px] sm:min-h-[50px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-2.5 sm:py-3.5 text-[1rem] sm:text-[1.1rem] text-cyan-50 placeholder:text-cyan-600/50 custom-scrollbar leading-relaxed font-mono tracking-wide relative z-10"
               rows={1}
               disabled={isLoading}
@@ -103,6 +105,13 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               <div className="flex items-center gap-1 sm:gap-1.5">
                   <button className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-cyan-600/70 hover:bg-cyan-500/10 hover:text-cyan-400 transition-all border border-transparent hover:border-cyan-500/30">
                     <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  </button>
+                  <button 
+                    onClick={() => setIsImageMode(!isImageMode)}
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all border ${isImageMode ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-[0_0_10px_rgba(0,242,255,0.2)]' : 'text-cyan-600/70 hover:bg-cyan-500/10 hover:text-cyan-400 border-transparent hover:border-cyan-500/30'}`}
+                    title={isImageMode ? "Switch to Chat Mode" : "Switch to Image Generation Mode"}
+                  >
+                    {isImageMode ? <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                   </button>
               </div>
               <div className="flex items-center gap-1 sm:gap-1.5">
@@ -172,7 +181,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Initiate command sequence..."
+              placeholder={isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
               className="w-full max-h-[200px] sm:max-h-[250px] min-h-[50px] sm:min-h-[60px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-3 sm:py-4 text-[1.05rem] sm:text-[1.2rem] text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6b6b80] custom-scrollbar leading-relaxed font-medium"
               rows={1}
               disabled={isLoading}
@@ -181,6 +190,13 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               <div className="flex items-center gap-2 sm:gap-3">
                   <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-slate-400 dark:text-[#888] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white transition-all">
                     <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                  <button 
+                    onClick={() => setIsImageMode(!isImageMode)}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${isImageMode ? 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400' : 'text-slate-400 dark:text-[#888] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white'}`}
+                    title={isImageMode ? "Switch to Chat Mode" : "Switch to Image Generation Mode"}
+                  >
+                    {isImageMode ? <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" /> : <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </button>
               </div>
               <div className="flex items-center gap-2 sm:gap-3">

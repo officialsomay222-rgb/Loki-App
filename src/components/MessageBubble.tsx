@@ -1,38 +1,41 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Bot, Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useSettings } from '../contexts/SettingsContext';
+import { BubbleStyle, FontSize } from '../contexts/SettingsContext';
+
+// Extract components to prevent re-creation on every render
+const MarkdownComponents = {
+  code({node, inline, className, children, ...props}: any) {
+    const match = /language-(\w+)/.exec(className || '')
+    return !inline && match ? (
+      <div className="rounded-md overflow-hidden my-4 border border-white/10 shadow-lg">
+        <div className="bg-black/80 text-xs text-slate-400 px-4 py-1.5 flex justify-between items-center border-b border-white/5">
+          <span>{match[1]}</span>
+        </div>
+        <SyntaxHighlighter
+          {...props}
+          children={String(children).replace(/\n$/, '')}
+          style={vscDarkPlus}
+          language={match[1]}
+          PreTag="div"
+          customStyle={{ margin: 0, background: '#0d0d12', padding: '1rem' }}
+        />
+      </div>
+    ) : (
+      <code {...props} className={`${className} bg-black/20 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-cyan-600 dark:text-cyan-400 font-mono text-sm`}>
+        {children}
+      </code>
+    )
+  }
+};
 
 const MemoizedMarkdown = memo(({ content }: { content: string }) => (
   <ReactMarkdown 
     remarkPlugins={[remarkGfm]}
-    components={{
-      code({node, inline, className, children, ...props}: any) {
-        const match = /language-(\w+)/.exec(className || '')
-        return !inline && match ? (
-          <div className="rounded-md overflow-hidden my-4 border border-white/10 shadow-lg">
-            <div className="bg-black/80 text-xs text-slate-400 px-4 py-1.5 flex justify-between items-center border-b border-white/5">
-              <span>{match[1]}</span>
-            </div>
-            <SyntaxHighlighter
-              {...props}
-              children={String(children).replace(/\n$/, '')}
-              style={vscDarkPlus}
-              language={match[1]}
-              PreTag="div"
-              customStyle={{ margin: 0, background: '#0d0d12', padding: '1rem' }}
-            />
-          </div>
-        ) : (
-          <code {...props} className={`${className} bg-black/20 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-cyan-600 dark:text-cyan-400 font-mono text-sm`}>
-            {children}
-          </code>
-        )
-      }
-    }}
+    components={MarkdownComponents}
   >
     {content}
   </ReactMarkdown>
@@ -47,6 +50,9 @@ interface MessageBubbleProps {
   copiedId: string | null;
   onCopy: (text: string, id: string) => void;
   formatDate: (date: Date) => string;
+  bubbleStyle: BubbleStyle;
+  fontSize: FontSize;
+  messageAnimation: boolean;
 }
 
 export const MessageBubble = memo(({
@@ -55,16 +61,18 @@ export const MessageBubble = memo(({
   commanderName,
   copiedId,
   onCopy,
-  formatDate
+  formatDate,
+  bubbleStyle,
+  fontSize,
+  messageAnimation
 }: MessageBubbleProps) => {
-  const { bubbleStyle, fontSize, messageAnimation } = useSettings();
-
+  
   const fontSizeClass = fontSize === 'small' ? 'text-xs sm:text-sm' : fontSize === 'large' ? 'text-base sm:text-lg' : 'text-sm sm:text-base';
   const userFontSizeClass = fontSize === 'small' ? 'text-[0.8rem] sm:text-[0.9rem]' : fontSize === 'large' ? 'text-[1rem] sm:text-[1.1rem]' : 'text-[0.9rem] sm:text-[1rem]';
 
   return (
     <div 
-      className={`flex gap-3 sm:gap-4 ${messageAnimation ? 'animate-in fade-in slide-in-from-bottom-4 duration-150' : ''} ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+      className={`flex gap-3 sm:gap-4 ${messageAnimation ? 'animate-in fade-in slide-in-from-bottom-4 duration-150' : ''} ${message.role === 'user' ? 'justify-end' : 'justify-start'} will-change-transform`}
     >
       {message.role === 'model' && !isAwakened && (
         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,242,255,0.2)] mt-1 border border-cyan-300/50">
