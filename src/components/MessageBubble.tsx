@@ -1,10 +1,12 @@
 import React, { memo, useMemo } from 'react';
-import { Bot, Copy, Check } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { BubbleStyle, FontSize } from '../contexts/SettingsContext';
+import { HeaderInfinityLogo } from './Logos';
+import { Message } from '../contexts/ChatContext';
 
 // Extract components to prevent re-creation on every render
 const MarkdownComponents = {
@@ -41,8 +43,6 @@ const MemoizedMarkdown = memo(({ content }: { content: string }) => (
   </ReactMarkdown>
 ));
 
-import { Message } from '../contexts/ChatContext';
-
 interface MessageBubbleProps {
   message: Message;
   isAwakened: boolean;
@@ -72,11 +72,11 @@ export const MessageBubble = memo(({
 
   return (
     <div 
-      className={`flex gap-3 sm:gap-4 ${messageAnimation ? 'animate-in fade-in slide-in-from-bottom-4 duration-150' : ''} ${message.role === 'user' ? 'justify-end' : 'justify-start'} will-change-transform`}
+      className={`flex gap-3 sm:gap-4 ${messageAnimation ? 'animate-in fade-in slide-in-from-bottom-4 duration-150' : ''} ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
-      {message.role === 'model' && !isAwakened && (
-        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,242,255,0.2)] mt-1 border border-cyan-300/50">
-          <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      {message.role === 'model' && (
+        <div className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 mt-1">
+          <HeaderInfinityLogo className="w-full h-full" />
         </div>
       )}
       
@@ -95,29 +95,16 @@ export const MessageBubble = memo(({
         
         <div className="relative group w-full">
           <div 
-            className={`px-4 py-3 sm:px-5 sm:py-4 premium-shadow relative overflow-hidden group/bubble transition-all duration-300 ${
+            className={`relative group/bubble transition-all duration-300 ${
               message.role === 'user' 
-                ? isAwakened
+                ? `px-4 py-3 sm:px-5 sm:py-4 premium-shadow overflow-hidden ${isAwakened
                   ? 'bg-gradient-to-br from-cyan-950/60 to-blue-950/40 text-cyan-50 rounded-2xl sm:rounded-3xl rounded-tr-sm border border-cyan-500/20 hover:border-cyan-500/40 shadow-[0_0_20px_rgba(0,242,255,0.04)]'
                   : bubbleStyle === 'glass'
                     ? 'bg-slate-900/90 dark:bg-[#2a2a30]/90 text-white rounded-2xl sm:rounded-3xl rounded-tr-sm border border-slate-700 dark:border-white/10 hover:border-slate-600 dark:hover:border-white/20 backdrop-blur-md'
-                    : 'bg-slate-900 dark:bg-[#2a2a30] text-white rounded-2xl sm:rounded-3xl rounded-tr-sm'
-                : isAwakened 
-                  ? 'bg-gradient-to-br from-[#0a0a12]/90 to-[#050508]/90 border border-cyan-500/20 hover:border-cyan-500/40 rounded-xl sm:rounded-2xl rounded-tl-sm text-cyan-50 shadow-[0_0_25px_rgba(0,242,255,0.06)] backdrop-blur-2xl'
-                  : bubbleStyle === 'glass'
-                    ? 'bg-white/80 dark:bg-[#1e1e22]/80 border border-slate-200/50 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 text-slate-800 dark:text-[#e0e0e0] rounded-xl sm:rounded-2xl rounded-tl-sm backdrop-blur-md'
-                    : 'bg-white dark:bg-[#1e1e22] border border-slate-100 dark:border-white/5 text-slate-800 dark:text-[#e0e0e0] rounded-xl sm:rounded-2xl rounded-tl-sm'
+                    : 'bg-slate-900 dark:bg-[#2a2a30] text-white rounded-2xl sm:rounded-3xl rounded-tr-sm'}`
+                : `py-2 ${isAwakened ? 'text-cyan-50' : 'text-slate-800 dark:text-[#e0e0e0]'}`
             }`}
           >
-            {isAwakened && message.role === 'model' && (
-              <>
-                <div className="absolute top-0 left-0 w-8 h-[1px] bg-gradient-to-r from-cyan-400 to-transparent"></div>
-                <div className="absolute bottom-0 right-0 w-8 h-[1px] bg-gradient-to-l from-cyan-400 to-transparent"></div>
-                <div className="absolute top-0 left-0 w-[1px] h-8 bg-gradient-to-b from-cyan-400 to-transparent"></div>
-                <div className="absolute bottom-0 right-0 w-[1px] h-8 bg-gradient-to-t from-cyan-400 to-transparent"></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent opacity-0 group-hover/bubble:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-              </>
-            )}
             {isAwakened && message.role === 'user' && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 to-transparent opacity-0 group-hover/bubble:opacity-100 transition-opacity duration-500 pointer-events-none"></div>

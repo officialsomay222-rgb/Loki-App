@@ -1,16 +1,20 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import apiApp from "./api/index.ts";
+import fs from "fs";
+import path from "path";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
   // Mount API routes
   app.use(apiApp);
 
+  const isProduction = process.env.NODE_ENV === "production" || fs.existsSync(path.join(process.cwd(), "dist", "index.html"));
+
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -20,12 +24,12 @@ async function startServer() {
     app.use(express.static("dist"));
     // SPA Fallback
     app.get("*", (req, res) => {
-      res.sendFile("index.html", { root: "dist" });
+      res.sendFile(path.join(process.cwd(), "dist", "index.html"));
     });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT} (Production: ${isProduction})`);
   });
 }
 

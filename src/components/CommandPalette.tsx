@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Command, Settings, Plus, X } from 'lucide-react';
 import { useChat } from '../contexts/ChatContext';
 
-export const CommandPalette = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+export const CommandPalette = memo(({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [query, setQuery] = useState('');
   const { sessions, createNewSession, setCurrentSessionId } = useChat();
 
@@ -65,4 +65,4 @@ export const CommandPalette = ({ isOpen, onClose }: { isOpen: boolean; onClose: 
       )}
     </AnimatePresence>
   );
-};
+});

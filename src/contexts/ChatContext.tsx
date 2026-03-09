@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef, useCallback } from 'react';
 import { useSettings } from './SettingsContext';
 
 export type Message = {
@@ -75,7 +75,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [sessions]);
 
-  const getFullSystemInstruction = () => {
+  const getFullSystemInstruction = useCallback(() => {
     let modeInstruction = '';
     switch(modelMode) {
       case 'fast': modeInstruction = `Provide concise, direct, and fast answers. `; break;
@@ -83,7 +83,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       case 'pro': modeInstruction = `Provide detailed, step-by-step reasoning. `; break;
     }
     return `Address the user as ${commanderName}. You MUST respond ONLY in Hinglish. NEVER output any internal thoughts, reasoning, or monologues. Do NOT use <thought> or <think> tags. Provide ONLY the final response. ${modeInstruction} ${systemInstruction}`;
-  };
+  }, [modelMode, commanderName, systemInstruction]);
 
   useEffect(() => {
     if (currentSessionId) {
@@ -91,7 +91,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [currentSessionId, modelMode, commanderName, systemInstruction, temperature, topP, topK]);
 
-  const createNewSession = () => {
+  const createNewSession = useCallback(() => {
     const newSession: ChatSession = {
       id: Date.now().toString(),
       title: 'New Awakening',
@@ -100,39 +100,43 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     };
     setSessions(prev => [newSession, ...prev]);
     setCurrentSessionId(newSession.id);
-  };
+  }, []);
 
-  const deleteSession = (id: string) => {
-    const updatedSessions = sessions.filter(s => s.id !== id);
-    setSessions(updatedSessions);
-    if (currentSessionId === id) {
-      if (updatedSessions.length > 0) {
-        setCurrentSessionId(updatedSessions[0].id);
-      } else {
-        createNewSession();
+  const deleteSession = useCallback((id: string) => {
+    setSessions(prev => {
+      const updatedSessions = prev.filter(s => s.id !== id);
+      if (currentSessionId === id) {
+        if (updatedSessions.length > 0) {
+          setCurrentSessionId(updatedSessions[0].id);
+        } else {
+          // We can't call createNewSession directly here easily without dependency issues,
+          // so we handle it in a useEffect or just create it inline
+          setTimeout(() => createNewSession(), 0);
+        }
       }
-    }
-  };
+      return updatedSessions;
+    });
+  }, [currentSessionId, createNewSession]);
 
-  const clearAllSessions = () => {
+  const clearAllSessions = useCallback(() => {
     setSessions([]);
     localStorage.removeItem('loki_chat_sessions');
     createNewSession();
-  };
+  }, [createNewSession]);
 
-  const renameSession = (id: string, title: string) => {
+  const renameSession = useCallback((id: string, title: string) => {
     setSessions(prev => prev.map(s => s.id === id ? { ...s, title } : s));
-  };
+  }, []);
 
-  const stopGeneration = () => {
+  const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const sendMessage = async (text: string, isImageMode?: boolean) => {
+  const sendMessage = useCallback(async (text: string, isImageMode?: boolean) => {
     if (!text.trim() || !currentSessionId || isLoading) return;
 
     const userMessage: Message = {
@@ -213,38 +217,97 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       });
 
       clearTimeout(timeoutId);
-      
-      let data;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        throw new Error(`Server returned non-JSON response: ${text.substring(0, 100)}...`);
-      }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch response');
+        let errorMsg = 'Failed to fetch response';
+        try {
+          const errData = await response.json();
+          errorMsg = errData.error || errorMsg;
+        } catch (e) {
+          errorMsg = await response.text();
+        }
+        throw new Error(errorMsg);
       }
 
-      // Cleaning function to strip out <thought> or <think> tags before rendering
-      let cleanResponse = data.response || '';
-      cleanResponse = cleanResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim();
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      
+      if (!reader) {
+        throw new Error("Failed to read response stream");
+      }
 
-      setSessions(prev => prev.map(s => {
-        if (s.id === currentSessionId) {
-          const updatedMessages = [...s.messages];
-          const lastMsgIndex = updatedMessages.findIndex(m => m.id === modelMessageId);
-          if (lastMsgIndex !== -1) {
-            updatedMessages[lastMsgIndex] = {
-              ...updatedMessages[lastMsgIndex],
-              content: cleanResponse
-            };
+      let fullResponse = "";
+      let buffer = "";
+      let lastUpdateTime = Date.now();
+      let pendingUpdate = false;
+
+      const updateState = (cleanResponse: string) => {
+        setSessions(prev => prev.map(s => {
+          if (s.id === currentSessionId) {
+            const updatedMessages = [...s.messages];
+            const lastMsgIndex = updatedMessages.findIndex(m => m.id === modelMessageId);
+            if (lastMsgIndex !== -1) {
+              updatedMessages[lastMsgIndex] = {
+                ...updatedMessages[lastMsgIndex],
+                content: cleanResponse
+              };
+            }
+            return { ...s, messages: updatedMessages };
           }
-          return { ...s, messages: updatedMessages };
+          return s;
+        }));
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          if (pendingUpdate) {
+            let cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<thought>[\s\S]*?<\/thought>/gi, '').trimStart();
+            updateState(cleanResponse);
+          }
+          break;
         }
-        return s;
-      }));
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || "";
+        
+        let hasNewData = false;
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.slice(6);
+            if (dataStr === '[DONE]') {
+              break;
+            }
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.error) {
+                throw new Error(data.error);
+              }
+              if (data.text) {
+                fullResponse += data.text;
+                hasNewData = true;
+              }
+            } catch (e) {
+              if (e instanceof Error && e.message !== "Unexpected end of JSON input" && !e.message.includes("Unexpected token")) {
+                throw e;
+              }
+            }
+          }
+        }
+
+        if (hasNewData) {
+          const now = Date.now();
+          if (now - lastUpdateTime > 30) {
+            let cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<thought>[\s\S]*?<\/thought>/gi, '').trimStart();
+            updateState(cleanResponse);
+            lastUpdateTime = now;
+            pendingUpdate = false;
+          } else {
+            pendingUpdate = true;
+          }
+        }
+      }
 
     } catch (error: any) {
       clearTimeout(timeoutId);
@@ -272,13 +335,15 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
       abortControllerRef.current = null;
     }
-  };
+  }, [currentSessionId, isLoading, modelMode, getFullSystemInstruction, temperature, topP, topK]);
+
+  const contextValue = React.useMemo(() => ({
+    sessions, currentSessionId, isLoading,
+    createNewSession, deleteSession, clearAllSessions, setCurrentSessionId, sendMessage, stopGeneration, renameSession
+  }), [sessions, currentSessionId, isLoading, createNewSession, deleteSession, clearAllSessions, sendMessage, stopGeneration, renameSession]);
 
   return (
-    <ChatContext.Provider value={{
-      sessions, currentSessionId, isLoading,
-      createNewSession, deleteSession, clearAllSessions, setCurrentSessionId, sendMessage, stopGeneration, renameSession
-    }}>
+    <ChatContext.Provider value={contextValue}>
       {children}
     </ChatContext.Provider>
   );
