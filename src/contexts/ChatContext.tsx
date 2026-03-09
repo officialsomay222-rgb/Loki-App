@@ -40,10 +40,21 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   
   const { commanderName, modelMode, systemInstruction, temperature, topP, topK } = useSettings();
 
+  const createNewSession = useCallback(() => {
+    const newSession: ChatSession = {
+      id: Date.now().toString(),
+      title: 'New Awakening',
+      messages: [],
+      updatedAt: new Date()
+    };
+    setSessions(prev => [newSession, ...prev]);
+    setCurrentSessionId(newSession.id);
+  }, []);
+
   useEffect(() => {
-    const savedSessions = localStorage.getItem('loki_chat_sessions');
-    if (savedSessions) {
-      try {
+    try {
+      const savedSessions = localStorage.getItem('loki_chat_sessions');
+      if (savedSessions) {
         const parsed = JSON.parse(savedSessions);
         const formatted = parsed.map((s: any) => ({
           ...s,
@@ -59,11 +70,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         } else {
           createNewSession();
         }
-      } catch (e) {
-        console.error("Failed to parse sessions", e);
+      } else {
         createNewSession();
       }
-    } else {
+    } catch (e) {
+      console.error("Failed to parse sessions", e);
       createNewSession();
     }
   }, []);
@@ -71,18 +82,22 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     sessionsRef.current = sessions;
     if (sessions.length > 0) {
-      localStorage.setItem('loki_chat_sessions', JSON.stringify(sessions));
+      try {
+        localStorage.setItem('loki_chat_sessions', JSON.stringify(sessions));
+      } catch (e) {
+        console.error("Failed to save sessions", e);
+      }
     }
   }, [sessions]);
 
   const getFullSystemInstruction = useCallback(() => {
     let modeInstruction = '';
     switch(modelMode) {
-      case 'fast': modeInstruction = `Provide concise, direct, and fast answers. `; break;
-      case 'happy': modeInstruction = `Be extremely cheerful, enthusiastic, and positive! `; break;
-      case 'pro': modeInstruction = `Provide detailed, step-by-step reasoning. `; break;
+      case 'fast': modeInstruction = `Provide concise, direct, and incredibly fast answers. Be sharp and to the point, but keep the human touch. `; break;
+      case 'happy': modeInstruction = `Be extremely cheerful, enthusiastic, and positive! Talk like a highly energetic and supportive human friend. `; break;
+      case 'pro': modeInstruction = `Provide detailed, step-by-step reasoning and advanced-level insights. Explain complex things simply, like an expert human mentor. `; break;
     }
-    return `Address the user as ${commanderName}. You MUST respond ONLY in Hinglish. NEVER output any internal thoughts, reasoning, or monologues. Do NOT use <thought> or <think> tags. Provide ONLY the final response. ${modeInstruction} ${systemInstruction}`;
+    return `Address the user as ${commanderName}. You MUST respond ONLY in Hinglish. Be extremely natural, human-like, and conversational. Avoid sounding like a robot. Understand the user's intent deeply and provide optimized, advanced-level responses. NEVER output any internal thoughts, reasoning, or monologues. Do NOT use <thought> or <think> tags. Provide ONLY the final response. ${modeInstruction} ${systemInstruction}`;
   }, [modelMode, commanderName, systemInstruction]);
 
   useEffect(() => {
@@ -90,17 +105,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       // No longer need to initialize chatInstanceRef
     }
   }, [currentSessionId, modelMode, commanderName, systemInstruction, temperature, topP, topK]);
-
-  const createNewSession = useCallback(() => {
-    const newSession: ChatSession = {
-      id: Date.now().toString(),
-      title: 'New Awakening',
-      messages: [],
-      updatedAt: new Date()
-    };
-    setSessions(prev => [newSession, ...prev]);
-    setCurrentSessionId(newSession.id);
-  }, []);
 
   const deleteSession = useCallback((id: string) => {
     setSessions(prev => {

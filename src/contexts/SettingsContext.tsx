@@ -61,7 +61,7 @@ const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setComma
   bgStyle: 'nebula',
   commanderName: 'Commander',
   modelMode: 'pro',
-  systemInstruction: 'You are Loki Prime X, an advanced, highly intelligent, and analytical AI. You MUST respond ONLY in Hinglish. NEVER output any internal thoughts, reasoning, or monologues. Do NOT use <thought> or <think> tags. Provide ONLY the final response.',
+  systemInstruction: 'You are Loki Prime X, an advanced, highly intelligent, and analytical AI. You MUST respond ONLY in Hinglish. Be extremely natural, human-like, and conversational. Avoid sounding like a robot. Understand the user\'s intent deeply and provide optimized, advanced-level responses. NEVER output any internal thoughts, reasoning, or monologues. Do NOT use <thought> or <think> tags. Provide ONLY the final response.',
   temperature: 0.7,
   topP: 0.95,
   topK: 64,
@@ -130,13 +130,13 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const loadSetting = <T,>(key: string, setter: (val: T) => void, parser?: (val: string) => T) => {
-      const saved = localStorage.getItem(`loki_${key}`);
-      if (saved) {
-        try {
+      try {
+        const saved = localStorage.getItem(`loki_${key}`);
+        if (saved) {
           setter(parser ? parser(saved) : saved as unknown as T);
-        } catch (e) {
-          console.error(`Failed to parse setting ${key}`, e);
         }
+      } catch (e) {
+        console.error(`Failed to load setting ${key}`, e);
       }
     };
 
@@ -163,26 +163,30 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('loki_theme', theme);
-    localStorage.setItem('loki_bgStyle', bgStyle);
-    localStorage.setItem('loki_commanderName', commanderName);
-    localStorage.setItem('loki_modelMode', modelMode);
-    localStorage.setItem('loki_systemInstruction', systemInstruction);
-    localStorage.setItem('loki_temperature', temperature.toString());
-    localStorage.setItem('loki_topP', topP.toString());
-    localStorage.setItem('loki_topK', topK.toString());
-    localStorage.setItem('loki_enterToSend', enterToSend.toString());
-    localStorage.setItem('loki_bubbleStyle', bubbleStyle);
-    localStorage.setItem('loki_fontSize', fontSize);
-    localStorage.setItem('loki_fontStyle', fontStyle);
-    localStorage.setItem('loki_soundEnabled', soundEnabled.toString());
-    localStorage.setItem('loki_messageAnimation', messageAnimation.toString());
-    localStorage.setItem('loki_autoScroll', autoScroll.toString());
-    localStorage.setItem('loki_typingSpeed', typingSpeed.toString());
-    localStorage.setItem('loki_showAvatars', showAvatars.toString());
-    localStorage.setItem('loki_responseLength', responseLength);
-    localStorage.setItem('loki_accentColor', accentColor);
-    localStorage.setItem('loki_messageDensity', messageDensity);
+    try {
+      localStorage.setItem('loki_theme', theme);
+      localStorage.setItem('loki_bgStyle', bgStyle);
+      localStorage.setItem('loki_commanderName', commanderName);
+      localStorage.setItem('loki_modelMode', modelMode);
+      localStorage.setItem('loki_systemInstruction', systemInstruction);
+      localStorage.setItem('loki_temperature', temperature.toString());
+      localStorage.setItem('loki_topP', topP.toString());
+      localStorage.setItem('loki_topK', topK.toString());
+      localStorage.setItem('loki_enterToSend', enterToSend.toString());
+      localStorage.setItem('loki_bubbleStyle', bubbleStyle);
+      localStorage.setItem('loki_fontSize', fontSize);
+      localStorage.setItem('loki_fontStyle', fontStyle);
+      localStorage.setItem('loki_soundEnabled', soundEnabled.toString());
+      localStorage.setItem('loki_messageAnimation', messageAnimation.toString());
+      localStorage.setItem('loki_autoScroll', autoScroll.toString());
+      localStorage.setItem('loki_typingSpeed', typingSpeed.toString());
+      localStorage.setItem('loki_showAvatars', showAvatars.toString());
+      localStorage.setItem('loki_responseLength', responseLength);
+      localStorage.setItem('loki_accentColor', accentColor);
+      localStorage.setItem('loki_messageDensity', messageDensity);
+    } catch (e) {
+      console.error('Failed to save settings to localStorage', e);
+    }
 
     if (isAwakened) {
       document.documentElement.classList.add('dark', 'awakened-mode-active');
