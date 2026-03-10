@@ -7,6 +7,7 @@ export type Message = {
   content: string;
   timestamp: Date;
   status?: 'pending' | 'sent' | 'error';
+  isImage?: boolean;
 };
 
 export type ChatSession = {
@@ -258,7 +259,8 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
               id: modelMessageId,
               role: 'model',
               content: '',
-              timestamp: new Date()
+              timestamp: new Date(),
+              isImage: isImageMode
             }]
           };
         }

@@ -166,6 +166,68 @@ const MemoizedMarkdown = memo(({ content }: { content: string }) => (
   </ReactMarkdown>
 ));
 
+const ImageGenerationPlaceholder = () => {
+  const [showCanvas, setShowCanvas] = React.useState(false);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowCanvas(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!showCanvas) {
+    return (
+      <div className="flex items-center gap-1 h-4 sm:h-5">
+        <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 dark:bg-[#00f2ff] rounded-full animate-bounce shadow-[0_0_6px_rgba(0,242,255,0.8)]" style={{ animationDelay: '0ms' }}></span>
+        <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 dark:bg-[#00f2ff] rounded-full animate-bounce shadow-[0_0_6px_rgba(0,242,255,0.8)]" style={{ animationDelay: '150ms' }}></span>
+        <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 dark:bg-[#00f2ff] rounded-full animate-bounce shadow-[0_0_6px_rgba(0,242,255,0.8)]" style={{ animationDelay: '300ms' }}></span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-4 aspect-square w-full max-w-[512px] mx-auto rounded-2xl overflow-hidden border border-cyan-500/30 shadow-[0_0_30px_rgba(0,242,255,0.15)] bg-black/60 relative animate-in fade-in zoom-in-95 duration-500">
+      {/* Scanning Line */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent h-[200%] -translate-y-full animate-[scanline_3s_linear_infinite]"></div>
+      
+      {/* Corner Accents */}
+      <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-cyan-400/50 rounded-tl-2xl"></div>
+      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-cyan-400/50 rounded-tr-2xl"></div>
+      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-cyan-400/50 rounded-bl-2xl"></div>
+      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-cyan-400/50 rounded-br-2xl"></div>
+
+      {/* Center Logo & Text */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+        <div className="w-24 h-12 mb-6">
+          <svg viewBox="0 0 100 50" className="w-full h-full overflow-visible drop-shadow-[0_0_15px_rgba(0,242,255,0.8)]">
+            <path
+              d="M25,25 C25,11.1928813 36.1928813,0 50,0 C63.8071187,0 75,11.1928813 75,25 C75,38.8071187 63.8071187,50 50,50 C36.1928813,50 25,38.8071187 25,25 Z M25,25 C25,38.8071187 13.8071187,50 0,50 C-13.8071187,50 -25,38.8071187 -25,25 C-25,11.1928813 -13.8071187,0 0,0 C13.8071187,0 25,11.1928813 25,25 Z"
+              fill="none"
+              stroke="url(#cyan-gradient-placeholder)"
+              strokeWidth="4"
+              className="animate-[dash_3s_linear_infinite]"
+              strokeDasharray="150"
+              strokeDashoffset="0"
+              transform="translate(25, 0)"
+            />
+            <defs>
+              <linearGradient id="cyan-gradient-placeholder" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#00f2ff" />
+                <stop offset="50%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#00f2ff" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div className="text-xs font-mono text-cyan-400 tracking-[0.4em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(0,242,255,0.8)]">
+          Rendering Canvas
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface MessageBubbleProps {
   message: Message;
   isAwakened: boolean;
@@ -208,7 +270,9 @@ export const MessageBubble = memo(({
               {formatDate(message.timestamp)}
             </span>
             {message.status === 'pending' && (
-              <span className="text-[9px] sm:text-[10px] font-mono text-cyan-500 animate-pulse">PENDING</span>
+              <span className="text-[9px] sm:text-[10px] font-mono text-cyan-500 animate-pulse">
+                {message.isImage ? 'GENERATING...' : 'PENDING'}
+              </span>
             )}
           </div>
         </div>
@@ -218,6 +282,8 @@ export const MessageBubble = memo(({
             <div className={`markdown-body ${fontSizeClass}`}>
               {message.content ? (
                 <MemoizedMarkdown content={message.content} />
+              ) : message.isImage ? (
+                <ImageGenerationPlaceholder />
               ) : (
                 <div className="flex items-center gap-1 h-4 sm:h-5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 dark:bg-[#00f2ff] rounded-full animate-bounce shadow-[0_0_6px_rgba(0,242,255,0.8)]" style={{ animationDelay: '0ms' }}></span>
