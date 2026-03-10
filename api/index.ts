@@ -87,8 +87,8 @@ app.post("/api/chat", async (req, res) => {
         const groq = new Groq({ apiKey: groqKey });
         
         // Pro: openai/gpt-oss-120b (as requested from Groq console)
-        // Happy: groq/compound (as requested from Groq console)
-        const modelName = mode === "pro" ? "openai/gpt-oss-120b" : "groq/compound";
+        // Happy: groq/compound-mini (as requested from Groq console)
+        const modelName = mode === "pro" ? "openai/gpt-oss-120b" : "groq/compound-mini";
 
         const messages = [
           { role: "system", content: systemInstruction },

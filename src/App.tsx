@@ -498,9 +498,9 @@ export default function App() {
                           <label className="text-[0.7rem] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Model Core</label>
                           <div className="grid grid-cols-3 gap-3">
                             {[
-                              { id: 'pro', label: 'GPT-OSS 120B' },
+                              { id: 'pro', label: 'PRO THINKING' },
                               { id: 'fast', label: 'FAST CORE' },
-                              { id: 'happy', label: 'GROQ COMPOUND' }
+                              { id: 'happy', label: 'HAPPY MODEL' }
                             ].map((m) => (
                               <button
                                 key={m.id}
