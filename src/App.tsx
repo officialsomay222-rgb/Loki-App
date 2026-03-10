@@ -493,6 +493,25 @@ export default function App() {
                             ))}
                           </div>
                         </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[0.7rem] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Model Core</label>
+                          <div className="grid grid-cols-3 gap-3">
+                            {[
+                              { id: 'pro', label: 'GPT-OSS 120B' },
+                              { id: 'fast', label: 'FAST CORE' },
+                              { id: 'happy', label: 'GROQ COMPOUND' }
+                            ].map((m) => (
+                              <button
+                                key={m.id}
+                                onClick={() => setModelMode(m.id as any)}
+                                className={`py-3 text-[0.7rem] font-bold rounded-xl border transition-all ${modelMode === m.id ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-700 dark:text-cyan-400' : 'bg-white dark:bg-[#0a0a0c] border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'}`}
+                              >
+                                {m.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </section>
 
                       <section className="space-y-6 pt-10 border-t border-slate-200 dark:border-white/5">

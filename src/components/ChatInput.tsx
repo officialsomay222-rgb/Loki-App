@@ -120,14 +120,14 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
                       onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
                       className="flex items-center gap-1 sm:gap-1 bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[0.6rem] sm:text-[0.75rem] font-bold tracking-[0.1em] transition-all whitespace-nowrap h-7 sm:h-8 border border-cyan-500/30 shadow-[0_0_8px_rgba(0,242,255,0.08)] hover:shadow-[0_0_12px_rgba(0,242,255,0.15)] uppercase"
                     >
-                      {modelMode === 'pro' ? 'PRO CORE' : modelMode === 'fast' ? 'FAST CORE' : 'HAPPY CORE'}
+                      {modelMode === 'pro' ? 'GPT-OSS 120B' : modelMode === 'fast' ? 'FAST CORE' : 'GROQ COMPOUND'}
                     </button>
                     {isModelDropdownOpen && (
                       <div className="absolute bottom-[calc(100%+8px)] sm:bottom-[calc(100%+12px)] right-0 bg-[#050508] border border-cyan-500/40 rounded-lg sm:rounded-xl p-1 sm:p-1.5 min-w-[130px] sm:min-w-[160px] z-[999] flex flex-col gap-0.5 animate-in slide-in-from-bottom-2 duration-200 shadow-[0_0_25px_rgba(0,242,255,0.25)]">
                         {[
-                          { id: 'pro', label: 'PRO CORE' },
+                          { id: 'pro', label: 'GPT-OSS 120B' },
                           { id: 'fast', label: 'FAST CORE' },
-                          { id: 'happy', label: 'HAPPY CORE' }
+                          { id: 'happy', label: 'GROQ COMPOUND' }
                         ].map(m => (
                           <button
                             key={m.id}
@@ -205,14 +205,14 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
                       onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
                       className="flex items-center gap-1.5 sm:gap-2 bg-slate-100/80 dark:bg-black/40 hover:bg-slate-200 dark:hover:bg-black/60 text-cyan-600 dark:text-[#00f2ff] px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-[0.65rem] sm:text-[0.8rem] font-bold tracking-wide transition-all whitespace-nowrap h-8 sm:h-10 border border-slate-200/50 dark:border-white/5"
                     >
-                      {modelMode === 'pro' ? 'PRO THINKING' : modelMode === 'fast' ? 'FAST MODEL' : 'HAPPY MODEL'}
+                      {modelMode === 'pro' ? 'GPT-OSS 120B' : modelMode === 'fast' ? 'FAST MODEL' : 'GROQ COMPOUND'}
                     </button>
                     {isModelDropdownOpen && (
                       <div className="absolute bottom-[calc(100%+10px)] sm:bottom-[calc(100%+14px)] right-0 bg-white dark:bg-[#050508] border border-slate-200 dark:border-cyan-500/40 rounded-xl sm:rounded-2xl p-1.5 sm:p-2 min-w-[140px] sm:min-w-[180px] z-[999] flex flex-col gap-1 animate-in slide-in-from-bottom-2 duration-200 shadow-xl dark:shadow-[0_0_25px_rgba(0,242,255,0.15)]">
                         {[
-                          { id: 'pro', label: 'Pro Thinking' },
+                          { id: 'pro', label: 'GPT-OSS 120B' },
                           { id: 'fast', label: 'Fast Model' },
-                          { id: 'happy', label: 'Happy Model' }
+                          { id: 'happy', label: 'Groq Compound' }
                         ].map(m => (
                           <button
                             key={m.id}

@@ -1,5 +1,6 @@
 import express from "express";
 import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
 
 const app = express();
 app.use(express.json());
@@ -24,86 +25,97 @@ app.post("/api/chat", async (req, res) => {
 
   try {
     if (mode === "fast" || mode === "pro" || mode === "happy") {
-      // All text modes now use Gemini for advanced, human-like Hinglish responses
       let geminiKey = process.env.GEMINI_API_KEY;
       let googleKey = process.env.GOOGLE_AI_KEY;
+      let groqKey = process.env.GROQ_API_KEY;
       
       // Filter out placeholder keys
       if (geminiKey && (geminiKey.includes("MY_GEMINI") || geminiKey.includes("YOUR_"))) geminiKey = undefined;
       if (googleKey && (googleKey.includes("MY_GOOGLE") || googleKey.includes("YOUR_"))) googleKey = undefined;
+      if (groqKey && (groqKey.includes("MY_GROQ") || groqKey.includes("YOUR_"))) groqKey = undefined;
 
       const apiKey = googleKey || geminiKey || process.env.API_KEY;
-      
-      if (!apiKey) {
-        throw new Error("API Key is missing or invalid. Please add a real GOOGLE_AI_KEY or GEMINI_API_KEY to your AI Studio Secrets.");
-      }
-      
-      const ai = new GoogleGenAI({ apiKey });
-      
-      let modelName = "gemini-1.5-flash-latest"; // Using flash-latest for better stability in fast mode
-      if (mode === "pro") {
-        modelName = "gemini-3.1-pro-preview";
-      } else if (mode === "happy") {
-        modelName = "gemini-3-flash-preview";
-      }
 
-      // Format history for Gemini
-      const rawContents: any[] = [];
-      if (history && Array.isArray(history)) {
-        history.forEach((msg: any) => {
-          if (msg.parts && msg.parts[0] && msg.parts[0].text) {
-            rawContents.push({
-              role: msg.role === 'model' ? 'model' : 'user',
-              parts: [{ text: msg.parts[0].text }]
-            });
+      if (mode === "fast") {
+        // Fast mode uses Gemini 3.1 Flash Lite as requested
+        if (!apiKey) {
+          throw new Error("Google AI Key is missing or invalid. Please add a real GOOGLE_AI_KEY or GEMINI_API_KEY.");
+        }
+        
+        const ai = new GoogleGenAI({ apiKey });
+        const modelName = "gemini-3.1-flash-lite-preview";
+
+        // Format history for Gemini
+        const contents: any[] = [];
+        if (history && Array.isArray(history)) {
+          history.forEach((msg: any) => {
+            if (msg.parts && msg.parts[0] && msg.parts[0].text) {
+              contents.push({
+                role: msg.role === 'model' ? 'model' : 'user',
+                parts: [{ text: msg.parts[0].text }]
+              });
+            }
+          });
+        }
+        contents.push({ role: 'user', parts: [{ text: message }] });
+
+        const responseStream = await ai.models.generateContentStream({
+          model: modelName,
+          contents: contents,
+          config: {
+            systemInstruction: systemInstruction,
+            temperature: temperature || 0.7,
+            topP: topP || 0.95,
+            topK: topK || 64,
           }
         });
-      }
-      
-      // Add the current message
-      rawContents.push({
-        role: 'user',
-        parts: [{ text: message }]
-      });
 
-      // Ensure strictly alternating roles starting with 'user'
-      const contents: any[] = [];
-      let expectedRole = 'user';
-      
-      for (const item of rawContents) {
-        if (item.role === expectedRole) {
-          contents.push(item);
-          expectedRole = expectedRole === 'user' ? 'model' : 'user';
-        } else {
-          // Merge consecutive messages of the same role
-          if (contents.length > 0) {
-            const last = contents[contents.length - 1];
-            last.parts[0].text += "\n\n" + item.parts[0].text;
-          } else if (item.role === 'model') {
-            // Skip model message if it's the first message
-            continue;
+        for await (const chunk of responseStream) {
+          if (chunk.text) {
+            res.write(`data: ${JSON.stringify({ text: chunk.text })}\n\n`);
           }
         }
-      }
+        res.write(`data: [DONE]\n\n`);
+        res.end();
 
-      const responseStream = await ai.models.generateContentStream({
-        model: modelName,
-        contents: contents,
-        config: {
-          systemInstruction: systemInstruction,
+      } else if (mode === "pro" || mode === "happy") {
+        // Pro and Happy modes use Groq as requested
+        if (!groqKey) {
+          throw new Error("Groq API Key is missing or invalid. Please add a real GROQ_API_KEY to your AI Studio Secrets.");
+        }
+
+        const groq = new Groq({ apiKey: groqKey });
+        
+        // Pro: openai/gpt-oss-120b (as requested from Groq console)
+        // Happy: groq/compound (as requested from Groq console)
+        const modelName = mode === "pro" ? "openai/gpt-oss-120b" : "groq/compound";
+
+        const messages = [
+          { role: "system", content: systemInstruction },
+          ...(history || []).map((msg: any) => ({
+            role: msg.role === "model" ? "assistant" : "user",
+            content: msg.parts[0].text
+          })),
+          { role: "user", content: message }
+        ];
+
+        const stream = await groq.chat.completions.create({
+          messages: messages as any,
+          model: modelName,
           temperature: temperature || 0.7,
-          topP: topP || 0.95,
-          topK: topK || 64,
-        }
-      });
+          top_p: topP || 0.95,
+          stream: true,
+        });
 
-      for await (const chunk of responseStream) {
-        if (chunk.text) {
-          res.write(`data: ${JSON.stringify({ text: chunk.text })}\n\n`);
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content || "";
+          if (content) {
+            res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
+          }
         }
+        res.write(`data: [DONE]\n\n`);
+        res.end();
       }
-      res.write(`data: [DONE]\n\n`);
-      res.end();
 
     } else if (mode === "image") {
       // Image Generation Logic
