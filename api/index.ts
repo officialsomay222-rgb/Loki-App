@@ -86,9 +86,9 @@ app.post("/api/chat", async (req, res) => {
 
         const groq = new Groq({ apiKey: groqKey });
         
-        // Pro: openai/gpt-oss-120b (as requested from Groq console)
-        // Happy: groq/compound-mini (as requested from Groq console)
-        const modelName = mode === "pro" ? "openai/gpt-oss-120b" : "groq/compound-mini";
+        // Pro: llama-3.3-70b-versatile
+        // Happy: llama-3.1-8b-instant
+        const modelName = mode === "pro" ? "llama-3.3-70b-versatile" : "llama-3.1-8b-instant";
 
         const messages = [
           { role: "system", content: systemInstruction },
@@ -140,53 +140,64 @@ app.post("/api/chat", async (req, res) => {
       
       const ai = new GoogleGenAI({ apiKey });
       
-      // Step 1: Refine prompt using Gemini
-      let detailedPrompt = message;
+      // Keep connection alive with SSE comments
+      const pingInterval = setInterval(() => {
+        res.write(`:\n\n`);
+      }, 15000);
+
       try {
-        const refinementResponse = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite-preview",
-          contents: `[IMAGE_MODE] Create a stunning visual description for: ${message}`,
-          config: {
-            systemInstruction: "Tum ek expert Image Prompt Engineer ho. Jab user '[IMAGE_MODE]' flag ke saath koi request bheje, toh tum us text ko ek detailed, artistic, aur high-quality visual description mein badal do. Description ko FLUX model ke liye optimize karo (lighting, style, aur camera angles add karo). Sirf description likhna, koi extra baat mat karna."
-          }
-        });
-        detailedPrompt = refinementResponse.text || message;
-      } catch (e) {
-        console.error("Gemini refinement failed, using original prompt:", e);
-      }
-
-      // Step 2: Generate image using Hugging Face FLUX
-      const API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell";
-      
-      const hfResponse = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${hfToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ inputs: detailedPrompt }),
-      });
-
-      if (!hfResponse.ok) {
-        const errText = await hfResponse.text();
-        if (hfResponse.status === 503) {
-          throw new Error("FLUX model is loading on Hugging Face. Please try again in 20-30 seconds.");
+        // Step 1: Refine prompt using Gemini
+        let detailedPrompt = message;
+        try {
+          const refinementResponse = await ai.models.generateContent({
+            model: "gemini-3.1-flash-lite-preview",
+            contents: `[IMAGE_MODE] Create a stunning visual description for: ${message}`,
+            config: {
+              systemInstruction: "Tum ek expert Image Prompt Engineer ho. Jab user '[IMAGE_MODE]' flag ke saath koi request bheje, toh tum us text ko ek detailed, artistic, aur high-quality visual description mein badal do. Description ko FLUX model ke liye optimize karo (lighting, style, aur camera angles add karo). Sirf description likhna, koi extra baat mat karna."
+            }
+          });
+          detailedPrompt = refinementResponse.text || message;
+        } catch (e) {
+          console.error("Gemini refinement failed, using original prompt:", e);
         }
-        throw new Error(`Hugging Face API Error (${hfResponse.status}): ${errText}`);
+
+        // Step 2: Generate image using Hugging Face stabilityai/stable-diffusion-xl-base-1.0
+        const { HfInference } = await import("@huggingface/inference");
+        const hf = new HfInference(hfToken);
+        
+        let blob;
+        try {
+          blob = await hf.textToImage({
+            inputs: detailedPrompt,
+            model: "stabilityai/stable-diffusion-xl-base-1.0",
+          });
+        } catch (e: any) {
+          if (e.message?.includes("loading") || e.status === 503) {
+            throw new Error("stable-diffusion-xl-base-1.0 model is loading on Hugging Face. Please try again in 20-30 seconds.");
+          }
+          throw new Error(`Hugging Face API Error: ${e.message}`);
+        }
+
+        const imageBuffer = await blob.arrayBuffer();
+        const base64EncodeString = Buffer.from(imageBuffer).toString('base64');
+
+        if (!base64EncodeString || base64EncodeString.length < 100) {
+          throw new Error("Generated image data is invalid or empty.");
+        }
+
+        let mimeType = blob.type;
+        if (!mimeType || !mimeType.startsWith('image/')) {
+          mimeType = 'image/jpeg';
+        }
+        
+        // Use a cleaner response format - Only send the image markdown
+        const responseText = `![Generated Image](data:${mimeType};base64,${base64EncodeString})`;
+        res.write(`data: ${JSON.stringify({ text: responseText })}\n\n`);
+        res.write(`data: [DONE]\n\n`);
+        res.end();
+      } finally {
+        clearInterval(pingInterval);
       }
-
-      const imageBuffer = await hfResponse.arrayBuffer();
-      const base64EncodeString = Buffer.from(imageBuffer).toString('base64');
-
-      if (!base64EncodeString || base64EncodeString.length < 100) {
-        throw new Error("Generated image data is invalid or empty.");
-      }
-
-      // Use a cleaner response format - Only send the image markdown
-      const responseText = `![Generated Image](data:image/jpeg;base64,${base64EncodeString})`;
-      res.write(`data: ${JSON.stringify({ text: responseText })}\n\n`);
-      res.write(`data: [DONE]\n\n`);
-      res.end();
 
     } else {
       throw new Error("Invalid mode selected");

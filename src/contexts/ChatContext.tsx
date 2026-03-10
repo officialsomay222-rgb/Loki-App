@@ -31,6 +31,10 @@ interface ChatState {
 
 const ChatContext = createContext<ChatState | undefined>(undefined);
 
+const generateId = () => {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+};
+
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
@@ -42,7 +46,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   const createNewSession = useCallback(() => {
     const newSession: ChatSession = {
-      id: Date.now().toString(),
+      id: generateId(),
       title: 'New Awakening',
       messages: [],
       updatedAt: new Date()
@@ -56,14 +60,37 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       const savedSessions = localStorage.getItem('loki_chat_sessions');
       if (savedSessions) {
         const parsed = JSON.parse(savedSessions);
-        const formatted = parsed.map((s: any) => ({
-          ...s,
-          updatedAt: new Date(s.updatedAt),
-          messages: s.messages.map((m: any) => ({
-            ...m,
-            timestamp: new Date(m.timestamp)
-          }))
-        }));
+        const usedIds = new Set<string>();
+        
+        const formatted = parsed.map((s: any) => {
+          // Ensure session ID is unique
+          let sessionId = s.id;
+          if (usedIds.has(sessionId)) {
+            sessionId = generateId();
+          }
+          usedIds.add(sessionId);
+
+          const sessionUsedMessageIds = new Set<string>();
+          return {
+            ...s,
+            id: sessionId,
+            updatedAt: new Date(s.updatedAt),
+            messages: s.messages.map((m: any) => {
+              // Ensure message ID is unique within session
+              let msgId = m.id;
+              if (sessionUsedMessageIds.has(msgId)) {
+                msgId = generateId();
+              }
+              sessionUsedMessageIds.add(msgId);
+              
+              return {
+                ...m,
+                id: msgId,
+                timestamp: new Date(m.timestamp)
+              };
+            })
+          };
+        });
         setSessions(formatted);
         if (formatted.length > 0) {
           setCurrentSessionId(formatted[0].id);
@@ -185,7 +212,7 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
     }
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: generateId(),
       role: 'user',
       content: text.trim(),
       timestamp: new Date(),
@@ -211,7 +238,7 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
     setIsLoading(true);
     const controller = new AbortController();
     abortControllerRef.current = controller;
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 300000); // 300 second timeout (5 minutes)
 
     try {
       setSessions(prev => prev.map(s => {
@@ -222,7 +249,7 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
         return s;
       }));
 
-      const modelMessageId = (Date.now() + 1).toString();
+      const modelMessageId = generateId();
       setSessions(prev => prev.map(s => {
         if (s.id === currentSessionId) {
           return {
@@ -366,7 +393,7 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
             return {
               ...s,
               messages: [...updatedMessages, {
-                id: Date.now().toString(),
+                id: generateId(),
                 role: 'model',
                 content: `SYSTEM ERROR: ${error.message || 'Connection to core interrupted. Please try again.'}`,
                 timestamp: new Date()

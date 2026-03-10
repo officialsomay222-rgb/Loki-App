@@ -11,16 +11,18 @@ async function startServer() {
   // Mount API routes
   app.use(apiApp);
 
-  const isProduction = process.env.NODE_ENV === "production" || fs.existsSync(path.join(process.cwd(), "dist", "index.html"));
+  const isProduction = process.env.NODE_ENV === "production";
 
   // Vite middleware for development
   if (!isProduction) {
+    console.log("Starting Vite in middleware mode...");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
+    console.log("Serving static files from dist...");
     app.use(express.static("dist"));
     // SPA Fallback
     app.get("*", (req, res) => {

@@ -295,7 +295,7 @@ export default function App() {
   }
 
   return (
-    <div className={`w-full h-[100dvh] relative overflow-hidden flex flex-col ${theme}`}>
+    <div className={`w-full h-[100dvh] relative overflow-hidden flex flex-col ${theme} ${isAwakened ? 'awakened-mode' : ''}`}>
       <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} />
       {/* 1. Background Layer (Fixed, never moves) */}
       <AwakenedBackground isAwakened={isAwakened} bgStyle={bgStyle} theme={theme} />
@@ -810,13 +810,26 @@ export default function App() {
             </div>
             
             <div className="flex items-center justify-center w-2/4">
-              <h1 className="flex items-center gap-3 sm:gap-4 font-montserrat font-bold text-xl sm:text-2xl tracking-[2px] sm:tracking-[4px] text-slate-900 dark:text-[#e0e0e0]">
-                <span>LOKI</span>
-                <div className="w-10 h-5 sm:w-14 sm:h-8">
-                  <HeaderInfinityLogo />
+              {isLoading && currentSession?.messages[currentSession.messages.length - 1]?.role === 'model' && currentSession?.messages[currentSession.messages.length - 2]?.content?.includes('[IMAGE_MODE]') ? (
+                <div className="flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500">
+                  <div className="flex items-center gap-2 font-montserrat font-bold text-lg sm:text-xl tracking-[2px] sm:tracking-[4px] text-cyan-400 drop-shadow-[0_0_10px_rgba(0,242,255,0.8)]">
+                    <span className="animate-pulse">GENERATING</span>
+                    <span className="flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    </span>
+                  </div>
                 </div>
-                <span className="text-[0.65rem] sm:text-[0.75rem] tracking-[2px] sm:tracking-[3px] font-black px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-cyan-500/50 dark:border-[#00f2ff]/50 text-cyan-600 dark:text-[#00f2ff] shadow-[0_0_12px_rgba(0,242,255,0.3)] dark:shadow-[0_0_20px_rgba(0,242,255,0.4)] bg-cyan-500/10">PRIME</span>
-              </h1>
+              ) : (
+                <h1 className="flex items-center gap-3 sm:gap-4 font-montserrat font-bold text-xl sm:text-2xl tracking-[2px] sm:tracking-[4px] text-slate-900 dark:text-[#e0e0e0]">
+                  <span>LOKI</span>
+                  <div className="w-10 h-5 sm:w-14 sm:h-8">
+                    <HeaderInfinityLogo />
+                  </div>
+                  <span className="text-[0.65rem] sm:text-[0.75rem] tracking-[2px] sm:tracking-[3px] font-black px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-cyan-500/50 dark:border-[#00f2ff]/50 text-cyan-600 dark:text-[#00f2ff] shadow-[0_0_12px_rgba(0,242,255,0.3)] dark:shadow-[0_0_20px_rgba(0,242,255,0.4)] bg-cyan-500/10">PRIME</span>
+                </h1>
+              )}
             </div>
 
             <div className="flex items-center justify-end gap-4 sm:gap-6 w-1/4">

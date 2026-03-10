@@ -475,8 +475,8 @@ html.dark, html.awakened-mode-active {
 
 .bg-cyber-grid {
   background-image: 
-    linear-gradient(to right, rgba(0, 242, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 242, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0, 242, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 242, 255, 0.1) 1px, transparent 1px);
   background-size: 60px 60px;
   position: relative;
   background-attachment: scroll;
@@ -649,6 +649,6 @@ body.awakened-mode-active {
 
 .dark .bg-cyber-grid {
   background-image: 
-    linear-gradient(to right, rgba(0, 242, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 242, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0, 242, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 242, 255, 0.08) 1px, transparent 1px);
 }

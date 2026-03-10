@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { Copy, Check } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -9,36 +9,42 @@ import { HeaderInfinityLogo } from './Logos';
 import { Message } from '../contexts/ChatContext';
 
 // Extract components to prevent re-creation on every render
-const MarkdownComponents = {
-  code({node, inline, className, children, ...props}: any) {
-    const match = /language-(\w+)/.exec(className || '')
-    return !inline && match ? (
-      <div className="rounded-md overflow-hidden my-4 border border-white/10 shadow-lg">
-        <div className="bg-black/80 text-xs text-slate-400 px-4 py-1.5 flex justify-between items-center border-b border-white/5">
-          <span>{match[1]}</span>
-        </div>
-        <SyntaxHighlighter
-          {...props}
-          children={String(children).replace(/\n$/, '')}
-          style={vscDarkPlus}
-          language={match[1]}
-          PreTag="div"
-          customStyle={{ margin: 0, background: '#0d0d12', padding: '1rem' }}
-        />
+const MarkdownCode = ({node, inline, className, children, ...props}: any) => {
+  const match = /language-(\w+)/.exec(className || '')
+  return !inline && match ? (
+    <div className="rounded-md overflow-hidden my-4 border border-white/10 shadow-lg">
+      <div className="bg-black/80 text-xs text-slate-400 px-4 py-1.5 flex justify-between items-center border-b border-white/5">
+        <span>{match[1]}</span>
       </div>
-    ) : (
-      <code {...props} className={`${className} bg-black/20 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-cyan-600 dark:text-cyan-400 font-mono text-sm`}>
-        {children}
-      </code>
-    )
-  },
-  img({node, ...props}: any) {
-    const isDataUri = props.src?.startsWith('data:');
-    const [hasError, setHasError] = React.useState(false);
-    const [isLoaded, setIsLoaded] = React.useState(false);
-    
-    return (
-      <div className="my-4 aspect-square w-full max-w-[512px] mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 group/img relative">
+      <SyntaxHighlighter
+        {...props}
+        children={String(children).replace(/\n$/, '')}
+        style={vscDarkPlus}
+        language={match[1]}
+        PreTag="div"
+        customStyle={{ margin: 0, background: '#0d0d12', padding: '1rem' }}
+      />
+    </div>
+  ) : (
+    <code {...props} className={`${className} bg-black/20 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-cyan-600 dark:text-cyan-400 font-mono text-sm`}>
+      {children}
+    </code>
+  )
+};
+
+const MarkdownImage = ({node, ...props}: any) => {
+  if (!props.src) return null;
+  const isDataUri = props.src?.startsWith('data:');
+  const [hasError, setHasError] = React.useState(false);
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  
+  return (
+    <>
+      <div 
+        className="my-4 aspect-square w-full max-w-[512px] mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 group/img relative cursor-pointer"
+        onClick={() => isLoaded && !hasError && setIsFullscreen(true)}
+      >
         {!hasError ? (
           <img 
             {...props} 
@@ -55,45 +61,106 @@ const MarkdownComponents = {
           </div>
         )}
         
-        {/* Download Button */}
-        {isDataUri && isLoaded && (
-          <button
-            onClick={() => {
-              const link = document.createElement('a');
-              link.href = props.src;
-              link.download = `loki-prime-gen-${Date.now()}.jpg`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }}
-            className="absolute top-3 right-3 p-2.5 rounded-xl bg-black/60 text-white/80 hover:text-white hover:bg-black/80 opacity-0 group-hover/img:opacity-100 transition-all backdrop-blur-md border border-white/10 z-10"
-            title="Download Image"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </button>
+        {/* Hover overlay for fullscreen hint */}
+        {isLoaded && !hasError && (
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          </div>
         )}
         
         {/* Loading Placeholder */}
         {!isLoaded && !hasError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-            <div className="relative">
-              <div className="w-12 h-12 border-2 border-cyan-500/20 rounded-full"></div>
-              <div className="absolute inset-0 w-12 h-12 border-2 border-t-cyan-500 rounded-full animate-spin"></div>
-              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-mono text-cyan-500/70 tracking-widest uppercase animate-pulse">
-                Rendering
-              </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/50 backdrop-blur-sm z-20">
+            <div className="w-24 h-12 mb-4">
+              <svg viewBox="0 0 100 50" className="w-full h-full overflow-visible drop-shadow-[0_0_15px_rgba(0,242,255,0.8)]">
+                <path
+                  d="M25,25 C25,11.1928813 36.1928813,0 50,0 C63.8071187,0 75,11.1928813 75,25 C75,38.8071187 63.8071187,50 50,50 C36.1928813,50 25,38.8071187 25,25 Z M25,25 C25,38.8071187 13.8071187,50 0,50 C-13.8071187,50 -25,38.8071187 -25,25 C-25,11.1928813 -13.8071187,0 0,0 C13.8071187,0 25,11.1928813 25,25 Z"
+                  fill="none"
+                  stroke="url(#cyan-gradient)"
+                  strokeWidth="4"
+                  className="animate-[dash_3s_linear_infinite]"
+                  strokeDasharray="150"
+                  strokeDashoffset="0"
+                  transform="translate(25, 0)"
+                />
+                <defs>
+                  <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#00f2ff" />
+                    <stop offset="50%" stopColor="#8b5cf6" />
+                    <stop offset="100%" stopColor="#00f2ff" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div className="text-[10px] font-mono text-cyan-400 tracking-[0.3em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(0,242,255,0.8)]">
+              Loading Image...
             </div>
           </div>
         )}
       </div>
-    )
+
+      {/* Fullscreen Modal */}
+      {isFullscreen && (
+        <div 
+          className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-xl flex items-center justify-center animate-in fade-in duration-300"
+          onClick={() => setIsFullscreen(false)}
+        >
+          <button 
+            className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
+            onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          
+          {isDataUri && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const link = document.createElement('a');
+                link.href = props.src;
+                link.download = `loki-prime-gen-${Date.now()}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/40 hover:text-white border border-cyan-500/50 transition-all backdrop-blur-md z-50 flex items-center gap-2 font-bold tracking-wider shadow-[0_0_20px_rgba(0,242,255,0.3)]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              DOWNLOAD IMAGE
+            </button>
+          )}
+
+          <img 
+            {...props} 
+            className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300" 
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+    </>
+  );
+};
+
+const MarkdownComponents = {
+  code: MarkdownCode,
+  img: MarkdownImage,
+  p({node, children}: any) {
+    return <div className="mb-4 last:mb-0">{children}</div>;
   }
+};
+
+const customUrlTransform = (url: string) => {
+  if (url.startsWith('data:image/')) {
+    return url;
+  }
+  return defaultUrlTransform(url);
 };
 
 const MemoizedMarkdown = memo(({ content }: { content: string }) => (
   <ReactMarkdown 
     remarkPlugins={[remarkGfm]}
     components={MarkdownComponents}
+    urlTransform={customUrlTransform}
   >
     {content}
   </ReactMarkdown>
