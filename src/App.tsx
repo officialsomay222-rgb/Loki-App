@@ -699,8 +699,8 @@ export default function App() {
 
         {/* Sidebar */}
         <div 
-          className={`fixed md:static inset-y-0 left-0 z-50 w-72 glass-panel premium-shadow border-y-0 border-l-0 border-r border-slate-200/30 dark:border-white/5 flex flex-col transition-transform duration-300 ease-in-out will-change-transform ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:w-0 md:opacity-0 md:overflow-hidden'
+          className={`fixed inset-y-0 left-0 z-50 w-72 glass-panel premium-shadow border-y-0 border-l-0 border-r border-slate-200/30 dark:border-white/5 flex flex-col transition-transform duration-300 ease-in-out will-change-transform ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
           <div className="p-4 flex items-center justify-between border-b border-slate-200/50 dark:border-white/5">
@@ -709,7 +709,7 @@ export default function App() {
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg md:hidden transition-colors"
+              className="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors"
             >
               <PanelLeftClose className="w-5 h-5" />
             </button>
