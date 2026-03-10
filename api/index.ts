@@ -182,8 +182,8 @@ app.post("/api/chat", async (req, res) => {
         throw new Error("Generated image data is invalid or empty.");
       }
 
-      // Use a cleaner response format
-      const responseText = `![Generated Image](data:image/png;base64,${base64EncodeString})\n\n**Refined Prompt:** ${detailedPrompt}`;
+      // Use a cleaner response format - Only send the image markdown
+      const responseText = `![Generated Image](data:image/jpeg;base64,${base64EncodeString})`;
       res.write(`data: ${JSON.stringify({ text: responseText })}\n\n`);
       res.write(`data: [DONE]\n\n`);
       res.end();
