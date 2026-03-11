@@ -709,7 +709,7 @@ export default function App() {
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors text-slate-600 dark:text-white"
             >
               <PanelLeftClose className="w-5 h-5" />
             </button>
@@ -802,7 +802,7 @@ export default function App() {
               {!isSidebarOpen && (
                 <button 
                   onClick={() => setIsSidebarOpen(true)}
-                  className="p-2 sm:p-2.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl transition-colors text-slate-600 dark:text-[#a0a0a0]"
+                  className="p-2 sm:p-2.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-xl transition-colors text-slate-600 dark:text-white"
                 >
                   <PanelLeftOpen className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
@@ -810,9 +810,12 @@ export default function App() {
             </div>
             
             <div className="flex items-center justify-center w-2/4">
-              {isLoading && currentSession?.messages[currentSession.messages.length - 1]?.role === 'model' && currentSession?.messages[currentSession.messages.length - 2]?.content?.includes('[IMAGE_MODE]') ? (
+              {isLoading && currentSession?.messages[currentSession.messages.length - 1]?.role === 'model' && currentSession?.messages[currentSession.messages.length - 2]?.isImage ? (
                 <div className="flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500">
-                  <div className="flex items-center gap-2 font-montserrat font-bold text-lg sm:text-xl tracking-[2px] sm:tracking-[4px] text-cyan-400 drop-shadow-[0_0_10px_rgba(0,242,255,0.8)]">
+                  <div className="flex items-center gap-3 font-montserrat font-bold text-lg sm:text-xl tracking-[2px] sm:tracking-[4px] text-cyan-400 drop-shadow-[0_0_10px_rgba(0,242,255,0.8)]">
+                    <div className="w-8 h-4 sm:w-10 sm:h-5">
+                      <HeaderInfinityLogo />
+                    </div>
                     <span className="animate-pulse">GENERATING</span>
                     <span className="flex gap-1">
                       <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>

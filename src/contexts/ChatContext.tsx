@@ -217,7 +217,8 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
       role: 'user',
       content: text.trim(),
       timestamp: new Date(),
-      status: 'pending'
+      status: 'pending',
+      isImage: isImageMode
     };
 
     setSessions(prev => prev.map(s => {

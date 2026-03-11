@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { BubbleStyle, FontSize } from '../contexts/SettingsContext';
-import { HeaderInfinityLogo } from './Logos';
+import { HeaderInfinityLogo, InfinityLogo } from './Logos';
 import { Message } from '../contexts/ChatContext';
 
 // Extract components to prevent re-creation on every render
@@ -71,26 +71,8 @@ const MarkdownImage = ({node, ...props}: any) => {
         {/* Loading Placeholder */}
         {!isLoaded && !hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/50 backdrop-blur-sm z-20">
-            <div className="w-24 h-12 mb-4">
-              <svg viewBox="0 0 100 50" className="w-full h-full overflow-visible drop-shadow-[0_0_15px_rgba(0,242,255,0.8)]">
-                <path
-                  d="M25,25 C25,11.1928813 36.1928813,0 50,0 C63.8071187,0 75,11.1928813 75,25 C75,38.8071187 63.8071187,50 50,50 C36.1928813,50 25,38.8071187 25,25 Z M25,25 C25,38.8071187 13.8071187,50 0,50 C-13.8071187,50 -25,38.8071187 -25,25 C-25,11.1928813 -13.8071187,0 0,0 C13.8071187,0 25,11.1928813 25,25 Z"
-                  fill="none"
-                  stroke="url(#cyan-gradient)"
-                  strokeWidth="4"
-                  className="animate-[dash_3s_linear_infinite]"
-                  strokeDasharray="150"
-                  strokeDashoffset="0"
-                  transform="translate(25, 0)"
-                />
-                <defs>
-                  <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#00f2ff" />
-                    <stop offset="50%" stopColor="#8b5cf6" />
-                    <stop offset="100%" stopColor="#00f2ff" />
-                  </linearGradient>
-                </defs>
-              </svg>
+            <div className="w-32 h-16 mb-4">
+              <InfinityLogo />
             </div>
             <div className="text-[10px] font-mono text-cyan-400 tracking-[0.3em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(0,242,255,0.8)]">
               Loading Image...
@@ -199,26 +181,8 @@ const ImageGenerationPlaceholder = () => {
 
       {/* Center Logo & Text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-        <div className="w-24 h-12 mb-6">
-          <svg viewBox="0 0 100 50" className="w-full h-full overflow-visible drop-shadow-[0_0_15px_rgba(0,242,255,0.8)]">
-            <path
-              d="M25,25 C25,11.1928813 36.1928813,0 50,0 C63.8071187,0 75,11.1928813 75,25 C75,38.8071187 63.8071187,50 50,50 C36.1928813,50 25,38.8071187 25,25 Z M25,25 C25,38.8071187 13.8071187,50 0,50 C-13.8071187,50 -25,38.8071187 -25,25 C-25,11.1928813 -13.8071187,0 0,0 C13.8071187,0 25,11.1928813 25,25 Z"
-              fill="none"
-              stroke="url(#cyan-gradient-placeholder)"
-              strokeWidth="4"
-              className="animate-[dash_3s_linear_infinite]"
-              strokeDasharray="150"
-              strokeDashoffset="0"
-              transform="translate(25, 0)"
-            />
-            <defs>
-              <linearGradient id="cyan-gradient-placeholder" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#00f2ff" />
-                <stop offset="50%" stopColor="#8b5cf6" />
-                <stop offset="100%" stopColor="#00f2ff" />
-              </linearGradient>
-            </defs>
-          </svg>
+        <div className="w-32 h-16 mb-6">
+          <InfinityLogo />
         </div>
         <div className="text-xs font-mono text-cyan-400 tracking-[0.4em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(0,242,255,0.8)]">
           Rendering Canvas
@@ -269,9 +233,9 @@ export const MessageBubble = memo(({
             <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 dark:text-[#6b6b80]">
               {formatDate(message.timestamp)}
             </span>
-            {message.status === 'pending' && (
+            {!message.content && (
               <span className="text-[9px] sm:text-[10px] font-mono text-cyan-500 animate-pulse">
-                {message.isImage ? 'GENERATING...' : 'PENDING'}
+                {message.isImage ? 'GENERATING...' : 'THINKING...'}
               </span>
             )}
           </div>
@@ -281,7 +245,11 @@ export const MessageBubble = memo(({
           <div className={`relative transition-all duration-300 py-2 ${isAwakened ? 'text-cyan-50' : 'text-slate-800 dark:text-[#e0e0e0]'}`}>
             <div className={`markdown-body ${fontSizeClass}`}>
               {message.content ? (
-                <MemoizedMarkdown content={message.content} />
+                message.isImage && message.content.startsWith('![') ? (
+                  <MarkdownImage src={message.content.slice(message.content.indexOf('(data:image') + 1, -1)} alt="Generated Image" />
+                ) : (
+                  <MemoizedMarkdown content={message.content} />
+                )
               ) : message.isImage ? (
                 <ImageGenerationPlaceholder />
               ) : (
@@ -319,6 +287,9 @@ export const MessageBubble = memo(({
           <span className="text-[8px] sm:text-[9px] font-mono text-slate-400 dark:text-[#6b6b80]">
             {formatDate(message.timestamp)}
           </span>
+          {message.status === 'pending' && (
+            <span className="text-[8px] sm:text-[9px] font-mono text-cyan-500 animate-pulse">PENDING</span>
+          )}
         </div>
         
         <div className="relative group w-full">
