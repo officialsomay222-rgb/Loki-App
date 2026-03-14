@@ -369,7 +369,6 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
         className="max-w-4xl mx-auto relative rounded-[1.2rem] sm:rounded-[1.5rem]"
         animate={{ 
           scale: isRecording ? 1.02 : 1,
-          boxShadow: isFocused ? '0 0 20px rgba(0, 255, 128, 0.4), 0 0 40px rgba(255, 128, 0, 0.2)' : '0 0 0px rgba(0,0,0,0)'
         }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
@@ -407,6 +406,51 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
             <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-cyan-400/30 rounded-bl-[1.2rem] sm:rounded-bl-[1.5rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
             <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-cyan-400/30 rounded-br-[1.2rem] sm:rounded-br-[1.5rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
+            {/* Premium Gemini RGB Gradient Border Layer */}
+            <motion.div 
+              className="absolute inset-0 rounded-[1.2rem] sm:rounded-[1.5rem] pointer-events-none z-0"
+              initial={{ opacity: 0 }}
+              animate={{ 
+                opacity: isFocused ? 1 : 0,
+              }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div
+                className="absolute inset-[-150%] bg-[conic-gradient(from_0deg,#4285F4,#DB4437,#F4B400,#0F9D58,#4285F4)]"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                style={{
+                  filter: 'blur(8px)',
+                }}
+              />
+              {/* Mask to create the 2px border effect */}
+              <div 
+                className="absolute inset-0 rounded-[1.2rem] sm:rounded-[1.5rem] bg-transparent border-[2px] border-transparent"
+                style={{
+                  maskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                  background: 'inherit'
+                }}
+              />
+            </motion.div>
+
+            {/* Pulsing Glow Effect */}
+            <motion.div
+              className="absolute inset-0 rounded-[1.2rem] sm:rounded-[1.5rem] pointer-events-none z-0"
+              animate={{ 
+                boxShadow: isFocused 
+                  ? [
+                      '0 0 10px rgba(66, 133, 244, 0.1)',
+                      '0 0 25px rgba(66, 133, 244, 0.2)',
+                      '0 0 10px rgba(66, 133, 244, 0.1)'
+                    ] 
+                  : '0 0 0px rgba(0,0,0,0)'
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            />
+
             <textarea
               ref={inputRef}
               value={input}
@@ -415,7 +459,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder={isTranscribing ? "Transcribing..." : isRecording ? "Listening..." : isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
-              className="w-full max-h-[120px] sm:max-h-[150px] min-h-[40px] sm:min-h-[50px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-2.5 sm:py-3.5 text-[1rem] sm:text-[1.1rem] text-cyan-50 placeholder:text-cyan-600/50 custom-scrollbar leading-relaxed font-mono tracking-wide relative z-10"
+              className="w-full max-h-[120px] sm:max-h-[150px] min-h-[40px] sm:min-h-[50px] bg-gray-950/90 border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-2.5 sm:py-3.5 text-[1rem] sm:text-[1.1rem] text-cyan-50 placeholder:text-cyan-600/50 custom-scrollbar leading-relaxed font-mono tracking-wide relative z-10 caret-[#4285F4] rounded-[1.1rem] sm:rounded-[1.4rem]"
               rows={1}
               disabled={isLoading || isRecording || isTranscribing}
             />
