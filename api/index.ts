@@ -35,6 +35,7 @@ app.post("/api/transcribe", async (req, res) => {
     formData.append('file', blob, `audio.${extension}`);
     formData.append('model', 'whisper-large-v3-turbo');
     formData.append('response_format', 'json');
+    formData.append('prompt', 'The following is a conversation in English and Hinglish (Hindi written in the Latin alphabet). Please transcribe exactly as spoken, keeping Hinglish words in Latin script. Examples: "Haan bhai, kya haal hai?", "I am doing good", "Theek hai."');
 
     const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',

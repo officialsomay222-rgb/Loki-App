@@ -38,6 +38,11 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
   const audioChunksRef = useRef<Blob[]>([]);
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = (ref as React.MutableRefObject<HTMLTextAreaElement>) || internalRef;
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const silenceStartRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const hasSpokenRef = useRef<boolean>(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -98,6 +103,12 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       };
 
       mediaRecorder.onstop = async () => {
+        if (!hasSpokenRef.current) {
+          // If the user didn't speak at all, just cancel the recording
+          setIsRecording(false);
+          return;
+        }
+
         const mimeType = mediaRecorder.mimeType || 'audio/webm';
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         const audioUrl = URL.createObjectURL(audioBlob);
@@ -133,6 +144,48 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
 
       mediaRecorder.start();
       setIsRecording(true);
+      hasSpokenRef.current = false;
+
+      // Silence Detection Logic
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
+      const analyser = audioContext.createAnalyser();
+      analyser.minDecibels = -60;
+      analyser.smoothingTimeConstant = 0.8;
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      const checkSilence = () => {
+        if (mediaRecorder.state !== 'recording') return;
+        
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const average = sum / dataArray.length;
+
+        if (average < 15) { // Threshold for silence
+          if (silenceStartRef.current === null) {
+            silenceStartRef.current = Date.now();
+          } else if (Date.now() - silenceStartRef.current > 2500) {
+            // 2.5 seconds of silence detected
+            stopRecording();
+            return;
+          }
+        } else {
+          hasSpokenRef.current = true;
+          silenceStartRef.current = null; // Reset silence timer if sound is detected
+        }
+
+        animationFrameRef.current = requestAnimationFrame(checkSilence);
+      };
+
+      checkSilence();
+
     } catch (err: any) {
       console.error("Error accessing microphone:", err);
       if (err.name === 'NotAllowedError' || err?.message?.includes('Permission denied')) {
@@ -152,6 +205,16 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       setIsRecording(false);
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
     }
+
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(console.error);
+      audioContextRef.current = null;
+    }
+    silenceStartRef.current = null;
   };
 
   const toggleRecording = () => {
