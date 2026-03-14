@@ -208,6 +208,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       };
 
       if (SpeechRecognition) {
+        console.log("SpeechRecognition supported");
         try {
           const recognition = new SpeechRecognition();
           recognitionRef.current = recognition;
@@ -299,7 +300,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
         const rms = Math.sqrt(sumSquares / dataArray.length);
         
         // Always update volume for visual feedback
-        setAudioVolume(Math.min(1, rms * 10));
+        setAudioVolume(Math.min(1, rms * 50));
 
         if (!isSpeechRecognitionActive) {
           const silenceThreshold = 0.015;

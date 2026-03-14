@@ -425,6 +425,10 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
               
               if (ttsResponse.ok) {
                 const ttsData = await ttsResponse.json();
+                console.log("TTS Data received:", ttsData);
+                if (!ttsData.audioBase64) {
+                  console.error("No audioBase64 in TTS response");
+                }
                 const audioBase64 = `data:audio/wav;base64,${ttsData.audioBase64}`;
                 
                 setSessions(prev => prev.map(s => {
