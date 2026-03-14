@@ -36,6 +36,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isSuccessFlash, setIsSuccessFlash] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -158,6 +159,8 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
             // We have the text from Web Speech API or input, send immediately!
             setInput('');
             playBlip();
+            setIsSuccessFlash(true);
+            setTimeout(() => setIsSuccessFlash(false), 1000);
             onSendMessage(textToSend, isImageMode, audioUrl);
           } else {
             // Fallback: Transcribe using backend API if Web Speech API failed or wasn't available
@@ -179,6 +182,8 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
                   
                   if (text) {
                     playBlip();
+                    setIsSuccessFlash(true);
+                    setTimeout(() => setIsSuccessFlash(false), 1000);
                     onSendMessage(text, isImageMode, audioUrl);
                   } else {
                     console.log("Empty transcription result");
@@ -384,12 +389,19 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
         
         {isAwakened ? (
           /* AWAKENED MODE TEXTPAD - 10X ADVANCED */
-          <div className="relative flex flex-col gap-1.5 sm:gap-2 rounded-[1.2rem] sm:rounded-[1.5rem] p-1.5 sm:p-2 bg-gradient-to-br from-[#0a0a12]/80 to-[#050508]/90 border border-cyan-500/20 backdrop-blur-2xl focus-within:bg-[#0a0a12]/95 focus-within:border-cyan-400/40 focus-within:shadow-[0_0_20px_rgba(0,242,255,0.08)] transition-all duration-500 group">
+          <div className={`relative flex flex-col gap-1.5 sm:gap-2 rounded-[1.2rem] sm:rounded-[1.5rem] p-1.5 sm:p-2 bg-gradient-to-br from-[#0a0a12]/80 to-[#050508]/90 border transition-all duration-500 group ${
+            isSuccessFlash ? 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 
+            isRecording ? 'border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.2)] animate-pulse' : 
+            'border-cyan-500/20 backdrop-blur-2xl focus-within:bg-[#0a0a12]/95 focus-within:border-cyan-400/40 focus-within:shadow-[0_0_20px_rgba(0,242,255,0.08)]'
+          }`}>
             
             {/* Background effects container (handles overflow for animations) */}
             <div className="absolute inset-0 overflow-hidden rounded-[1.2rem] sm:rounded-[1.5rem] pointer-events-none">
               {/* Scanning Line Animation */}
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent h-[200%] -translate-y-full group-focus-within:animate-[scanline_4s_linear_infinite]"></div>
+              {isRecording && (
+                <div className="absolute inset-0 bg-rose-500/5 animate-pulse"></div>
+              )}
             </div>
 
             {/* Tech Corner Accents */}
@@ -537,7 +549,11 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
           </div>
         ) : (
           /* NORMAL MODE TEXTPAD - CLEAN & SIMPLE */
-          <div className="relative flex flex-col gap-2 sm:gap-3 glass-panel premium-shadow rounded-[1.5rem] sm:rounded-[2rem] p-3 sm:p-4 input-container-focus border border-slate-200/50 dark:border-white/10">
+          <div className={`relative flex flex-col gap-2 sm:gap-3 glass-panel premium-shadow rounded-[1.5rem] sm:rounded-[2rem] p-3 sm:p-4 input-container-focus border transition-all duration-500 ${
+            isSuccessFlash ? 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 
+            isRecording ? 'border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.15)] animate-pulse' : 
+            'border-slate-200/50 dark:border-white/10'
+          }`}>
             <textarea
               ref={inputRef}
               value={input}

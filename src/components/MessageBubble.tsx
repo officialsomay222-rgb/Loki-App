@@ -253,19 +253,19 @@ const AudioPlayer = ({ url, autoPlay, onPlay }: { url: string, autoPlay?: boolea
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="flex items-center gap-3 bg-[#4f80ff] rounded-full p-2 pr-5 shadow-md w-[260px] sm:w-[300px]">
+    <div className="flex items-center gap-3 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full p-2 pr-5 shadow-[0_0_15px_rgba(6,182,212,0.3)] w-[260px] sm:w-[300px] border border-white/20 group/player">
       <button 
         onClick={togglePlay}
-        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors shrink-0"
+        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-all active:scale-95 shrink-0 shadow-inner"
       >
         {isPlaying ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
         )}
       </button>
       
-      <div className="flex-1 flex items-center justify-between h-8 gap-[2px] relative cursor-pointer" onClick={(e) => {
+      <div className="flex-1 flex items-center justify-between h-8 gap-[3px] relative cursor-pointer" onClick={(e) => {
         if (!audioRef.current || !duration) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -277,17 +277,18 @@ const AudioPlayer = ({ url, autoPlay, onPlay }: { url: string, autoPlay?: boolea
           return (
             <div 
               key={i} 
-              className={`w-1 rounded-full transition-colors duration-150 ${isPlayed ? 'bg-white' : 'bg-white/40'}`}
+              className={`w-1 rounded-full transition-all duration-300 ${isPlayed ? 'bg-white shadow-[0_0_8px_white]' : 'bg-white/30'}`}
               style={{ 
                 height: `${height}%`,
-                opacity: isPlaying && !isPlayed ? 0.6 + Math.random() * 0.4 : 1
+                opacity: isPlaying && !isPlayed ? 0.4 + Math.random() * 0.6 : 1,
+                transform: isPlaying && isPlayed ? `scaleY(${1 + Math.sin(Date.now()/200 + i)*0.2})` : 'scaleY(1)'
               }}
             />
           );
         })}
       </div>
 
-      <div className="text-[10px] sm:text-xs font-medium text-white tracking-wide shrink-0 w-10 text-right opacity-90">
+      <div className="text-[10px] sm:text-xs font-mono font-bold text-white tracking-tighter shrink-0 w-10 text-right opacity-90">
         {formatTime(currentTime > 0 ? currentTime : duration)}
       </div>
 

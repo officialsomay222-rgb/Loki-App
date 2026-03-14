@@ -98,10 +98,17 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
                 }
                 sessionUsedMessageIds.add(msgId);
                 
+                // If it's a stored base64 audio, convert back to blob URL for playback
+                let audioUrl = m.audioUrl;
+                if (audioUrl && audioUrl.startsWith('data:audio')) {
+                  // Keep as data URL, it's fine for playback
+                }
+
                 return {
                   ...m,
                   id: msgId,
-                  timestamp: new Date(m.timestamp)
+                  timestamp: new Date(m.timestamp),
+                  audioUrl: audioUrl
                 };
               })
             };
@@ -248,6 +255,25 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
       setTone(newTone);
     }
 
+    // Store if this was a voice message to trigger voice response
+    const isVoiceRequest = !!audioUrl;
+    
+    // Convert blob URL to data URL for persistence if needed
+    let persistentAudioUrl = audioUrl;
+    if (audioUrl && audioUrl.startsWith('blob:')) {
+      try {
+        const response = await fetch(audioUrl);
+        const blob = await response.blob();
+        persistentAudioUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        console.error("Failed to convert blob to data URL", e);
+      }
+    }
+
     const userMessage: Message = {
       id: generateId(),
       role: 'user',
@@ -255,11 +281,11 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
       timestamp: new Date(),
       status: 'pending',
       isImage: isImageMode,
-      audioUrl: audioUrl
+      audioUrl: persistentAudioUrl
     };
-
-    // Store if this was a voice message to trigger voice response
-    const isVoiceRequest = !!audioUrl;
+    
+    // Add a hidden flag for the AI if it's a voice request
+    const processedText = isVoiceRequest ? `[VOICE_INPUT] ${text.trim()}` : text.trim();
 
     setSessions(prev => prev.map(s => {
       if (s.id === currentSessionId) {
@@ -326,10 +352,10 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: userMessage.content,
+          message: processedText,
           history: history,
           mode: isImageMode ? 'image' : modelMode,
-          systemInstruction: getFullSystemInstruction(),
+          systemInstruction: `${getFullSystemInstruction()}\n\nIMPORTANT: If the user input starts with [VOICE_INPUT], you are receiving a voice message. Bypass extensive reasoning or research. Keep your response concise, conversational, and direct. Your response will be read aloud, so make it sound natural for speech.`,
           temperature,
           topP,
           topK
@@ -389,15 +415,41 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
           
           // If it was a voice request, mark the response as a voice response
           if (isVoiceRequest && fullResponse && !isImageMode) {
-            setSessions(prev => prev.map(s => {
-              if (s.id === currentSessionId) {
-                const updatedMessages = s.messages.map(m => 
-                  m.id === modelMessageId ? { ...m, isVoiceResponse: true } : m
-                );
-                return { ...s, messages: updatedMessages };
+            // Generate TTS for the response
+            try {
+              const ttsResponse = await fetch('/api/tts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: fullResponse })
+              });
+              
+              if (ttsResponse.ok) {
+                const ttsData = await ttsResponse.json();
+                const audioBase64 = `data:audio/wav;base64,${ttsData.audioBase64}`;
+                
+                setSessions(prev => prev.map(s => {
+                  if (s.id === currentSessionId) {
+                    const updatedMessages = s.messages.map(m => 
+                      m.id === modelMessageId ? { ...m, isVoiceResponse: true, audioUrl: audioBase64 } : m
+                    );
+                    return { ...s, messages: updatedMessages };
+                  }
+                  return s;
+                }));
               }
-              return s;
-            }));
+            } catch (e) {
+              console.error("TTS generation failed during sendMessage", e);
+              // Fallback to just marking as voice response
+              setSessions(prev => prev.map(s => {
+                if (s.id === currentSessionId) {
+                  const updatedMessages = s.messages.map(m => 
+                    m.id === modelMessageId ? { ...m, isVoiceResponse: true } : m
+                  );
+                  return { ...s, messages: updatedMessages };
+                }
+                return s;
+              }));
+            }
           }
           break;
         }
