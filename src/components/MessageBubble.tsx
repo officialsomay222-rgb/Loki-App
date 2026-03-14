@@ -194,7 +194,35 @@ const ImageGenerationPlaceholder = () => {
 
 const AudioPlayer = ({ url }: { url: string }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Use a fixed seed for the waveform so it doesn't change on re-renders
+  const bars = useMemo(() => {
+    return Array.from({ length: 35 }).map(() => 20 + Math.random() * 80);
+  }, [url]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const setAudioData = () => {
+      setDuration(audio.duration);
+    };
+
+    const setAudioTime = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    audio.addEventListener('loadedmetadata', setAudioData);
+    audio.addEventListener('timeupdate', setAudioTime);
+
+    return () => {
+      audio.removeEventListener('loadedmetadata', setAudioData);
+      audio.removeEventListener('timeupdate', setAudioTime);
+    };
+  }, []);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -207,21 +235,54 @@ const AudioPlayer = ({ url }: { url: string }) => {
     }
   };
 
+  const formatTime = (time: number) => {
+    if (isNaN(time) || !isFinite(time)) return "00:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+
   return (
-    <div className="flex items-center gap-3 bg-black/20 dark:bg-white/5 rounded-xl p-2 sm:p-3 border border-white/10 w-[200px] sm:w-[250px]">
+    <div className="flex items-center gap-3 bg-slate-900/60 dark:bg-[#1a1a24]/60 rounded-full p-1.5 pr-4 border border-cyan-500/20 shadow-[0_4px_20px_rgba(0,0,0,0.2)] w-[260px] sm:w-[300px] backdrop-blur-md">
       <button 
         onClick={togglePlay}
-        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center hover:bg-cyan-500/40 transition-colors shrink-0"
+        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-cyan-600 text-white flex items-center justify-center hover:bg-cyan-500 transition-colors shrink-0 shadow-[0_0_15px_rgba(0,242,255,0.3)]"
       >
-        {isPlaying ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4 ml-1" />}
+        {isPlaying ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        )}
       </button>
-      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden relative">
-        <div className={`absolute inset-0 bg-gradient-to-r from-cyan-500/50 to-blue-500/50 w-full ${isPlaying ? 'animate-[scanline_2s_linear_infinite]' : ''}`}></div>
+      
+      <div className="flex-1 flex items-center justify-between h-8 gap-[2px] relative cursor-pointer" onClick={(e) => {
+        if (!audioRef.current || !duration) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = x / rect.width;
+        audioRef.current.currentTime = percentage * duration;
+      }}>
+        {bars.map((height, i) => {
+          const isPlayed = (i / bars.length) * 100 <= progressPercentage;
+          return (
+            <div 
+              key={i} 
+              className={`w-1 rounded-full transition-colors duration-150 ${isPlayed ? 'bg-cyan-400' : 'bg-cyan-900/40'}`}
+              style={{ 
+                height: `${height}%`,
+                opacity: isPlaying && !isPlayed ? 0.6 + Math.random() * 0.4 : 1
+              }}
+            />
+          );
+        })}
       </div>
-      <div className="text-[10px] sm:text-xs font-mono text-cyan-500/70 flex items-center gap-1">
-        <Mic className="w-3 h-3" />
-        VOICE
+
+      <div className="text-[10px] sm:text-xs font-medium text-cyan-100/80 tracking-wide shrink-0 w-10 text-right">
+        {formatTime(currentTime > 0 ? currentTime : duration)}
       </div>
+
       <audio 
         ref={audioRef} 
         src={url} 

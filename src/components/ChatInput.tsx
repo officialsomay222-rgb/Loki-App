@@ -38,6 +38,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
   const audioChunksRef = useRef<Blob[]>([]);
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = (ref as React.MutableRefObject<HTMLTextAreaElement>) || internalRef;
+  const [audioVolume, setAudioVolume] = useState<number>(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const silenceStartRef = useRef<number | null>(null);
@@ -91,7 +92,14 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error("Microphone access is not supported in this browser or environment.");
       }
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1
+        } 
+      });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -146,39 +154,48 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       setIsRecording(true);
       hasSpokenRef.current = false;
 
-      // Silence Detection Logic
+      // Silence Detection Logic using RMS (Root Mean Square)
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = audioContext;
       const analyser = audioContext.createAnalyser();
-      analyser.minDecibels = -60;
-      analyser.smoothingTimeConstant = 0.8;
+      analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = 0.5;
       const source = audioContext.createMediaStreamSource(stream);
       source.connect(analyser);
       analyserRef.current = analyser;
 
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const dataArray = new Float32Array(analyser.fftSize);
 
       const checkSilence = () => {
         if (mediaRecorder.state !== 'recording') return;
         
-        analyser.getByteFrequencyData(dataArray);
-        let sum = 0;
+        analyser.getFloatTimeDomainData(dataArray);
+        
+        // Calculate RMS (Root Mean Square)
+        let sumSquares = 0;
         for (let i = 0; i < dataArray.length; i++) {
-          sum += dataArray[i];
+          sumSquares += dataArray[i] * dataArray[i];
         }
-        const average = sum / dataArray.length;
+        const rms = Math.sqrt(sumSquares / dataArray.length);
+        
+        // Update visual volume (scale 0 to 1 for UI)
+        setAudioVolume(Math.min(1, rms * 10));
 
-        if (average < 15) { // Threshold for silence
+        // Threshold for silence (adjust as needed, 0.01 is usually a good baseline for background noise)
+        const silenceThreshold = 0.015;
+
+        if (rms < silenceThreshold) { 
           if (silenceStartRef.current === null) {
             silenceStartRef.current = Date.now();
           } else if (Date.now() - silenceStartRef.current > 2500) {
-            // 2.5 seconds of silence detected
+            // 2.5 seconds of continuous silence detected
             stopRecording();
             return;
           }
         } else {
+          // Sound detected, reset silence timer
           hasSpokenRef.current = true;
-          silenceStartRef.current = null; // Reset silence timer if sound is detected
+          silenceStartRef.current = null; 
         }
 
         animationFrameRef.current = requestAnimationFrame(checkSilence);
@@ -189,13 +206,13 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
     } catch (err: any) {
       console.error("Error accessing microphone:", err);
       if (err.name === 'NotAllowedError' || err?.message?.includes('Permission denied')) {
-        setMicError("Microphone access denied. Please allow microphone access in your browser settings.");
+        setMicError("Microphone access denied. Please click the microphone icon in your browser's address bar to allow access, then refresh this page.");
       } else {
-        setMicError("Could not access the microphone. Please ensure a microphone is connected.");
+        setMicError("Could not access the microphone. Please ensure a microphone is connected and refresh the page.");
       }
       
-      // Clear error after 5 seconds
-      setTimeout(() => setMicError(null), 5000);
+      // Clear error after 8 seconds
+      setTimeout(() => setMicError(null), 8000);
     }
   };
 
@@ -215,6 +232,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       audioContextRef.current = null;
     }
     silenceStartRef.current = null;
+    setAudioVolume(0);
   };
 
   const toggleRecording = () => {
@@ -229,9 +247,20 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
     <div className="w-full pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] px-3 sm:px-6 bg-transparent">
       <div className="max-w-4xl mx-auto relative">
         {micError && (
-          <div className="absolute -top-12 left-0 right-0 mx-auto w-fit px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs sm:text-sm rounded-lg backdrop-blur-md shadow-lg flex items-center gap-2 animate-in slide-in-from-bottom-2 fade-in duration-300 z-50">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            {micError}
+          <div className="absolute -top-16 left-0 right-0 mx-auto w-fit px-4 py-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs sm:text-sm rounded-lg backdrop-blur-md shadow-lg flex flex-col items-center gap-2 animate-in slide-in-from-bottom-2 fade-in duration-300 z-50">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {micError}
+            </div>
+            {micError.includes('denied') && (
+              <button 
+                onClick={() => window.open(window.location.href, '_blank')}
+                className="mt-1 px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-md transition-colors flex items-center gap-2 font-medium"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                Open App in New Tab to Fix
+              </button>
+            )}
           </div>
         )}
         
@@ -256,10 +285,10 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
+              placeholder={isTranscribing ? "Transcribing..." : isRecording ? "Listening..." : isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
               className="w-full max-h-[120px] sm:max-h-[150px] min-h-[40px] sm:min-h-[50px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-2.5 sm:py-3.5 text-[1rem] sm:text-[1.1rem] text-cyan-50 placeholder:text-cyan-600/50 custom-scrollbar leading-relaxed font-mono tracking-wide relative z-10"
               rows={1}
-              disabled={isLoading}
+              disabled={isLoading || isRecording || isTranscribing}
             />
             <div className="flex justify-between items-center w-full px-1 relative z-10">
               <div className="flex items-center gap-1 sm:gap-1.5">
@@ -305,7 +334,11 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
                   <button 
                     onClick={toggleRecording}
                     disabled={isTranscribing}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all border overflow-hidden ${input.length > 0 ? 'w-0 opacity-0 scale-50 pointer-events-none p-0 m-0 border-0' : 'opacity-100'} ${isRecording ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.3)] animate-pulse' : 'text-cyan-600/70 hover:bg-cyan-500/10 hover:text-cyan-400 border-transparent hover:border-cyan-500/30'}`}
+                    style={{
+                      boxShadow: isRecording ? `0 0 ${10 + audioVolume * 40}px rgba(244,63,94,${0.3 + audioVolume * 0.5})` : undefined,
+                      transform: isRecording ? `scale(${1 + audioVolume * 0.15})` : undefined
+                    }}
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all border overflow-hidden ${input.length > 0 ? 'w-0 opacity-0 scale-50 pointer-events-none p-0 m-0 border-0' : 'opacity-100'} ${isRecording ? 'bg-rose-500/20 text-rose-400 border-rose-500/50' : 'text-cyan-600/70 hover:bg-cyan-500/10 hover:text-cyan-400 border-transparent hover:border-cyan-500/30'}`}
                   >
                     {isTranscribing ? <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" /> : isRecording ? <StopSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Mic className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                   </button>
@@ -345,10 +378,10 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
+              placeholder={isTranscribing ? "Transcribing..." : isRecording ? "Listening..." : isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
               className="w-full max-h-[200px] sm:max-h-[250px] min-h-[50px] sm:min-h-[60px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-3 sm:py-4 text-[1.05rem] sm:text-[1.2rem] text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6b6b80] custom-scrollbar leading-relaxed font-medium"
               rows={1}
-              disabled={isLoading}
+              disabled={isLoading || isRecording || isTranscribing}
             />
             <div className="flex justify-between items-center w-full px-2">
               <div className="flex items-center gap-2 sm:gap-3">
@@ -394,7 +427,11 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
                   <button 
                     onClick={toggleRecording}
                     disabled={isTranscribing}
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all overflow-hidden ${input.length > 0 ? 'w-0 opacity-0 scale-50 pointer-events-none p-0 m-0' : 'opacity-100'} ${isRecording ? 'bg-rose-500/20 text-rose-500 animate-pulse' : 'text-slate-400 dark:text-[#888] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white'}`}
+                    style={{
+                      boxShadow: isRecording ? `0 0 ${10 + audioVolume * 30}px rgba(244,63,94,${0.2 + audioVolume * 0.4})` : undefined,
+                      transform: isRecording ? `scale(${1 + audioVolume * 0.1})` : undefined
+                    }}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all overflow-hidden ${input.length > 0 ? 'w-0 opacity-0 scale-50 pointer-events-none p-0 m-0' : 'opacity-100'} ${isRecording ? 'bg-rose-500/20 text-rose-500' : 'text-slate-400 dark:text-[#888] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white'}`}
                   >
                     {isTranscribing ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : isRecording ? <StopSquare className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </button>
