@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, memo, forwardRef } from 'react';
 import { Plus, Mic, Send, Loader2, Trash2, Square, Image as ImageIcon, MessageSquare, Square as StopSquare } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { useGlobalInteraction } from '../contexts/GlobalInteractionContext';
+import { motion } from 'framer-motion';
 
 interface ChatInputProps {
   isAwakened: boolean;
@@ -33,6 +35,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
   const [isImageMode, setIsImageMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -44,6 +47,8 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
   const silenceStartRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const hasSpokenRef = useRef<boolean>(false);
+
+  const { playChirp, playBlip } = useGlobalInteraction();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -89,6 +94,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
   const startRecording = async () => {
     setMicError(null);
     setInput('');
+    playChirp();
     
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -153,6 +159,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
           if (textToSend) {
             // We have the text from Web Speech API or input, send immediately!
             setInput('');
+            playBlip();
             onSendMessage(textToSend, isImageMode, audioUrl);
             setIsRecording(false);
             setAudioVolume(0);
@@ -180,6 +187,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
                   ];
                   
                   if (text && !hallucinations.includes(lowerText)) {
+                    playBlip();
                     onSendMessage(text, isImageMode, audioUrl);
                   } else {
                     console.log("Filtered out hallucinated or empty audio:", text);
@@ -357,7 +365,14 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
 
   return (
     <div className="w-full pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] px-3 sm:px-6 bg-transparent">
-      <div className="max-w-4xl mx-auto relative">
+      <motion.div 
+        className="max-w-4xl mx-auto relative rounded-[1.2rem] sm:rounded-[1.5rem]"
+        animate={{ 
+          scale: isRecording ? 1.02 : 1,
+          boxShadow: isFocused ? '0 0 20px rgba(0, 255, 128, 0.4), 0 0 40px rgba(255, 128, 0, 0.2)' : '0 0 0px rgba(0,0,0,0)'
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
         {micError && (
           <div className="absolute -top-16 left-0 right-0 mx-auto w-fit px-4 py-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs sm:text-sm rounded-lg backdrop-blur-md shadow-lg flex flex-col items-center gap-2 animate-in slide-in-from-bottom-2 fade-in duration-300 z-50">
             <div className="flex items-center gap-2">
@@ -397,6 +412,8 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               placeholder={isTranscribing ? "Transcribing..." : isRecording ? "Listening..." : isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
               className="w-full max-h-[120px] sm:max-h-[150px] min-h-[40px] sm:min-h-[50px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-2.5 sm:py-3.5 text-[1rem] sm:text-[1.1rem] text-cyan-50 placeholder:text-cyan-600/50 custom-scrollbar leading-relaxed font-mono tracking-wide relative z-10"
               rows={1}
@@ -490,6 +507,8 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               placeholder={isTranscribing ? "Transcribing..." : isRecording ? "Listening..." : isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
               className="w-full max-h-[200px] sm:max-h-[250px] min-h-[50px] sm:min-h-[60px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-3 sm:py-4 text-[1.05rem] sm:text-[1.2rem] text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6b6b80] custom-scrollbar leading-relaxed font-medium"
               rows={1}
@@ -572,7 +591,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
             </div>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }));
