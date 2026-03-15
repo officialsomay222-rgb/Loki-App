@@ -32,20 +32,29 @@ app.post("/api/transcribe", async (req, res) => {
     // Convert base64 to buffer
     const buffer = Buffer.from(audioBase64, 'base64');
     
-    // Create a temporary file-like object for Groq SDK
-    // Groq SDK expects a File or a stream with a path
-    const { Readable } = await import('stream');
-    const stream = Readable.from(buffer);
-    (stream as any).path = `audio.${mimeType?.includes('mp4') ? 'mp4' : mimeType?.includes('ogg') ? 'ogg' : 'webm'}`;
+    // Write to a temporary file
+    const fs = await import('fs');
+    const path = await import('path');
+    const os = await import('os');
+    const tempFilePath = path.join(os.tmpdir(), `audio_${Date.now()}.${mimeType?.includes('mp4') ? 'mp4' : mimeType?.includes('ogg') ? 'ogg' : 'webm'}`);
+    
+    fs.writeFileSync(tempFilePath, buffer);
 
-    const transcription = await groq.audio.transcriptions.create({
-      file: stream as any,
-      model: 'whisper-large-v3-turbo',
-      response_format: 'json',
-      prompt: 'The following is a conversation in English and Hinglish (Hindi written in the Latin alphabet). Please transcribe exactly as spoken, keeping Hinglish words in Latin script. Examples: "Haan bhai, kya haal hai?", "Theek hai."',
-    });
+    try {
+      const transcription = await groq.audio.transcriptions.create({
+        file: fs.createReadStream(tempFilePath),
+        model: 'whisper-large-v3-turbo',
+        response_format: 'json',
+        prompt: 'The following is a conversation in English and Hinglish (Hindi written in the Latin alphabet). Please transcribe exactly as spoken, keeping Hinglish words in Latin script. Examples: "Haan bhai, kya haal hai?", "Theek hai."',
+      });
 
-    res.json({ text: transcription.text });
+      res.json({ text: transcription.text });
+    } finally {
+      // Clean up temp file
+      if (fs.existsSync(tempFilePath)) {
+        fs.unlinkSync(tempFilePath);
+      }
+    }
   } catch (error: any) {
     console.error("Transcription Error:", error);
     res.status(500).json({ error: error.message || "Internal server error during transcription." });

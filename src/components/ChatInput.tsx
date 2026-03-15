@@ -110,14 +110,21 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       if (!window.MediaRecorder) {
         throw new Error("Audio recording is not supported in this browser.");
       }
-      stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          channelCount: 1
-        } 
-      });
+      
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            channelCount: 1
+          } 
+        });
+      } catch (advancedErr) {
+        console.warn("Advanced audio constraints failed, falling back to basic audio", advancedErr);
+        // Fallback to basic audio if advanced constraints fail
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
       
       // 1. Setup MediaRecorder for capturing the actual audio file
       mediaRecorder = new MediaRecorder(stream);
@@ -130,26 +137,29 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
         }
       };
 
-      // 2. Setup Web Speech API for live transcription and silence detection (if available)
+      // 2. Setup Web Speech API for live transcription (if available)
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       let finalTranscript = '';
-      let isSpeechRecognitionActive = false;
-
       let isFinishing = false;
 
-      const finishRecording = async (textFromSpeechAPI: string) => {
+      const finishRecording = async () => {
         if (isFinishing) return;
         isFinishing = true;
 
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.stop();
+          } catch (e) {}
+        }
+
         if (mediaRecorder.state === 'recording') {
           mediaRecorder.stop();
-          // The actual sending and cleanup will happen in mediaRecorder.onstop
         }
       };
 
       mediaRecorder.onstop = () => {
-        // Wait a tiny bit to ensure we have the latest text
         setTimeout(async () => {
+          // If no audio was detected at all, just cancel
           if (!hasSpokenRef.current && !finalTranscript && !input.trim()) {
             setIsRecording(false);
             stopRecording();
@@ -160,68 +170,66 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
           const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
           const audioUrl = URL.createObjectURL(audioBlob);
           
-          const textToSend = finalTranscript.trim() || input.trim();
-          
-          if (textToSend) {
-            // We have the text from Web Speech API or input, send immediately!
-            setInput('');
-            playBlip();
-            setIsSuccessFlash(true);
-            setTimeout(() => setIsSuccessFlash(false), 1000);
-            onSendMessage(textToSend, isImageMode, audioUrl);
-          } else {
-            // Fallback: Transcribe using backend API if Web Speech API failed or wasn't available
-            setIsTranscribing(true);
-            const reader = new FileReader();
-            reader.readAsDataURL(audioBlob);
-            reader.onloadend = async () => {
-              const base64data = (reader.result as string).split(',')[1];
-              try {
-                const response = await fetch('/api/transcribe', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ audioBase64: base64data, mimeType })
-                });
+          // Always use Groq Whisper for final highly accurate transcription
+          setIsTranscribing(true);
+          const currentInput = input.trim();
+          setInput(''); // Clear the live transcription text
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = async () => {
+            const base64data = (reader.result as string).split(',')[1];
+            try {
+              const response = await fetch('/api/transcribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ audioBase64: base64data, mimeType })
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                const text = data.text?.trim() || finalTranscript.trim() || currentInput;
                 
-                if (response.ok) {
-                  const data = await response.json();
-                  const text = data.text?.trim() || '';
-                  
-                  if (text) {
-                    playBlip();
-                    setIsSuccessFlash(true);
-                    setTimeout(() => setIsSuccessFlash(false), 1000);
-                    onSendMessage(text, isImageMode, audioUrl);
-                  } else {
-                    console.log("Empty transcription result");
-                  }
+                playBlip();
+                setIsSuccessFlash(true);
+                setTimeout(() => setIsSuccessFlash(false), 1000);
+                onSendMessage(text, isImageMode, audioUrl);
+              } else {
+                const errorData = await response.json().catch(() => null);
+                if (errorData?.error) {
+                  setTranscriptionError(errorData.error);
+                  setTimeout(() => setTranscriptionError(null), 8000);
                 }
-              } catch (error) {
-                console.error("Error transcribing audio:", error);
-              } finally {
-                setIsTranscribing(false);
+                const fallbackText = finalTranscript.trim() || currentInput;
+                playBlip();
+                setIsSuccessFlash(true);
+                setTimeout(() => setIsSuccessFlash(false), 1000);
+                onSendMessage(fallbackText, isImageMode, audioUrl);
               }
-            };
-          }
+            } catch (error) {
+              console.error("Error transcribing audio:", error);
+              setTranscriptionError("Network error while transcribing audio.");
+              setTimeout(() => setTranscriptionError(null), 8000);
+              const fallbackText = finalTranscript.trim() || currentInput;
+              playBlip();
+              setIsSuccessFlash(true);
+              setTimeout(() => setIsSuccessFlash(false), 1000);
+              onSendMessage(fallbackText, isImageMode, audioUrl);
+            } finally {
+              setIsTranscribing(false);
+            }
+          };
           
-          // Cleanup after sending/processing
           stopRecording();
         }, 500);
       };
 
       if (SpeechRecognition) {
-        console.log("SpeechRecognition supported");
         try {
           const recognition = new SpeechRecognition();
           recognitionRef.current = recognition;
           recognition.continuous = true;
           recognition.interimResults = true;
           recognition.lang = 'en-IN'; // Optimized for Hinglish
-          
-          recognition.onstart = () => {
-            isSpeechRecognitionActive = true;
-            setAudioVolume(0.5);
-          };
           
           recognition.onresult = (event: any) => {
             let interimTranscript = '';
@@ -235,41 +243,19 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
             
             const currentText = (finalTranscript + interimTranscript).trim();
             if (currentText) {
-              setInput(currentText); // Show live text!
+              // The user requested NOT to automatically type on the textpad while speaking.
+              // We just record the fact that they have spoken.
               hasSpokenRef.current = true;
-              setAudioVolume(0.8 + Math.random() * 0.2);
-              
-              if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-              silenceTimerRef.current = setTimeout(() => {
-                if (recognitionRef.current) {
-                  recognitionRef.current.stop();
-                }
-              }, 2500); // 2.5s silence detection
             }
           };
           
           recognition.onerror = (event: any) => {
             console.error("Speech recognition error:", event.error);
-            isSpeechRecognitionActive = false;
           };
           
-          recognition.onend = () => {
-            if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-            finishRecording(finalTranscript);
-          };
-
           recognition.start();
-
-          // Fallback timer if they don't speak at all
-          silenceTimerRef.current = setTimeout(() => {
-            if (recognitionRef.current) {
-              recognitionRef.current.stop();
-            }
-          }, 5000);
-          
         } catch (err) {
           console.error("Speech recognition initialization failed", err);
-          isSpeechRecognitionActive = false;
         }
       }
 
@@ -277,205 +263,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
       setIsRecording(true);
       hasSpokenRef.current = false;
 
-      // 3. Fallback Silence Detection (RMS) if SpeechRecognition isn't active
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      await audioContext.resume();
-      audioContextRef.current = audioContext;
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 1024;
-      analyser.smoothingTimeConstant = 0.5;
-      const source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyser);
-      analyserRef.current = analyser;
-
-      const dataArray = new Float32Array(analyser.fftSize);
-
-      const checkSilence = () => {
-        if (mediaRecorder.state !== 'recording') return;
-        
-        analyser.getFloatTimeDomainData(dataArray);
-        
-        let sumSquares = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          sumSquares += dataArray[i] * dataArray[i];
-        }
-        const rms = Math.sqrt(sumSquares / dataArray.length);
-        
-        // Simple RMS threshold for silence detection
-        if (rms < 0.01) {
-          if (!silenceStartRef.current) silenceStartRef.current = Date.now();
-          if (Date.now() - silenceStartRef.current > 2500) {
-            // Silence detected for 2.5s
-            if (mediaRecorder.state === 'recording') {
-              mediaRecorder.stop();
-            }
-            return;
-          }
-        } else {
-          silenceStartRef.current = null;
-        }
-        
-        animationFrameRef.current = requestAnimationFrame(checkSilence);
-      };
-      checkSilence();
-      
-    } catch (err: any) {
-      console.error("Error accessing microphone:", err);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setMicError("Microphone permission denied. Please click the lock icon in your browser address bar to allow microphone access.");
-      } else {
-        setMicError("Error accessing microphone: " + (err.message || "Unknown error"));
-      }
-      return;
-    }
-    try {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      let finalTranscript = '';
-      let isSpeechRecognitionActive = false;
-
-      let isFinishing = false;
-
-      const finishRecording = async (textFromSpeechAPI: string) => {
-        if (isFinishing) return;
-        isFinishing = true;
-
-        if (mediaRecorder.state === 'recording') {
-          mediaRecorder.stop();
-          // The actual sending and cleanup will happen in mediaRecorder.onstop
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        // Wait a tiny bit to ensure we have the latest text
-        setTimeout(async () => {
-          if (!hasSpokenRef.current && !finalTranscript && !input.trim()) {
-            setIsRecording(false);
-            stopRecording();
-            return;
-          }
-
-          const mimeType = mediaRecorder.mimeType || 'audio/webm';
-          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          
-          const textToSend = finalTranscript.trim() || input.trim();
-          
-          if (textToSend) {
-            // We have the text from Web Speech API or input, send immediately!
-            setInput('');
-            playBlip();
-            setIsSuccessFlash(true);
-            setTimeout(() => setIsSuccessFlash(false), 1000);
-            onSendMessage(textToSend, isImageMode, audioUrl);
-          } else {
-            // Fallback: Transcribe using backend API if Web Speech API failed or wasn't available
-            setIsTranscribing(true);
-            const reader = new FileReader();
-            reader.readAsDataURL(audioBlob);
-            reader.onloadend = async () => {
-              const base64data = (reader.result as string).split(',')[1];
-              try {
-                const response = await fetch('/api/transcribe', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ audioBase64: base64data, mimeType })
-                });
-                
-                if (response.ok) {
-                  const data = await response.json();
-                  const text = data.text?.trim() || '';
-                  
-                  if (text) {
-                    playBlip();
-                    setIsSuccessFlash(true);
-                    setTimeout(() => setIsSuccessFlash(false), 1000);
-                    onSendMessage(text, isImageMode, audioUrl);
-                  } else {
-                    console.log("Empty transcription result");
-                  }
-                }
-              } catch (error) {
-                console.error("Error transcribing audio:", error);
-              } finally {
-                setIsTranscribing(false);
-              }
-            };
-          }
-          
-          // Cleanup after sending/processing
-          stopRecording();
-        }, 500);
-      };
-
-      if (SpeechRecognition) {
-        console.log("SpeechRecognition supported");
-        try {
-          const recognition = new SpeechRecognition();
-          recognitionRef.current = recognition;
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          recognition.lang = 'en-IN'; // Optimized for Hinglish
-          
-          recognition.onstart = () => {
-            isSpeechRecognitionActive = true;
-            setAudioVolume(0.5);
-          };
-          
-          recognition.onresult = (event: any) => {
-            let interimTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-              if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript + ' ';
-              } else {
-                interimTranscript += event.results[i][0].transcript;
-              }
-            }
-            
-            const currentText = (finalTranscript + interimTranscript).trim();
-            if (currentText) {
-              setInput(currentText); // Show live text!
-              hasSpokenRef.current = true;
-              setAudioVolume(0.8 + Math.random() * 0.2);
-              
-              if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-              silenceTimerRef.current = setTimeout(() => {
-                if (recognitionRef.current) {
-                  recognitionRef.current.stop();
-                }
-              }, 2500); // 2.5s silence detection
-            }
-          };
-          
-          recognition.onerror = (event: any) => {
-            console.error("Speech recognition error:", event.error);
-            isSpeechRecognitionActive = false;
-          };
-          
-          recognition.onend = () => {
-            if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-            finishRecording(finalTranscript);
-          };
-
-          recognition.start();
-
-          // Fallback timer if they don't speak at all
-          silenceTimerRef.current = setTimeout(() => {
-            if (recognitionRef.current) {
-              recognitionRef.current.stop();
-            }
-          }, 5000);
-          
-        } catch (err) {
-          console.error("Speech recognition initialization failed", err);
-          isSpeechRecognitionActive = false;
-        }
-      }
-
-      mediaRecorder.start();
-      setIsRecording(true);
-      hasSpokenRef.current = false;
-
-      // 3. Fallback Silence Detection (RMS) if SpeechRecognition isn't active
+      // 3. Robust Silence Detection (RMS) - Always active
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       await audioContext.resume();
       audioContextRef.current = audioContext;
@@ -502,19 +290,18 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
         // Always update volume for visual feedback
         setAudioVolume(Math.min(1, rms * 50));
 
-        if (!isSpeechRecognitionActive) {
-          const silenceThreshold = 0.015;
+        const silenceThreshold = 0.015;
 
-          if (rms < silenceThreshold) { 
-            if (silenceStartRef.current === null) {
-              silenceStartRef.current = Date.now();
-            } else if (Date.now() - silenceStartRef.current > 2500) {
-              finishRecording('');
-              return;
-            }
-          } else {
-            hasSpokenRef.current = true;
-            silenceStartRef.current = null; 
+        if (rms >= silenceThreshold) {
+          hasSpokenRef.current = true;
+          silenceStartRef.current = null; 
+        } else {
+          if (silenceStartRef.current === null) {
+            silenceStartRef.current = Date.now();
+          } else if (Date.now() - silenceStartRef.current > 2500) {
+            // 2.5 seconds of silence detected by RMS
+            finishRecording();
+            return;
           }
         }
 
@@ -612,10 +399,10 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
         
         {isAwakened ? (
           /* AWAKENED MODE TEXTPAD - 10X ADVANCED */
-          <div className={`relative flex flex-col gap-1.5 sm:gap-2 rounded-[1.2rem] sm:rounded-[1.5rem] p-1.5 sm:p-2 bg-gradient-to-br from-[#0a0a12]/80 to-[#050508]/90 border transition-all duration-500 group ${
-            isSuccessFlash ? 'success-flash border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 
-            isRecording ? 'border-rose-500/50 shadow-[0_0_20px_rgba(244,63,94,0.2)] animate-pulse' : 
-            'border-cyan-500/20 backdrop-blur-2xl focus-within:bg-[#0a0a12]/95 focus-within:border-cyan-400/40 focus-within:shadow-[0_0_20px_rgba(0,242,255,0.08)]'
+          <div className={`textpad-container relative flex flex-col gap-1.5 sm:gap-2 p-1.5 sm:p-2 transition-all duration-500 group ${
+            isSuccessFlash ? 'success-flash shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 
+            isRecording ? 'shadow-[0_0_20px_rgba(244,63,94,0.2)] animate-pulse' : 
+            ''
           }`}>
             
             {/* Background effects container (handles overflow for animations) */}
@@ -633,51 +420,6 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
             <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-cyan-400/30 rounded-bl-[1.2rem] sm:rounded-bl-[1.5rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
             <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-cyan-400/30 rounded-br-[1.2rem] sm:rounded-br-[1.5rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
-            {/* Premium Gemini RGB Gradient Border Layer */}
-            <motion.div 
-              className="absolute inset-0 rounded-[1.2rem] sm:rounded-[1.5rem] pointer-events-none z-0"
-              initial={{ opacity: 0 }}
-              animate={{ 
-                opacity: isFocused ? 1 : 0,
-              }}
-              transition={{ duration: 0.5 }}
-            >
-              <motion.div
-                className="absolute inset-[-150%] bg-[conic-gradient(from_0deg,#4285F4,#DB4437,#F4B400,#0F9D58,#4285F4)]"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                style={{
-                  filter: 'blur(8px)',
-                }}
-              />
-              {/* Mask to create the 2px border effect */}
-              <div 
-                className="absolute inset-0 rounded-[1.2rem] sm:rounded-[1.5rem] bg-transparent border-[2px] border-transparent"
-                style={{
-                  maskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                  WebkitMaskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                  WebkitMaskComposite: 'xor',
-                  maskComposite: 'exclude',
-                  background: 'inherit'
-                }}
-              />
-            </motion.div>
-
-            {/* Pulsing Glow Effect */}
-            <motion.div
-              className="absolute inset-0 rounded-[1.2rem] sm:rounded-[1.5rem] pointer-events-none z-0"
-              animate={{ 
-                boxShadow: isFocused 
-                  ? [
-                      '0 0 10px rgba(66, 133, 244, 0.1)',
-                      '0 0 25px rgba(66, 133, 244, 0.2)',
-                      '0 0 10px rgba(66, 133, 244, 0.1)'
-                    ] 
-                  : '0 0 0px rgba(0,0,0,0)'
-              }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            />
-
             <textarea
               ref={inputRef}
               value={input}
@@ -686,7 +428,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder={isTranscribing ? "Transcribing..." : isRecording ? "Listening..." : isImageMode ? "Describe the image for LOKI..." : "Ask LOKI..."}
-              className="w-full max-h-[120px] sm:max-h-[150px] min-h-[40px] sm:min-h-[50px] bg-gray-950/90 border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-2.5 sm:py-3.5 text-[1rem] sm:text-[1.1rem] text-cyan-50 placeholder:text-cyan-600/50 custom-scrollbar leading-relaxed font-mono tracking-wide relative z-10 caret-[#4285F4] rounded-[1.1rem] sm:rounded-[1.4rem]"
+              className="w-full max-h-[120px] sm:max-h-[150px] min-h-[40px] sm:min-h-[50px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-2.5 sm:py-3.5 text-[1rem] sm:text-[1.1rem] text-cyan-50 placeholder:text-cyan-600/50 custom-scrollbar leading-relaxed font-mono tracking-wide relative z-10 caret-[#4285F4] rounded-[1.1rem] sm:rounded-[1.4rem]"
               rows={1}
               readOnly={isRecording || isTranscribing}
               disabled={isLoading}
@@ -787,11 +529,28 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
           </div>
         ) : (
           /* NORMAL MODE TEXTPAD - CLEAN & SIMPLE */
-          <div className={`relative flex flex-col gap-2 sm:gap-3 glass-panel premium-shadow rounded-[1.5rem] sm:rounded-[2rem] p-3 sm:p-4 input-container-focus border transition-all duration-500 ${
-            isSuccessFlash ? 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.5)]' : 
-            isRecording ? 'border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.5)] animate-pulse' : 
-            'border-slate-200/50 dark:border-white/10'
+          <div className={`textpad-container relative flex flex-col gap-2 sm:gap-3 p-3 sm:p-4 transition-all duration-500 ${
+            isSuccessFlash ? 'shadow-[0_0_30px_rgba(16,185,129,0.5)]' : 
+            isRecording ? 'shadow-[0_0_20px_rgba(6,182,212,0.5)] animate-pulse' : 
+            ''
           }`}>
+            <motion.div
+              className="textpad-gradient"
+              animate={{
+                backgroundPosition: ["0% 0%", "100% 100%", "0% 100%", "0% 0%"],
+                scale: isFocused ? 1.02 : 1,
+                filter: isFocused ? "blur(12px) brightness(1.4)" : "blur(12px) brightness(1)"
+              }}
+              transition={{
+                duration: 10,
+                ease: "linear",
+                repeat: Infinity
+              }}
+              style={{
+                background: "radial-gradient(circle at 20% 30%, #4285F4, transparent 50%), radial-gradient(circle at 80% 20%, #9B72CB, transparent 50%), radial-gradient(circle at 70% 80%, #D96570, transparent 50%), radial-gradient(circle at 30% 70%, #F4B400, transparent 50%)",
+                backgroundSize: "200% 200%"
+              }}
+            />
             <textarea
               ref={inputRef}
               value={input}

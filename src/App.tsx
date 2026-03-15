@@ -159,34 +159,13 @@ export default function App() {
   }, [currentSession?.messages.length, currentSessionId, autoScroll]);
 
   const handleSendMessage = useCallback(async (text: string, isImageMode?: boolean, audioUrl?: boolean | string) => {
-    // Trigger awakening effect if it's a voice message
-    if (audioUrl && !awakening) {
-      const micButton = document.querySelector('.mic-button-trigger');
-      if (micButton) {
-        const rect = micButton.getBoundingClientRect();
-        setAwakening({ 
-          id: Date.now(), 
-          phase: 'shockwave', 
-          startX: rect.left, 
-          startY: rect.top, 
-          width: rect.width, 
-          height: rect.height 
-        });
-        
-        // Auto-clear shockwave after some time
-        setTimeout(() => {
-          setAwakening(null);
-        }, 3000);
-      }
-    }
-
     await sendMessage(text, isImageMode, typeof audioUrl === 'string' ? audioUrl : undefined);
     if (window.innerWidth >= 768) {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 10);
     }
-  }, [sendMessage, awakening]);
+  }, [sendMessage]);
 
   const handleDeleteSession = useCallback((e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -849,7 +828,7 @@ export default function App() {
               className="flex items-center gap-3 w-full px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-[#888] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5 rounded-xl transition-all border border-transparent hover:border-slate-200/50 dark:hover:border-white/5"
             >
               <CheckCircle2 className="w-4 h-4" />
-              GOD-LEVEL TASKS
+              TASK LIST
             </motion.button>
             <motion.button 
               whileTap={{ scale: 0.97 }}

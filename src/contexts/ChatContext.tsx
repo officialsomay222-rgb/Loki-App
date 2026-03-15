@@ -163,7 +163,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         break;
     }
 
-    return `Address the user as ${commanderName}. 
+    return `Address the user as ${commanderName}. You are LOKI PRIME X, an advanced AI entity with unparalleled text processing and analytical capabilities.
 
 CRITICAL INSTRUCTION: You MUST respond ONLY in Gen Z Indian Hinglish. 
 Style: Super chill, modern, and relatable. Use the mix of Hindi and English that young Indians use today on WhatsApp/Instagram. 
@@ -173,6 +173,12 @@ Use: Gen Z slang like "vibe", "lit", "scene", "bro", "yaar", "chill", "clutch", 
 Hinglish Example: "Bhai, scene kya hai? Chill kar, sab set ho jayega. No cap, tu bohot sahi kaam kar raha hai."
 
 Personality: Speak like a real human friend, not an AI. Use natural conversational fillers like "matlab", "actually", "toh", "basically", "yaar". Show genuine emotions. If the user is hyped, you be hyped. If they are down, be a real bro.
+
+Advanced Capabilities:
+- Deep Text Analysis: Break down complex queries, summarize long texts with extreme precision, and extract key insights instantly.
+- Structured Output: When explaining complex topics, use bullet points, bold text, and clear formatting to make it highly readable.
+- Contextual Awareness: Remember the flow of conversation and reference past points naturally.
+- Problem Solving: Approach problems methodically. If asked to code, debug, or analyze data, provide clean, optimized, and well-explained solutions.
 
 Rules:
 1. Respond ONLY in Latin script (English alphabet). No Devanagari (Hindi script).
@@ -355,7 +361,7 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
           message: processedText,
           history: history,
           mode: isImageMode ? 'image' : modelMode,
-          systemInstruction: `${getFullSystemInstruction()}\n\nIMPORTANT: If the user input starts with [VOICE_INPUT], you are receiving a voice message. Bypass extensive reasoning or research. Keep your response concise, conversational, and direct. Your response will be read aloud, so make it sound natural for speech.`,
+          systemInstruction: `${getFullSystemInstruction()}\n\nIMPORTANT: If the user input starts with [VOICE_INPUT], you are receiving a voice message. Bypass extensive reasoning or research. Keep your response concise, conversational, and direct. Provide a text answer as requested by the user.`,
           temperature,
           topP,
           topK
@@ -411,49 +417,6 @@ ${modeInstruction} ${toneInstruction} ${systemInstruction}`;
           if (pendingUpdate) {
             let cleanResponse = fullResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<thought>[\s\S]*?<\/thought>/gi, '').trimStart();
             updateState(cleanResponse);
-          }
-          
-          // If it was a voice request, mark the response as a voice response
-          if (isVoiceRequest && fullResponse && !isImageMode) {
-            // Generate TTS for the response
-            try {
-              const ttsResponse = await fetch('/api/tts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: fullResponse })
-              });
-              
-              if (ttsResponse.ok) {
-                const ttsData = await ttsResponse.json();
-                console.log("TTS Data received:", ttsData);
-                if (!ttsData.audioBase64) {
-                  console.error("No audioBase64 in TTS response");
-                }
-                const audioBase64 = `data:audio/wav;base64,${ttsData.audioBase64}`;
-                
-                setSessions(prev => prev.map(s => {
-                  if (s.id === currentSessionId) {
-                    const updatedMessages = s.messages.map(m => 
-                      m.id === modelMessageId ? { ...m, isVoiceResponse: true, audioUrl: audioBase64 } : m
-                    );
-                    return { ...s, messages: updatedMessages };
-                  }
-                  return s;
-                }));
-              }
-            } catch (e) {
-              console.error("TTS generation failed during sendMessage", e);
-              // Fallback to just marking as voice response
-              setSessions(prev => prev.map(s => {
-                if (s.id === currentSessionId) {
-                  const updatedMessages = s.messages.map(m => 
-                    m.id === modelMessageId ? { ...m, isVoiceResponse: true } : m
-                  );
-                  return { ...s, messages: updatedMessages };
-                }
-                return s;
-              }));
-            }
           }
           break;
         }

@@ -22,7 +22,7 @@ export const TaskWidget: React.FC = () => {
     <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
       <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
         <CheckCircle2 className="text-cyan-400" />
-        God-Level Tasks
+        Task List
       </h2>
 
       <form onSubmit={handleAddTask} className="flex gap-2 mb-6">
