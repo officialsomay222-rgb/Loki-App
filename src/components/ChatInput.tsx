@@ -365,7 +365,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
   return (
     <div className="w-full pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] px-3 sm:px-6 bg-transparent">
       <motion.div 
-        className="max-w-4xl mx-auto relative rounded-[1.2rem] sm:rounded-[1.5rem]"
+        className="max-w-4xl mx-auto relative rounded-[1.75rem]"
         animate={{ 
           scale: isRecording ? 1.02 : 1,
         }}
@@ -406,11 +406,11 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               ''
             }`}
             animate={{ "--border-angle": ["0deg", "360deg"] } as any}
-            transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+            transition={{ duration: 12, ease: "linear", repeat: Infinity }}
           >
             
             {/* Background effects container (handles overflow for animations) */}
-            <div className="absolute inset-0 overflow-hidden rounded-[1.2rem] sm:rounded-[1.5rem] pointer-events-none">
+            <div className="absolute inset-0 overflow-hidden rounded-[1.75rem] pointer-events-none">
               {/* Scanning Line Animation */}
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent h-[200%] -translate-y-full group-focus-within:animate-[scanline_4s_linear_infinite]"></div>
               {isRecording && (
@@ -419,10 +419,10 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
             </div>
 
             {/* Tech Corner Accents */}
-            <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-cyan-400/30 rounded-tl-[1.2rem] sm:rounded-tl-[1.5rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-            <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-cyan-400/30 rounded-tr-[1.2rem] sm:rounded-tr-[1.5rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-cyan-400/30 rounded-bl-[1.2rem] sm:rounded-bl-[1.5rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-cyan-400/30 rounded-br-[1.2rem] sm:rounded-br-[1.5rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+            <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-cyan-400/30 rounded-tl-[1.75rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-cyan-400/30 rounded-tr-[1.75rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-cyan-400/30 rounded-bl-[1.75rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+            <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-cyan-400/30 rounded-br-[1.75rem] opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
             <textarea
               ref={inputRef}
@@ -540,7 +540,7 @@ export const ChatInput = memo(forwardRef<HTMLTextAreaElement, ChatInputProps>(({
               ''
             }`}
             animate={{ "--border-angle": ["0deg", "360deg"] } as any}
-            transition={{ duration: 4, ease: "linear", repeat: Infinity }}
+            transition={{ duration: 12, ease: "linear", repeat: Infinity }}
           >
             <textarea
               ref={inputRef}
