@@ -103,7 +103,7 @@ app.post("/api/tts", async (req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
-  const { message, history, mode, systemInstruction, temperature, topP, topK } = req.body;
+  const { message, history, mode, systemInstruction, temperature, topP, topK, thinkingMode, searchGrounding } = req.body;
 
   if (!message || !mode) {
     return res.status(400).json({ error: "Message and mode are required" });
@@ -135,7 +135,24 @@ app.post("/api/chat", async (req, res) => {
         }
         
         const ai = new GoogleGenAI({ apiKey });
-        const modelName = "gemini-3.1-flash-lite-preview";
+        let modelName = "gemini-3.1-flash-lite-preview";
+        
+        const config: any = {
+          systemInstruction: systemInstruction,
+          temperature: temperature || 0.7,
+          topP: topP || 0.95,
+          topK: topK || 64,
+        };
+
+        if (searchGrounding) {
+          modelName = "gemini-3-flash-preview";
+          config.tools = [{ googleSearch: {} }];
+        }
+
+        if (thinkingMode) {
+          // Thinking mode is only available for Gemini 3 series
+          config.thinkingConfig = { thinkingLevel: "HIGH" };
+        }
 
         // Format history for Gemini
         const contents: any[] = [];
@@ -154,12 +171,7 @@ app.post("/api/chat", async (req, res) => {
         const responseStream = await ai.models.generateContentStream({
           model: modelName,
           contents: contents,
-          config: {
-            systemInstruction: systemInstruction,
-            temperature: temperature || 0.7,
-            topP: topP || 0.95,
-            topK: topK || 64,
-          }
+          config: config
         });
 
         for await (const chunk of responseStream) {
@@ -245,7 +257,7 @@ app.post("/api/chat", async (req, res) => {
             model: "gemini-3.1-flash-lite-preview",
             contents: `[IMAGE_MODE] Create a stunning visual description for: ${message}`,
             config: {
-              systemInstruction: "Tum ek expert Image Prompt Engineer ho. Jab user '[IMAGE_MODE]' flag ke saath koi request bheje, toh tum us text ko ek detailed, artistic, aur high-quality visual description mein badal do. Description ko FLUX model ke liye optimize karo (lighting, style, aur camera angles add karo). Sirf description likhna, koi extra baat mat karna."
+              systemInstruction: "Tum ek expert Image Prompt Engineer ho. Jab user '[IMAGE_MODE]' flag ke saath koi request bheje, toh tum us text ko ek detailed, artistic, aur high-quality visual description mein badal do. Description ko Stable Diffusion XL model ke liye optimize karo (lighting, style, aur camera angles add karo). Sirf description likhna, koi extra baat mat karna."
             }
           });
           detailedPrompt = refinementResponse.text || message;
