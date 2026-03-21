@@ -21,7 +21,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
     temperature, setTemperature,
     topP, setTopP,
     topK, setTopK,
-    isAwakened, setIsAwakened,
     enterToSend, setEnterToSend,
     bubbleStyle, setBubbleStyle,
     fontSize, setFontSize,
@@ -43,6 +42,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
     textReveal, setTextReveal,
     appWidth, setAppWidth,
     glowIntensity, setGlowIntensity,
+    isAwakened, setIsAwakened,
     resetSettings
   } = useSettings();
 
@@ -83,11 +83,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
   };
 
   return (
-    <div className="fixed inset-0 z-[100000] flex bg-white dark:bg-[#000000] animate-in fade-in duration-300 font-sans">
-      <div className="w-full h-full flex flex-col md:flex-row overflow-hidden max-w-[1600px] mx-auto">
+    <div className="fixed inset-0 z-[100000] flex bg-white dark:bg-[#000000] animate-in fade-in duration-300 font-sans overscroll-none settings-modal">
+      <div className="w-full h-[100dvh] flex flex-col md:flex-row overflow-hidden max-w-[1600px] mx-auto relative">
         
         {/* Sidebar (Menu) */}
-        <div className={`w-full md:w-[320px] shrink-0 border-r border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#050505] flex-col ${mobileView === 'menu' ? 'flex' : 'hidden md:flex'}`}>
+        <div className={`w-full md:w-[320px] shrink-0 border-r border-slate-200 dark:border-white/10 bg-[#f8fafd] dark:bg-[#131314] flex-col ${mobileView === 'menu' ? 'flex' : 'hidden md:flex'}`}>
           <div className="p-6 md:p-8 flex items-center justify-between shrink-0">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
               Settings
@@ -100,9 +100,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
             </button>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-4 md:px-6 space-y-1 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto px-4 md:px-6 space-y-1 custom-scrollbar min-h-0 overscroll-contain touch-pan-y">
             {/* Profile Summary in Sidebar */}
-            <div className="mb-8 p-4 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center gap-4">
+            <div className="mb-8 p-4 rounded-lg bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-white/10 flex items-center gap-4 shadow-sm">
               <img src={avatarUrl} alt="Avatar" className="w-12 h-12 rounded-full object-cover border border-slate-300 dark:border-white/20" />
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{commanderName}</h3>
@@ -117,17 +117,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-lg transition-all text-left group ${
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-full transition-all text-left group ${
                     isActive 
-                      ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-sm' 
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
+                      ? 'bg-[#c2e7ff] text-[#001d35] dark:bg-[#004a77] dark:text-[#c2e7ff]' 
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-white/5'
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-white dark:text-black' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white transition-colors'}`} />
-                    <span className="text-sm font-semibold">{tab.label}</span>
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-[#001d35] dark:text-[#c2e7ff]' : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors'}`} />
+                    <span className={`text-sm ${isActive ? 'font-medium' : 'font-normal'}`}>{tab.label}</span>
                   </div>
-                  <ChevronRight className={`w-4 h-4 md:hidden ${isActive ? 'text-white/50 dark:text-black/50' : 'text-slate-300 dark:text-slate-600'}`} />
+                  <ChevronRight className={`w-4 h-4 md:hidden ${isActive ? 'text-[#001d35]/50 dark:text-[#c2e7ff]/50' : 'text-slate-300 dark:text-slate-600'}`} />
                 </button>
               );
             })}
@@ -135,14 +135,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
         </div>
 
         {/* Content Area */}
-        <div className={`flex-1 flex-col min-w-0 bg-white dark:bg-[#000000] relative ${mobileView === 'content' ? 'flex' : 'hidden md:flex'}`}>
+        <div className={`flex-1 flex-col min-w-0 bg-white dark:bg-[#000000] relative h-full overflow-hidden ${mobileView === 'content' ? 'flex' : 'hidden md:flex'}`}>
           <div className="flex items-center justify-between p-4 md:p-8 border-b border-slate-100 dark:border-white/10 shrink-0 bg-white/80 dark:bg-[#000000]/80 backdrop-blur-md sticky top-0 z-10">
             <div className="flex items-center gap-3">
               <button 
-                onClick={() => setMobileView('menu')}
-                className="md:hidden p-2 -ml-2 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                onClick={() => mobileView === 'content' ? setMobileView('menu') : onClose()}
+                className="p-2 -ml-2 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center gap-1"
               >
                 <ChevronLeft className="w-6 h-6" />
+                <span className="text-sm font-semibold hidden sm:inline">Back</span>
               </button>
               <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white capitalize tracking-tight">
                 {activeTab === 'data' ? 'Data & Privacy' : activeTab}
@@ -150,13 +151,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
             </div>
             <button 
               onClick={onClose}
-              className="hidden md:block p-2.5 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+              className="p-2.5 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 md:p-12 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 md:p-12 custom-scrollbar min-h-0 overscroll-contain touch-pan-y">
             <div className="max-w-3xl mx-auto space-y-12 pb-24">
               
               {activeTab === 'account' && (
@@ -176,7 +177,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       <div>
                         <button 
                           onClick={() => fileInputRef.current?.click()}
-                          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black rounded-full text-sm font-semibold transition-colors"
+                          className="px-4 py-2 bg-[#0b57d0] hover:bg-[#0842a0] text-white dark:bg-[#a8c7fa] dark:hover:bg-[#d3e3fd] dark:text-[#062e6f] rounded-full text-sm font-semibold transition-colors"
                         >
                           Change Avatar
                         </button>
@@ -216,7 +217,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                             <button
                               key={m}
                               onClick={() => setModelMode(m as any)}
-                              className={`flex-1 py-3 rounded-lg border text-sm font-bold capitalize transition-all ${modelMode === m ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black shadow-md' : 'bg-transparent border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-white/40'}`}
+                              className={`flex-1 py-3 rounded-lg border text-sm font-bold capitalize transition-all ${modelMode === m ? 'bg-[#0b57d0] border-[#0b57d0] text-white dark:bg-[#a8c7fa] dark:border-[#a8c7fa] dark:text-[#062e6f] shadow-md' : 'bg-transparent border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-white/40'}`}
                             >
                               {m}
                             </button>
@@ -240,7 +241,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" className="sr-only peer" checked={enterToSend} onChange={(e) => setEnterToSend(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                       </label>
                     </div>
 
@@ -251,7 +252,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" className="sr-only peer" checked={soundEnabled} onChange={(e) => setSoundEnabled(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                       </label>
                     </div>
 
@@ -262,7 +263,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" className="sr-only peer" checked={autoScroll} onChange={(e) => setAutoScroll(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                       </label>
                     </div>
                   </section>
@@ -278,7 +279,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                         <button
                           key={t}
                           onClick={() => setTheme(t as any)}
-                          className={`p-5 rounded-lg border text-base font-semibold capitalize transition-all ${theme === t ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black shadow-lg' : 'bg-transparent border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-white/40'}`}
+                          className={`p-5 rounded-lg border text-base font-semibold capitalize transition-all ${theme === t ? 'bg-[#0b57d0] border-[#0b57d0] text-white dark:bg-[#a8c7fa] dark:border-[#a8c7fa] dark:text-[#062e6f] shadow-lg' : 'bg-transparent border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-white/40'}`}
                         >
                           {t}
                         </button>
@@ -292,7 +293,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                           <button
                             key={s}
                             onClick={() => setBgStyle(s as any)}
-                            className={`px-4 py-2.5 rounded-lg border text-sm font-medium capitalize transition-all ${bgStyle === s ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black shadow-md' : 'bg-transparent border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-white/40'}`}
+                            className={`px-4 py-2.5 rounded-lg border text-sm font-medium capitalize transition-all ${bgStyle === s ? 'bg-[#0b57d0] border-[#0b57d0] text-white dark:bg-[#a8c7fa] dark:border-[#a8c7fa] dark:text-[#062e6f] shadow-md' : 'bg-transparent border-slate-200 dark:border-white/20 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-white/40'}`}
                           >
                             {s}
                           </button>
@@ -300,21 +301,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       </div>
                     </div>
 
-                    <div className="pt-4">
-                      <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">Accent Color</label>
-                      <div className="flex flex-wrap gap-3">
-                        {['cyan', 'emerald', 'violet', 'amber', 'rose', 'blue'].map((c) => (
-                          <button
-                            key={c}
-                            onClick={() => setAccentColor(c as any)}
-                            className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center ${accentColor === c ? 'border-slate-900 dark:border-white scale-110 shadow-lg' : 'border-transparent hover:scale-105'}`}
-                            title={c}
-                          >
-                            <div className={`w-6 h-6 rounded-full bg-${c}-500 shadow-inner`} />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+
                   </section>
 
                   <section className="space-y-6">
@@ -510,7 +497,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" className="sr-only peer" checked={showAvatars} onChange={(e) => setShowAvatars(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                       </label>
                     </div>
 
@@ -521,7 +508,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" className="sr-only peer" checked={messageAnimation} onChange={(e) => setMessageAnimation(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                       </label>
                     </div>
                   </section>
@@ -615,12 +602,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                     
                     <div className="flex items-center justify-between py-4 border-b border-slate-100 dark:border-white/5 last:border-0">
                       <div>
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Awakened Mode</div>
+                        <div className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Enable experimental AI personality traits</div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                        <input type="checkbox" className="sr-only peer" checked={isAwakened} onChange={(e) => setIsAwakened(e.target.checked)} />
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between py-4 border-b border-slate-100 dark:border-white/5 last:border-0">
+                      <div>
                         <div className="text-sm font-semibold text-slate-900 dark:text-white">Google Search Grounding</div>
                         <div className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Allow the model to access real-time information</div>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" className="sr-only peer" checked={searchGrounding} onChange={(e) => setSearchGrounding(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                       </label>
                     </div>
 
@@ -631,7 +629,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" className="sr-only peer" checked={thinkingMode} onChange={(e) => setThinkingMode(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                       </label>
                     </div>
 
@@ -642,18 +640,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" className="sr-only peer" checked={liveAudioEnabled} onChange={(e) => setLiveAudioEnabled(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between py-4 border-b border-slate-100 dark:border-white/5 last:border-0">
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Awakened Mode</div>
-                        <div className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Unlock advanced consciousness features</div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
-                        <input type="checkbox" className="sr-only peer" checked={isAwakened} onChange={(e) => setIsAwakened(e.target.checked)} />
-                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                        <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                       </label>
                     </div>
 
@@ -716,7 +703,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                         </div>
                         <button 
                           onClick={onExportChat}
-                          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-200 dark:text-black rounded-full text-sm font-semibold transition-colors"
+                          className="px-4 py-2 bg-[#0b57d0] hover:bg-[#0842a0] text-white dark:bg-[#a8c7fa] dark:hover:bg-[#d3e3fd] dark:text-[#062e6f] rounded-full text-sm font-semibold transition-colors"
                         >
                           Export
                         </button>
@@ -735,7 +722,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                         {!showClearConfirm ? (
                           <button 
                             onClick={() => setShowClearConfirm(true)}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full text-sm font-semibold transition-colors"
+                            className="px-4 py-2 bg-[#b3261e] hover:bg-[#8c1d18] text-white rounded-full text-sm font-semibold transition-colors"
                           >
                             Clear
                           </button>
@@ -753,7 +740,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                                 onClose();
                                 setShowClearConfirm(false);
                               }}
-                              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full text-sm font-bold transition-colors shadow-lg shadow-red-500/20"
+                              className="px-4 py-2 bg-[#b3261e] hover:bg-[#8c1d18] text-white rounded-full text-sm font-bold transition-colors shadow-lg shadow-red-500/20"
                             >
                               Confirm
                             </button>
@@ -780,7 +767,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                           <input type="checkbox" className="sr-only peer" checked={true} readOnly />
-                          <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-slate-900 dark:peer-checked:bg-white"></div>
+                          <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-[#0b57d0] dark:peer-checked:bg-[#a8c7fa]"></div>
                         </label>
                       </div>
                     </div>

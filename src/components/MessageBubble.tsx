@@ -47,7 +47,7 @@ const MarkdownCode = ({ node, inline, className, children, ...props }: any) => {
   ) : (
     <code
       {...props}
-      className={`${className} bg-black/20 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-cyan-600 dark:text-cyan-400 font-mono text-sm`}
+      className={`${className} bg-black/20 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-white font-mono text-sm`}
     >
       {children}
     </code>
@@ -123,7 +123,7 @@ const MarkdownImage = ({ node, ...props }: any) => {
             <div className="w-32 h-16 mb-4">
               <InfinityLogo />
             </div>
-            <div className="text-[10px] font-mono text-cyan-400 tracking-[0.3em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(0,242,255,0.8)]">
+            <div className="text-[10px] font-mono text-white tracking-[0.3em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">
               Loading Image...
             </div>
           </div>
@@ -170,7 +170,7 @@ const MarkdownImage = ({ node, ...props }: any) => {
                 link.click();
                 document.body.removeChild(link);
               }}
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/40 hover:text-white border border-cyan-500/50 transition-all backdrop-blur-md z-50 flex items-center gap-2 font-bold tracking-wider shadow-[0_0_20px_rgba(0,242,255,0.3)]"
+              className="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-white/20 text-white hover:bg-white/40 hover:text-white border border-white/50 transition-all backdrop-blur-md z-50 flex items-center gap-2 font-bold tracking-wider shadow-[0_0_20px_rgba(255,255,255,0.3)]"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -365,15 +365,15 @@ const ImageGenerationPlaceholder = () => {
     return (
       <div className="flex items-center gap-1 h-4 sm:h-5">
         <span
-          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 dark:bg-[#00f2ff] rounded-full animate-bounce shadow-[0_0_6px_rgba(0,242,255,0.8)]"
+          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-bounce shadow-[0_0_6px_rgba(255,255,255,0.8)]"
           style={{ animationDelay: "0ms" }}
         ></span>
         <span
-          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 dark:bg-[#00f2ff] rounded-full animate-bounce shadow-[0_0_6px_rgba(0,242,255,0.8)]"
+          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-bounce shadow-[0_0_6px_rgba(255,255,255,0.8)]"
           style={{ animationDelay: "150ms" }}
         ></span>
         <span
-          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-cyan-400 dark:bg-[#00f2ff] rounded-full animate-bounce shadow-[0_0_6px_rgba(0,242,255,0.8)]"
+          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-bounce shadow-[0_0_6px_rgba(255,255,255,0.8)]"
           style={{ animationDelay: "300ms" }}
         ></span>
       </div>
@@ -381,22 +381,22 @@ const ImageGenerationPlaceholder = () => {
   }
 
   return (
-    <div className="my-4 aspect-square w-full max-w-[512px] mx-auto rounded-lg overflow-hidden border border-cyan-500/30 shadow-[0_0_30px_rgba(0,242,255,0.15)] bg-black/60 relative animate-in fade-in zoom-in-95 duration-500">
+    <div className="my-4 aspect-square w-full max-w-[512px] mx-auto rounded-lg overflow-hidden border border-white/30 shadow-[0_0_30px_rgba(255,255,255,0.15)] bg-black/60 relative animate-in fade-in zoom-in-95 duration-500">
       {/* Scanning Line */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent h-[200%] -translate-y-full animate-[scanline_3s_linear_infinite]"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-transparent h-[200%] -translate-y-full animate-[scanline_3s_linear_infinite]"></div>
 
       {/* Corner Accents */}
-      <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-cyan-400/50 rounded-tl-2xl"></div>
-      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-cyan-400/50 rounded-tr-2xl"></div>
-      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-cyan-400/50 rounded-bl-2xl"></div>
-      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-cyan-400/50 rounded-br-2xl"></div>
+      <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/50 rounded-tl-2xl"></div>
+      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/50 rounded-tr-2xl"></div>
+      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/50 rounded-bl-2xl"></div>
+      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/50 rounded-br-2xl"></div>
 
       {/* Center Logo & Text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
         <div className="w-32 h-16 mb-6">
           <InfinityLogo />
         </div>
-        <div className="text-xs font-mono text-cyan-400 tracking-[0.4em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(0,242,255,0.8)]">
+        <div className="text-xs font-mono text-white tracking-[0.4em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">
           Rendering Canvas
         </div>
       </div>
@@ -481,7 +481,7 @@ const AudioPlayer = ({
     <div className="flex items-center gap-3 bg-black/20 dark:bg-black/40 backdrop-blur-md rounded-lg p-2 pr-4 shadow-inner w-[260px] sm:w-[300px] border border-white/10 group/player">
       <button
         onClick={togglePlay}
-        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 flex items-center justify-center transition-all active:scale-95 shrink-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border border-cyan-500/30"
+        className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all active:scale-95 shrink-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] border border-white/30"
       >
         {isPlaying ? (
           <svg
@@ -534,7 +534,7 @@ const AudioPlayer = ({
           return (
             <div
               key={i}
-              className={`w-[3px] rounded-full transition-all duration-150 ${isPlaying ? "waveform-bar-playing" : ""} ${isPlayed ? "bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" : "bg-white/20"}`}
+              className={`w-[3px] rounded-full transition-all duration-150 ${isPlaying ? "waveform-bar-playing" : ""} ${isPlayed ? "bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]" : "bg-white/20"}`}
               style={{
                 height: `${height}%`,
                 animationDelay: `${i * 0.05}s`,
@@ -566,7 +566,6 @@ const AudioPlayer = ({
 
 interface MessageBubbleProps {
   message: Message;
-  isAwakened: boolean;
   commanderName: string;
   avatarUrl: string;
   copiedId: string | null;
@@ -587,7 +586,6 @@ interface MessageBubbleProps {
 export const MessageBubble = memo(
   ({
     message,
-    isAwakened,
     commanderName,
     avatarUrl,
     copiedId,
@@ -620,10 +618,10 @@ export const MessageBubble = memo(
     const densityClass = messageDensity === 'compact' ? 'py-1' : 'py-2';
     const gapClass = messageDensity === 'compact' ? 'gap-1' : 'gap-2';
     
-    const accentHex = accentColor === 'cyan' ? '#06b6d4' : accentColor === 'violet' ? '#8b5cf6' : accentColor === 'emerald' ? '#10b981' : '#f43f5e';
-    const accentClass = accentColor === 'cyan' ? 'text-cyan-500' : accentColor === 'violet' ? 'text-violet-500' : accentColor === 'emerald' ? 'text-emerald-500' : 'text-rose-500';
-    const bgAccentClass = accentColor === 'cyan' ? 'bg-cyan-500/10' : accentColor === 'violet' ? 'bg-violet-500/10' : accentColor === 'emerald' ? 'bg-emerald-500/10' : 'bg-rose-500/10';
-    const borderAccentClass = accentColor === 'cyan' ? 'border-cyan-500/20' : accentColor === 'violet' ? 'border-violet-500/20' : accentColor === 'emerald' ? 'border-emerald-500/20' : 'border-rose-500/20';
+    const accentHex = '#ffffff';
+    const accentClass = 'text-white';
+    const bgAccentClass = 'bg-white/10';
+    const borderAccentClass = 'border-white/20';
 
     if (message.role === "model") {
       return (
@@ -636,24 +634,24 @@ export const MessageBubble = memo(
                 <HeaderInfinityLogo className="w-full h-full" />
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 dark:text-[#888] uppercase">
-                Loki Prime
+          <div className="flex items-center gap-2 px-1.5">
+            <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-400 dark:text-[#555] uppercase font-mono">
+              Loki Prime
+            </span>
+            <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 dark:text-[#444] opacity-60">
+              {formatDate(message.timestamp)}
+            </span>
+            {!message.content && !message.audioUrl && (
+              <span className={`text-[9px] sm:text-[10px] font-mono ${accentClass} animate-pulse`}>
+                {message.isImage ? "GENERATING..." : "THINKING..."}
               </span>
-              <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 dark:text-[#6b6b80]">
-                {formatDate(message.timestamp)}
-              </span>
-              {!message.content && !message.audioUrl && (
-                <span className={`text-[9px] sm:text-[10px] font-mono ${accentClass} animate-pulse`}>
-                  {message.isImage ? "GENERATING..." : "THINKING..."}
-                </span>
-              )}
-            </div>
+            )}
+          </div>
           </div>
 
           <div className="relative group w-full">
             <div
-              className={`relative transition-all duration-300 ${isAwakened ? "awakened-msg-bubble p-4 sm:p-6 text-cyan-50" : `${densityClass} text-slate-800 dark:text-[#e0e0e0]`}`}
+              className={`relative transition-all duration-300 ${densityClass} text-[#e0e0e0]`}
             >
               <div className={`markdown-body ${fontSizeClass}`}>
                 {message.audioUrl && (
@@ -787,17 +785,12 @@ export const MessageBubble = memo(
 
           <div className="relative group w-full">
             <div
-              className={`relative group/bubble transition-all duration-300 px-4 py-3 sm:px-5 sm:py-4 premium-shadow overflow-hidden ${
-                isAwakened
-                  ? "bg-gradient-to-br from-cyan-950/60 to-blue-950/40 text-cyan-50 rounded-xl sm:rounded-2xl rounded-tr-sm border border-cyan-500/20 hover:border-cyan-500/40 shadow-[0_0_20px_rgba(0,242,255,0.04)]"
-                  : bubbleStyle === "glass"
-                    ? `${bgAccentClass} text-slate-800 dark:text-slate-200 rounded-xl sm:rounded-2xl rounded-tr-sm border ${borderAccentClass} hover:border-slate-600 dark:hover:border-white/20 backdrop-blur-md`
-                    : `${bgAccentClass} text-slate-800 dark:text-slate-200 rounded-xl sm:rounded-2xl rounded-tr-sm`
+              className={`relative group/bubble transition-all duration-300 px-4 py-3 sm:px-5 sm:py-4 bg-[#15151e] border border-white/5 shadow-sm hover:shadow-md overflow-hidden ${
+                bubbleStyle === "glass"
+                  ? `text-slate-200 rounded-xl sm:rounded-2xl rounded-tr-sm backdrop-blur-md`
+                  : `text-slate-200 rounded-xl sm:rounded-2xl rounded-tr-sm`
               }`}
             >
-              {isAwakened && (
-                <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 to-transparent opacity-0 group-hover/bubble:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-              )}
               {message.audioUrl && (
                 <div className="mb-3">
                   <AudioPlayer url={message.audioUrl} autoPlay={false} />
@@ -819,7 +812,7 @@ export const MessageBubble = memo(
                   <>
                     <button
                       onClick={() => onCopy(message.content, message.id)}
-                      className="p-1.5 rounded-lg bg-white/50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 backdrop-blur-sm"
+                      className="p-1.5 rounded-lg bg-white/50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-white backdrop-blur-sm"
                       title="Copy text"
                     >
                       {copiedId === message.id ? (
@@ -831,7 +824,7 @@ export const MessageBubble = memo(
                     {onEdit && (
                       <button
                         onClick={() => onEdit(message.content)}
-                        className="p-1.5 rounded-lg bg-white/50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 backdrop-blur-sm"
+                        className="p-1.5 rounded-lg bg-white/50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-white backdrop-blur-sm"
                         title="Edit message"
                       >
                         <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

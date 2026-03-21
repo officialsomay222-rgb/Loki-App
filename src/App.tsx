@@ -167,7 +167,7 @@ export default function App() {
   // Scroll to bottom when messages change
   useEffect(() => {
     if (autoScroll) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
     }
   }, [currentSession?.messages.length, currentSessionId, autoScroll]);
 
@@ -277,7 +277,6 @@ export default function App() {
       <MessageBubble
         key={message.id}
         message={message}
-        isAwakened={isAwakened}
         commanderName={commanderName}
         avatarUrl={avatarUrl}
         copiedId={copiedId}
@@ -384,7 +383,7 @@ export default function App() {
               height: awakening.height,
             } as any}
           >
-             <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-[spin-aura_3s_linear_infinite]" style={{ background: 'conic-gradient(from 0deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00f0ff, #bd00ff, #ff00ff, #ff0000)' }}></div>
+             <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-[spin-aura_3s_linear_infinite] bg-cyan-500/50 shadow-[0_0_15px_rgba(0,242,255,0.5)]"></div>
              <img src={"https://i.ibb.co/ns3LTFwp/Picsart-26-02-28-11-29-26-443.jpg"} className="absolute inset-0 w-full h-full rounded-full object-cover z-[2] border-2 border-white dark:border-[#08080c]" alt="Commander" />
           </div>
         </div>
@@ -582,7 +581,10 @@ export default function App() {
                 title={commanderName}
                 onClick={triggerAwakening}
               >
-                 <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-[spin-aura_3s_linear_infinite]" style={{ background: 'conic-gradient(from 0deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00f0ff, #bd00ff, #ff00ff, #ff0000)' }}></div>
+                 <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-[spin-aura_3s_linear_infinite]" style={{
+                   background: 'conic-gradient(from 0deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00f0ff, #bd00ff, #ff00ff, #ff0000)',
+                   boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)'
+                 }}></div>
                  <img src="https://i.ibb.co/ns3LTFwp/Picsart-26-02-28-11-29-26-443.jpg" className="w-full h-full rounded-full object-cover z-[2] border-2 border-white dark:border-[#08080c]" alt="Commander" />
               </div>
             </div>

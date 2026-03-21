@@ -28,7 +28,6 @@ interface SettingsState {
   temperature: number;
   topP: number;
   topK: number;
-  isAwakened: boolean;
   enterToSend: boolean;
   bubbleStyle: BubbleStyle;
   fontSize: FontSize;
@@ -50,6 +49,7 @@ interface SettingsState {
   textReveal: TextReveal;
   appWidth: AppWidth;
   glowIntensity: GlowIntensity;
+  isAwakened: boolean;
   setTheme: (theme: Theme) => void;
   setBgStyle: (bg: BgStyle) => void;
   setCommanderName: (name: string) => void;
@@ -59,7 +59,6 @@ interface SettingsState {
   setTemperature: (temp: number) => void;
   setTopP: (topP: number) => void;
   setTopK: (topK: number) => void;
-  setIsAwakened: (awakened: boolean) => void;
   setEnterToSend: (enterToSend: boolean) => void;
   setBubbleStyle: (style: BubbleStyle) => void;
   setFontSize: (size: FontSize) => void;
@@ -82,10 +81,11 @@ interface SettingsState {
   setTextReveal: (reveal: TextReveal) => void;
   setAppWidth: (width: AppWidth) => void;
   setGlowIntensity: (intensity: GlowIntensity) => void;
+  setIsAwakened: (isAwakened: boolean) => void;
   resetSettings: () => void;
 }
 
-const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setCommanderName' | 'setAvatarUrl' | 'setModelMode' | 'setTone' | 'setSystemInstruction' | 'setTemperature' | 'setTopP' | 'setTopK' | 'setIsAwakened' | 'setEnterToSend' | 'setBubbleStyle' | 'setFontSize' | 'setFontStyle' | 'setSoundEnabled' | 'setMessageAnimation' | 'setAutoScroll' | 'setTypingSpeed' | 'setShowAvatars' | 'setResponseLength' | 'setAccentColor' | 'setMessageDensity' | 'setThinkingMode' | 'setSearchGrounding' | 'setImageSize' | 'setLiveAudioEnabled' | 'setAnimationSpeed' | 'setBorderRadius' | 'setTextReveal' | 'setAppWidth' | 'setGlowIntensity' | 'resetSettings'> = {
+const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setCommanderName' | 'setAvatarUrl' | 'setModelMode' | 'setTone' | 'setSystemInstruction' | 'setTemperature' | 'setTopP' | 'setTopK' | 'setEnterToSend' | 'setBubbleStyle' | 'setFontSize' | 'setFontStyle' | 'setSoundEnabled' | 'setMessageAnimation' | 'setAutoScroll' | 'setTypingSpeed' | 'setShowAvatars' | 'setResponseLength' | 'setAccentColor' | 'setMessageDensity' | 'setThinkingMode' | 'setSearchGrounding' | 'setImageSize' | 'setLiveAudioEnabled' | 'setAnimationSpeed' | 'setBorderRadius' | 'setTextReveal' | 'setAppWidth' | 'setGlowIntensity' | 'setIsAwakened' | 'resetSettings'> = {
   theme: 'dark',
   bgStyle: 'nebula',
   commanderName: 'Commander',
@@ -96,7 +96,6 @@ const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setComma
   temperature: 0.7,
   topP: 0.95,
   topK: 64,
-  isAwakened: false,
   enterToSend: false,
   bubbleStyle: 'glass',
   fontSize: 'medium',
@@ -118,6 +117,7 @@ const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setComma
   textReveal: 'typewriter',
   appWidth: 'normal',
   glowIntensity: 'medium',
+  isAwakened: true,
 };
 
 const SettingsContext = createContext<SettingsState | undefined>(undefined);
@@ -133,7 +133,6 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [temperature, setTemperature] = useState(defaultSettings.temperature);
   const [topP, setTopP] = useState(defaultSettings.topP);
   const [topK, setTopK] = useState(defaultSettings.topK);
-  const [isAwakened, setIsAwakened] = useState(defaultSettings.isAwakened);
   const [enterToSend, setEnterToSend] = useState(defaultSettings.enterToSend);
   const [bubbleStyle, setBubbleStyle] = useState<BubbleStyle>(defaultSettings.bubbleStyle);
   const [fontSize, setFontSize] = useState<FontSize>(defaultSettings.fontSize);
@@ -155,6 +154,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [textReveal, setTextReveal] = useState<TextReveal>(defaultSettings.textReveal);
   const [appWidth, setAppWidth] = useState<AppWidth>(defaultSettings.appWidth);
   const [glowIntensity, setGlowIntensity] = useState<GlowIntensity>(defaultSettings.glowIntensity);
+  const [isAwakened, setIsAwakened] = useState<boolean>(defaultSettings.isAwakened);
 
   const resetSettings = () => {
     setTheme(defaultSettings.theme);
@@ -233,6 +233,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     loadSetting('textReveal', setTextReveal as any);
     loadSetting('appWidth', setAppWidth as any);
     loadSetting('glowIntensity', setGlowIntensity as any);
+    loadSetting('isAwakened', setIsAwakened, (val) => val === 'true');
   }, []);
 
   useEffect(() => {
@@ -268,24 +269,17 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('loki_textReveal', textReveal);
       localStorage.setItem('loki_appWidth', appWidth);
       localStorage.setItem('loki_glowIntensity', glowIntensity);
+      localStorage.setItem('loki_isAwakened', isAwakened.toString());
     } catch (e) {
       console.error('Failed to save settings to localStorage', e);
     }
 
-    if (isAwakened) {
-      document.documentElement.classList.add('dark', 'awakened-mode-active');
-      document.body.classList.add('awakened-mode-active');
-      document.body.style.backgroundColor = '#050508';
-      document.documentElement.style.backgroundColor = '#050508';
-    } else if (theme === 'dark') {
+    if (theme === 'dark') {
       document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('awakened-mode-active');
-      document.body.classList.remove('awakened-mode-active');
       document.body.style.backgroundColor = '#08080c';
       document.documentElement.style.backgroundColor = '#08080c';
     } else {
-      document.documentElement.classList.remove('dark', 'awakened-mode-active');
-      document.body.classList.remove('awakened-mode-active');
+      document.documentElement.classList.remove('dark');
       document.body.style.backgroundColor = '#f8fafc';
       document.documentElement.style.backgroundColor = '#f8fafc';
     }
@@ -296,12 +290,12 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     
     document.documentElement.style.setProperty('--global-radius', radiusVar);
     document.documentElement.style.setProperty('--glow-opacity', glowOpacity);
-  }, [theme, bgStyle, commanderName, avatarUrl, modelMode, tone, systemInstruction, temperature, topP, topK, isAwakened, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity, thinkingMode, searchGrounding, imageSize, liveAudioEnabled, animationSpeed, borderRadius, textReveal, appWidth, glowIntensity]);
+  }, [theme, bgStyle, commanderName, avatarUrl, modelMode, tone, systemInstruction, temperature, topP, topK, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity, thinkingMode, searchGrounding, imageSize, liveAudioEnabled, animationSpeed, borderRadius, textReveal, appWidth, glowIntensity, isAwakened]);
 
   return (
     <SettingsContext.Provider value={{
-      theme, bgStyle, commanderName, avatarUrl, modelMode, tone, systemInstruction, temperature, topP, topK, isAwakened, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity, thinkingMode, searchGrounding, imageSize, liveAudioEnabled, animationSpeed, borderRadius, textReveal, appWidth, glowIntensity,
-      setTheme, setBgStyle, setCommanderName, setAvatarUrl, setModelMode, setTone, setSystemInstruction, setTemperature, setTopP, setTopK, setIsAwakened, setEnterToSend, setBubbleStyle, setFontSize, setFontStyle, setSoundEnabled, setMessageAnimation, setAutoScroll, setTypingSpeed, setShowAvatars, setResponseLength, setAccentColor, setMessageDensity, setThinkingMode, setSearchGrounding, setImageSize, setLiveAudioEnabled, setAnimationSpeed, setBorderRadius, setTextReveal, setAppWidth, setGlowIntensity, resetSettings
+      theme, bgStyle, commanderName, avatarUrl, modelMode, tone, systemInstruction, temperature, topP, topK, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity, thinkingMode, searchGrounding, imageSize, liveAudioEnabled, animationSpeed, borderRadius, textReveal, appWidth, glowIntensity, isAwakened,
+      setTheme, setBgStyle, setCommanderName, setAvatarUrl, setModelMode, setTone, setSystemInstruction, setTemperature, setTopP, setTopK, setEnterToSend, setBubbleStyle, setFontSize, setFontStyle, setSoundEnabled, setMessageAnimation, setAutoScroll, setTypingSpeed, setShowAvatars, setResponseLength, setAccentColor, setMessageDensity, setThinkingMode, setSearchGrounding, setImageSize, setLiveAudioEnabled, setAnimationSpeed, setBorderRadius, setTextReveal, setAppWidth, setGlowIntensity, setIsAwakened, resetSettings
     }}>
       {children}
     </SettingsContext.Provider>

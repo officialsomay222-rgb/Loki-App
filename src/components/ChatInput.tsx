@@ -27,7 +27,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { InfinityMic } from "./Logos";
 
 interface ChatInputProps {
-  isAwakened: boolean;
   isLoading: boolean;
   modelMode: string;
   setModelMode: (mode: string) => void;
@@ -42,13 +41,13 @@ interface ChatInputProps {
   enterToSend: boolean;
   input: string;
   setInput: (value: string) => void;
+  isAwakened?: boolean;
 }
 
 export const ChatInput = memo(
   forwardRef<HTMLTextAreaElement, ChatInputProps>(
     (
       {
-        isAwakened,
         isLoading,
         modelMode,
         setModelMode,
@@ -59,6 +58,7 @@ export const ChatInput = memo(
         enterToSend,
         input,
         setInput,
+        isAwakened,
       },
       ref,
     ) => {
@@ -78,10 +78,20 @@ export const ChatInput = memo(
       const internalRef = useRef<HTMLTextAreaElement>(null);
       const inputRef =
         (ref as React.MutableRefObject<HTMLTextAreaElement>) || internalRef;
+      const fileInputRef = useRef<HTMLInputElement>(null);
       const [audioVolume, setAudioVolume] = useState<number>(0);
       const audioContextRef = useRef<AudioContext | null>(null);
       const analyserRef = useRef<AnalyserNode | null>(null);
       const silenceStartRef = useRef<number | null>(null);
+
+      const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+          // Handle file upload logic here
+          console.log("Files selected:", files);
+          // You can add logic to display selected files or pass them to the parent component
+        }
+      };
       const animationFrameRef = useRef<number | null>(null);
       const hasSpokenRef = useRef<boolean>(false);
       const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -677,558 +687,292 @@ export const ChatInput = memo(
               </div>
             )}
 
-            {isAwakened ? (
-              /* AWAKENED MODE TEXTPAD - 10X ADVANCED */
+            {/* INPUT PANEL */}
               <motion.div 
-                className="relative w-full group"
-                initial={{ "--border-opacity": 0 } as any}
-                animate={{ 
-                  "--border-opacity": 1
-                } as any}
-                transition={{
-                  duration: 1.5, 
-                  ease: "easeOut", 
-                  delay: 0.5 
-                }}
+                className="relative w-full group mx-auto max-w-3xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
               >
-                <div
-                  className={`input-wrapper textpad-entry-anim transition-all duration-500 mx-auto ${
-                    isSuccessFlash
-                      ? "success-flash shadow-[0_0_30px_rgba(16,185,129,0.4)]"
-                      : isRecording
-                        ? "shadow-[0_0_20px_rgba(244,63,94,0.2)] animate-pulse"
-                        : ""
-                  }`}
-                >
-                  <div className="input-border-container"></div>
-                  <div className="inner-input flex flex-col gap-1.5 sm:gap-2 p-2 sm:p-3">
-
-                  {/* Background effects container (handles overflow for animations) */}
-                  <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-                    {/* Scanning Line Animation */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent h-[200%] -translate-y-full group-focus-within:animate-[scanline_4s_linear_infinite]"></div>
-                    {isRecording && (
-                      <div className="absolute inset-0 bg-rose-500/5 animate-pulse"></div>
-                    )}
-                  </div>
-
-                  {/* Tech Corner Accents */}
-                  <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-cyan-400/30 rounded-tl-2xl opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                  <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-cyan-400/30 rounded-tr-2xl opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-cyan-400/30 rounded-bl-2xl opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-cyan-400/30 rounded-br-2xl opacity-50 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
-                  <textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    placeholder={
-                      isTranscribing
-                        ? "Transcribing..."
+                <div className={`relative rounded-3xl transition-all duration-500 overflow-hidden ${isAwakened ? 'p-[2px] shadow-[0_0_20px_rgba(0,255,255,0.2)]' : 'p-0 bg-transparent'}`}>
+                  {isAwakened && (
+                    <div 
+                      className="absolute top-1/2 left-1/2 w-[300%] sm:w-[250%] aspect-square -translate-x-1/2 -translate-y-1/2 animate-[spin_4s_linear_infinite]" 
+                      style={{ background: 'conic-gradient(from 0deg at 50% 50%, transparent 0%, rgba(0, 242, 255, 0.1) 15%, #00f2ff 30%, transparent 30%, transparent 50%, rgba(189, 0, 255, 0.1) 65%, #bd00ff 80%, transparent 80%, transparent 100%)' }}
+                    />
+                  )}
+                  <div
+                    className={`relative z-10 rounded-[22px] transition-all duration-500 flex flex-col p-2 sm:p-3 ${
+                      isAwakened ? 'bg-[#050508] border-transparent' : 'bg-white dark:bg-[#131314] border border-slate-200 dark:border-white/10'
+                    } ${
+                      isSuccessFlash
+                        ? "shadow-[0_0_30px_rgba(255,255,255,0.5)] border-white/50"
                         : isRecording
-                          ? "Listening..."
-                          : isImageMode
-                            ? "Describe the image for LOKI..."
-                            : "Describe an app and let Gemini do the rest"
-                    }
-                    className="w-full max-h-[120px] sm:max-h-[150px] min-h-[40px] sm:min-h-[50px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-2.5 sm:py-3.5 text-[1rem] sm:text-[1.1rem] text-cyan-50 placeholder:text-cyan-600/50 custom-scrollbar leading-relaxed font-mono tracking-wide relative z-10 caret-[#4285F4] rounded-lg sm:rounded-xl"
-                    rows={1}
-                    readOnly={isRecording || isTranscribing}
-                    disabled={isLoading}
-                  />
-                  <div className="flex justify-between items-center w-full px-1 relative z-10">
-                    <div className="flex items-center gap-0 sm:gap-0.5">
-                      <div className="relative options-menu-container">
+                          ? "shadow-[0_0_20px_rgba(255,255,255,0.5)] animate-pulse border-white/50"
+                          : !isAwakened ? "hover:border-slate-300 dark:hover:border-white/20" : ""
+                    }`}
+                  >
+                    <textarea
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      onFocus={() => setIsFocused(true)}
+                      onBlur={() => setIsFocused(false)}
+                      placeholder={
+                        isTranscribing
+                          ? "Transcribing..."
+                          : isRecording
+                            ? "Listening..."
+                            : isImageMode
+                              ? "Describe the image for LOKI..."
+                              : "Describe your idea to Loki"
+                      }
+                      className="w-full max-h-[200px] sm:max-h-[250px] min-h-[44px] sm:min-h-[52px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-2 py-2 sm:py-3 text-base sm:text-lg text-slate-900 dark:text-white placeholder:text-slate-500 custom-scrollbar leading-relaxed font-medium"
+                      rows={1}
+                      readOnly={isRecording || isTranscribing}
+                      disabled={isLoading}
+                    />
+                    
+                    <div className="flex items-center justify-between mt-1 sm:mt-2 px-1">
+                      {/* Left Side Actions */}
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          className="hidden"
+                          onChange={handleFileUpload}
+                          multiple
+                        />
                         <button
-                          onClick={() => setIsOptionsOpen(!isOptionsOpen)}
-                          className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all border ${isOptionsOpen || isImageMode || thinkingMode || searchGrounding ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-[0_0_10px_rgba(0,242,255,0.2)]" : "text-cyan-600/70 hover:bg-cyan-500/10 hover:text-cyan-400 border-transparent hover:border-cyan-500/30"}`}
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white transition-all"
+                          title="Attach file"
                         >
-                          {getOptionsIcon()}
+                          <Paperclip className="w-5 h-5 sm:w-6 sm:h-6" />
                         </button>
-
-                        <AnimatePresence>
-                          {isOptionsOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                              className="absolute bottom-[calc(100%+8px)] sm:bottom-[calc(100%+12px)] left-0 bg-[#050508]/95 backdrop-blur-xl border border-cyan-500/40 rounded-lg p-2 min-w-[180px] sm:min-w-[220px] z-[999] flex flex-col gap-1.5 shadow-[0_0_30px_rgba(0,242,255,0.2)]"
-                            >
-                              <div className="px-2 py-1 text-[0.6rem] font-black text-cyan-500/50 uppercase tracking-[0.2em]">
-                                Advanced Core
-                              </div>
-
-                              <div className="space-y-1">
-                                <button
-                                  onClick={() => setThinkingMode(!thinkingMode)}
-                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all ${thinkingMode ? "bg-cyan-500/20 text-cyan-300" : "text-cyan-700 hover:bg-cyan-500/10 hover:text-cyan-400"}`}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <Sparkles className="w-3.5 h-3.5" />
-                                    <span className="text-[0.65rem] font-bold uppercase tracking-wider">
-                                      Deep Search
-                                    </span>
-                                  </div>
-                                  <div
-                                    className={`w-6 h-3 rounded-full relative transition-colors ${thinkingMode ? "bg-cyan-500" : "bg-cyan-950"}`}
-                                  >
-                                    <div
-                                      className={`absolute top-0.5 w-2 h-2 rounded-full bg-white transition-transform ${thinkingMode ? "left-3.5" : "left-0.5"}`}
-                                    />
-                                  </div>
-                                </button>
-
-                                <button
-                                  onClick={() =>
-                                    setSearchGrounding(!searchGrounding)
-                                  }
-                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all ${searchGrounding ? "bg-cyan-500/20 text-cyan-300" : "text-cyan-700 hover:bg-cyan-500/10 hover:text-cyan-400"}`}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <Globe className="w-3.5 h-3.5" />
-                                    <span className="text-[0.65rem] font-bold uppercase tracking-wider">
-                                      Web Grounding
-                                    </span>
-                                  </div>
-                                  <div
-                                    className={`w-6 h-3 rounded-full relative transition-colors ${searchGrounding ? "bg-cyan-500" : "bg-cyan-950"}`}
-                                  >
-                                    <div
-                                      className={`absolute top-0.5 w-2 h-2 rounded-full bg-white transition-transform ${searchGrounding ? "left-3.5" : "left-0.5"}`}
-                                    />
-                                  </div>
-                                </button>
-
-                                <button
-                                  onClick={() => setIsImageMode(!isImageMode)}
-                                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all ${isImageMode ? "bg-cyan-500/20 text-cyan-300" : "text-cyan-700 hover:bg-cyan-500/10 hover:text-cyan-400"}`}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <ImageIcon className="w-3.5 h-3.5" />
-                                    <span className="text-[0.65rem] font-bold uppercase tracking-wider">
-                                      Image Mode
-                                    </span>
-                                  </div>
-                                  <div
-                                    className={`w-6 h-3 rounded-full relative transition-colors ${isImageMode ? "bg-cyan-500" : "bg-cyan-950"}`}
-                                  >
-                                    <div
-                                      className={`absolute top-0.5 w-2 h-2 rounded-full bg-white transition-transform ${isImageMode ? "left-3.5" : "left-0.5"}`}
-                                    />
-                                  </div>
-                                </button>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 sm:gap-1.5">
-                      <div className="relative model-menu-container">
-                        <button
-                          onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-                          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border transition-all ${isModelMenuOpen ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50 shadow-[0_0_10px_rgba(0,242,255,0.2)]" : "text-cyan-600/70 hover:bg-cyan-500/10 hover:text-cyan-400 border-transparent hover:border-cyan-500/30"}`}
-                        >
-                          {getModelIcon(modelMode)}
-                          <span className="text-[0.65rem] font-black uppercase tracking-widest hidden sm:inline">
-                            {modelMode}
-                          </span>
-                          <ChevronUp
-                            className={`w-3.5 h-3.5 transition-transform duration-300 ${isModelMenuOpen ? "rotate-180" : ""}`}
-                          />
-                        </button>
-
-                        <AnimatePresence>
-                          {isModelMenuOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                              className="absolute bottom-[calc(100%+8px)] sm:bottom-[calc(100%+12px)] right-0 bg-[#050508]/95 backdrop-blur-xl border border-cyan-500/40 rounded-lg p-1.5 min-w-[120px] z-[999] flex flex-col gap-1 shadow-[0_0_30px_rgba(0,242,255,0.2)]"
-                            >
-                              {[
-                                { id: "fast", icon: Zap, label: "Fast" },
-                                { id: "pro", icon: Brain, label: "Pro" },
-                                { id: "happy", icon: Smile, label: "Happy" },
-                              ].map((m) => (
-                                <button
-                                  key={m.id}
-                                  onClick={() => {
-                                    setModelMode(m.id);
-                                    setIsModelMenuOpen(false);
-                                  }}
-                                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${modelMode === m.id ? "bg-cyan-500/20 text-cyan-300" : "text-cyan-700 hover:text-cyan-400 hover:bg-cyan-500/10"}`}
-                                >
-                                  <m.icon className="w-3.5 h-3.5" />
-                                  <span className="text-[0.65rem] font-bold uppercase tracking-wider">
-                                    {m.label}
-                                  </span>
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      {/* Merged Mic/Send Button */}
-                      <div className="flex items-center gap-1.5">
-                        {liveAudioEnabled && !input.trim() && (
+                        
+                        <div className="relative options-menu-container">
                           <button
-                            onClick={
-                              isLiveSessionActive
-                                ? stopLiveSession
-                                : startLiveSession
-                            }
-                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all border ${isLiveSessionActive ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/50 animate-pulse" : "text-cyan-600/70 hover:bg-cyan-500/10 hover:text-cyan-400 border-transparent hover:border-cyan-500/30"}`}
-                            title={
-                              isLiveSessionActive
-                                ? "Stop Live Session"
-                                : "Start Live Session"
-                            }
+                            onClick={() => setIsOptionsOpen(!isOptionsOpen)}
+                            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all ${isOptionsOpen || isImageMode || thinkingMode || searchGrounding ? "bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white"}`}
                           >
-                            <Radio
-                              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isLiveSessionActive ? "animate-spin" : ""}`}
+                            {getOptionsIcon()}
+                          </button>
+
+                          <AnimatePresence>
+                            {isOptionsOpen && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute bottom-[calc(100%+10px)] sm:bottom-[calc(100%+14px)] left-0 bg-white dark:bg-[#050508] border border-slate-200 dark:border-white/20 rounded-2xl p-3 min-w-[200px] sm:min-w-[250px] z-[999] flex flex-col gap-2 shadow-2xl dark:shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+                              >
+                                <div className="px-2 py-1 text-[0.7rem] font-black text-slate-400 dark:text-white/50 uppercase tracking-[0.2em]">
+                                  Advanced Core
+                                </div>
+
+                                <div className="space-y-1">
+                                  <button
+                                    onClick={() => setThinkingMode(!thinkingMode)}
+                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all ${thinkingMode ? "bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"}`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <Sparkles className="w-4 h-4" />
+                                      <span className="text-[0.75rem] font-bold uppercase tracking-wider">
+                                        Deep Search
+                                      </span>
+                                    </div>
+                                    <div
+                                      className={`w-8 h-4 rounded-full relative transition-colors ${thinkingMode ? "bg-white" : "bg-slate-200 dark:bg-slate-800"}`}
+                                    >
+                                      <div
+                                        className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${thinkingMode ? "left-4.5" : "left-0.5"}`}
+                                      />
+                                    </div>
+                                  </button>
+
+                                  <button
+                                    onClick={() =>
+                                      setSearchGrounding(!searchGrounding)
+                                    }
+                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all ${searchGrounding ? "bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"}`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <Globe className="w-4 h-4" />
+                                      <span className="text-[0.75rem] font-bold uppercase tracking-wider">
+                                        Web Grounding
+                                      </span>
+                                    </div>
+                                    <div
+                                      className={`w-8 h-4 rounded-full relative transition-colors ${searchGrounding ? "bg-white" : "bg-slate-200 dark:bg-slate-800"}`}
+                                    >
+                                      <div
+                                        className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${searchGrounding ? "left-4.5" : "left-0.5"}`}
+                                      />
+                                    </div>
+                                  </button>
+
+                                  <button
+                                    onClick={() => setIsImageMode(!isImageMode)}
+                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all ${isImageMode ? "bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"}`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <ImageIcon className="w-4 h-4" />
+                                      <span className="text-[0.75rem] font-bold uppercase tracking-wider">
+                                        Image Mode
+                                      </span>
+                                    </div>
+                                    <div
+                                      className={`w-8 h-4 rounded-full relative transition-colors ${isImageMode ? "bg-white" : "bg-slate-200 dark:bg-slate-800"}`}
+                                    >
+                                      <div
+                                        className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${isImageMode ? "left-4.5" : "left-0.5"}`}
+                                      />
+                                    </div>
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+
+                      {/* Right Side Actions */}
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="relative model-menu-container">
+                          <button
+                            onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+                            className={`flex items-center gap-2.5 px-4 py-2 rounded-full transition-all ${isModelMenuOpen ? "bg-slate-200 dark:bg-white/20 text-slate-900 dark:text-white shadow-md" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-700 dark:hover:text-white"}`}
+                          >
+                            {getModelIcon(modelMode)}
+                            <span className="text-[0.75rem] font-bold uppercase tracking-wider hidden sm:inline">
+                              {modelMode}
+                            </span>
+                            <ChevronUp
+                              className={`w-4 h-4 transition-transform duration-300 ${isModelMenuOpen ? "rotate-180" : ""}`}
                             />
                           </button>
-                        )}
 
-                        {isRecording && (
-                          <div className="flex items-center gap-[2px] h-4 mr-2">
-                            {[1, 2, 3, 4].map((i) => (
+                          <AnimatePresence>
+                            {isModelMenuOpen && (
                               <motion.div
-                                key={i}
-                                animate={{
-                                  height: [
-                                    4,
-                                    4 +
-                                      audioVolume *
-                                        12 *
-                                        (i % 2 === 0 ? 1 : 0.7),
-                                    4,
-                                  ],
-                                }}
-                                transition={{ duration: 0.2, repeat: Infinity }}
-                                className="w-[2px] bg-rose-500 rounded-full"
-                              />
-                            ))}
-                          </div>
-                        )}
-
-                        {isLoading ? (
-                          <button
-                            onClick={onStopGeneration}
-                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 relative overflow-hidden bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.4)] border border-rose-400/50 group"
-                          >
-                            <div className="absolute inset-0 bg-rose-400/20 animate-pulse group-hover:animate-none"></div>
-                            <Square className="w-3 h-3 sm:w-3.5 sm:h-3.5 relative z-10 drop-shadow-[0_0_4px_rgba(244,63,94,1)] fill-current" />
-                          </button>
-                        ) : input.trim() ? (
-                          <button
-                            onClick={handleSend}
-                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 relative overflow-hidden bg-cyan-500/20 text-[#00f2ff] hover:bg-cyan-500/40 shadow-[0_0_15px_rgba(0,242,255,0.4)] border border-cyan-400/50 group"
-                          >
-                            <div className="absolute inset-0 bg-cyan-400/20 animate-pulse group-hover:animate-none"></div>
-                            <Send className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-0.5 relative z-10 drop-shadow-[0_0_4px_rgba(0,242,255,1)]" />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={toggleRecording}
-                            disabled={isTranscribing}
-                            style={{
-                              boxShadow: isRecording
-                                ? `0 0 ${10 + audioVolume * 40}px rgba(244,63,94,${0.3 + audioVolume * 0.5})`
-                                : undefined,
-                              transform: isRecording
-                                ? `scale(${1 + audioVolume * 0.15})`
-                                : undefined,
-                            }}
-                            className={`mic-button-trigger w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all border overflow-hidden ${isRecording ? "bg-rose-500/20 text-rose-400 border-rose-500/50" : "text-cyan-600/70 hover:bg-cyan-500/10 hover:text-cyan-400 border-transparent hover:border-cyan-500/30"}`}
-                          >
-                            {isTranscribing ? (
-                              <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
-                            ) : isRecording ? (
-                              <StopSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            ) : (
-                              <InfinityMic className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-[0_0_8px_rgba(0,242,255,0.5)]" />
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute bottom-[calc(100%+10px)] sm:bottom-[calc(100%+14px)] right-0 bg-white dark:bg-[#050508] border border-slate-200 dark:border-white/20 rounded-2xl p-2 min-w-[140px] z-[999] flex flex-col gap-1 shadow-2xl dark:shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+                              >
+                                {[
+                                  { id: "fast", icon: Zap, label: "Fast" },
+                                  { id: "pro", icon: Brain, label: "Pro" },
+                                  { id: "happy", icon: Smile, label: "Happy" },
+                                ].map((m) => (
+                                  <button
+                                    key={m.id}
+                                    onClick={() => {
+                                      setModelMode(m.id);
+                                      setIsModelMenuOpen(false);
+                                    }}
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${modelMode === m.id ? "bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"}`}
+                                  >
+                                    <m.icon className="w-4 h-4" />
+                                    <span className="text-[0.75rem] font-bold uppercase tracking-wider">
+                                      {m.label}
+                                    </span>
+                                  </button>
+                                ))}
+                              </motion.div>
                             )}
-                          </button>
-                        )}
+                          </AnimatePresence>
+                        </div>
+
+                        {/* Merged Mic/Send Button */}
+                        <div className="flex items-center gap-2">
+                          {liveAudioEnabled && !input.trim() && (
+                            <button
+                              onClick={
+                                isLiveSessionActive
+                                  ? stopLiveSession
+                                  : startLiveSession
+                              }
+                              className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all border ${isLiveSessionActive ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/50 animate-pulse" : "text-slate-500 dark:text-[#888] hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white border-transparent"}`}
+                              title={
+                                isLiveSessionActive
+                                  ? "Stop Live Session"
+                                  : "Start Live Session"
+                              }
+                            >
+                              <Radio
+                                className={`w-5 h-5 sm:w-6 sm:h-6 ${isLiveSessionActive ? "animate-spin" : ""}`}
+                              />
+                            </button>
+                          )}
+
+                          {isRecording && (
+                            <div className="flex items-center gap-[2px] h-4 mr-2">
+                              {[1, 2, 3, 4].map((i) => (
+                                <motion.div
+                                  key={i}
+                                  animate={{
+                                    height: [
+                                      4,
+                                      4 +
+                                        audioVolume *
+                                          12 *
+                                          (i % 2 === 0 ? 1 : 0.7),
+                                      4,
+                                    ],
+                                  }}
+                                  transition={{ duration: 0.2, repeat: Infinity }}
+                                  className="w-[2px] bg-rose-500 rounded-full"
+                                />
+                              ))}
+                            </div>
+                          )}
+
+                          {isLoading ? (
+                            <button
+                              onClick={onStopGeneration}
+                              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 bg-rose-100 dark:bg-rose-500/20 text-rose-500 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-500/40 border border-rose-200 dark:border-rose-400/50"
+                            >
+                              <Square className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                            </button>
+                          ) : input.trim() ? (
+                            <button
+                              onClick={handleSend}
+                              className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${isAwakened ? 'bg-[#ffffff] text-black hover:bg-slate-200 shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 shadow-md dark:shadow-[0_0_15px_rgba(255,255,255,0.4)]'}`}
+                            >
+                              <Send className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={toggleRecording}
+                              disabled={isTranscribing}
+                              style={{
+                                boxShadow: isRecording
+                                  ? `0 0 ${10 + audioVolume * 30}px rgba(244,63,94,${0.2 + audioVolume * 0.4})`
+                                  : undefined,
+                                transform: isRecording
+                                  ? `scale(${1 + audioVolume * 0.1})`
+                                  : undefined,
+                              }}
+                              className={`mic-button-trigger w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all overflow-hidden ${isRecording ? "bg-rose-100 dark:bg-rose-500/20 text-rose-500" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white"}`}
+                            >
+                              {isTranscribing ? (
+                                <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
+                              ) : isRecording ? (
+                                <StopSquare className="w-5 h-5 sm:w-6 sm:h-6" />
+                              ) : (
+                                <InfinityMic className="w-6 h-6 sm:w-7 sm:h-7" />
+                              )}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
                   </div>
                 </div>
               </motion.div>
-            ) : (
-              /* NORMAL MODE TEXTPAD - CLEAN & SIMPLE */
-              <motion.div 
-                className="relative w-full group"
-                initial={{ "--border-opacity": 0 } as any}
-                animate={{ 
-                  "--border-opacity": 1
-                } as any}
-                transition={{
-                  duration: 1.5, 
-                  ease: "easeOut", 
-                  delay: 0.5 
-                }}
-              >
-                <div
-                  className={`input-wrapper textpad-entry-anim transition-all duration-500 mx-auto ${
-                    isSuccessFlash
-                      ? "shadow-[0_0_30px_rgba(16,185,129,0.5)]"
-                      : isRecording
-                        ? "shadow-[0_0_20px_rgba(6,182,212,0.5)] animate-pulse"
-                        : ""
-                  }`}
-                >
-                  <div className="input-border-container"></div>
-                  <div className="inner-input flex flex-col gap-2 sm:gap-3 p-4 sm:p-5">
-
-                  <textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    placeholder={
-                      isTranscribing
-                        ? "Transcribing..."
-                        : isRecording
-                          ? "Listening..."
-                          : isImageMode
-                            ? "Describe the image for LOKI..."
-                            : "Describe an app and let Gemini do the rest"
-                    }
-                    className="w-full max-h-[200px] sm:max-h-[250px] min-h-[50px] sm:min-h-[60px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 sm:px-4 py-3 sm:py-4 text-[1.05rem] sm:text-[1.2rem] text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6b6b80] custom-scrollbar leading-relaxed font-medium"
-                    rows={1}
-                    readOnly={isRecording || isTranscribing}
-                    disabled={isLoading}
-                  />
-                  <div className="flex justify-between items-center w-full px-2">
-                    <div className="flex items-center gap-0 sm:gap-0.5">
-                      <div className="relative options-menu-container">
-                        <button
-                          onClick={() => setIsOptionsOpen(!isOptionsOpen)}
-                          className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all ${isOptionsOpen || isImageMode || thinkingMode || searchGrounding ? "bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 shadow-lg" : "text-slate-400 dark:text-[#888] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white"}`}
-                        >
-                          {getOptionsIcon()}
-                        </button>
-
-                        <AnimatePresence>
-                          {isOptionsOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                              className="absolute bottom-[calc(100%+10px)] sm:bottom-[calc(100%+14px)] left-0 bg-white dark:bg-[#050508] border border-slate-200 dark:border-cyan-500/40 rounded-2xl p-3 min-w-[200px] sm:min-w-[250px] z-[999] flex flex-col gap-2 shadow-2xl dark:shadow-[0_0_30px_rgba(0,242,255,0.15)]"
-                            >
-                              <div className="px-2 py-1 text-[0.7rem] font-black text-slate-400 dark:text-cyan-500/50 uppercase tracking-[0.2em]">
-                                Advanced Core
-                              </div>
-
-                              <div className="space-y-1">
-                                <button
-                                  onClick={() => setThinkingMode(!thinkingMode)}
-                                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all ${thinkingMode ? "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"}`}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <Sparkles className="w-4 h-4" />
-                                    <span className="text-[0.75rem] font-bold uppercase tracking-wider">
-                                      Deep Search
-                                    </span>
-                                  </div>
-                                  <div
-                                    className={`w-8 h-4 rounded-full relative transition-colors ${thinkingMode ? "bg-cyan-500" : "bg-slate-200 dark:bg-slate-800"}`}
-                                  >
-                                    <div
-                                      className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${thinkingMode ? "left-4.5" : "left-0.5"}`}
-                                    />
-                                  </div>
-                                </button>
-
-                                <button
-                                  onClick={() =>
-                                    setSearchGrounding(!searchGrounding)
-                                  }
-                                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all ${searchGrounding ? "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"}`}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <Globe className="w-4 h-4" />
-                                    <span className="text-[0.75rem] font-bold uppercase tracking-wider">
-                                      Web Grounding
-                                    </span>
-                                  </div>
-                                  <div
-                                    className={`w-8 h-4 rounded-full relative transition-colors ${searchGrounding ? "bg-cyan-500" : "bg-slate-200 dark:bg-slate-800"}`}
-                                  >
-                                    <div
-                                      className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${searchGrounding ? "left-4.5" : "left-0.5"}`}
-                                    />
-                                  </div>
-                                </button>
-
-                                <button
-                                  onClick={() => setIsImageMode(!isImageMode)}
-                                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all ${isImageMode ? "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"}`}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <ImageIcon className="w-4 h-4" />
-                                    <span className="text-[0.75rem] font-bold uppercase tracking-wider">
-                                      Image Mode
-                                    </span>
-                                  </div>
-                                  <div
-                                    className={`w-8 h-4 rounded-full relative transition-colors ${isImageMode ? "bg-cyan-500" : "bg-slate-200 dark:bg-slate-800"}`}
-                                  >
-                                    <div
-                                      className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${isImageMode ? "left-4.5" : "left-0.5"}`}
-                                    />
-                                  </div>
-                                </button>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="relative model-menu-container">
-                        <button
-                          onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-                          className={`flex items-center gap-2.5 px-4 py-2 rounded-full transition-all ${isModelMenuOpen ? "bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 shadow-md" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-700 dark:hover:text-white"}`}
-                        >
-                          {getModelIcon(modelMode)}
-                          <span className="text-[0.75rem] font-bold uppercase tracking-wider hidden sm:inline">
-                            {modelMode}
-                          </span>
-                          <ChevronUp
-                            className={`w-4 h-4 transition-transform duration-300 ${isModelMenuOpen ? "rotate-180" : ""}`}
-                          />
-                        </button>
-
-                        <AnimatePresence>
-                          {isModelMenuOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                              className="absolute bottom-[calc(100%+10px)] sm:bottom-[calc(100%+14px)] right-0 bg-white dark:bg-[#050508] border border-slate-200 dark:border-cyan-500/40 rounded-2xl p-2 min-w-[140px] z-[999] flex flex-col gap-1 shadow-2xl dark:shadow-[0_0_30px_rgba(0,242,255,0.15)]"
-                            >
-                              {[
-                                { id: "fast", icon: Zap, label: "Fast" },
-                                { id: "pro", icon: Brain, label: "Pro" },
-                                { id: "happy", icon: Smile, label: "Happy" },
-                              ].map((m) => (
-                                <button
-                                  key={m.id}
-                                  onClick={() => {
-                                    setModelMode(m.id);
-                                    setIsModelMenuOpen(false);
-                                  }}
-                                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${modelMode === m.id ? "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"}`}
-                                >
-                                  <m.icon className="w-4 h-4" />
-                                  <span className="text-[0.75rem] font-bold uppercase tracking-wider">
-                                    {m.label}
-                                  </span>
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      {/* Merged Mic/Send Button */}
-                      <div className="flex items-center gap-2">
-                        {liveAudioEnabled && !input.trim() && (
-                          <button
-                            onClick={
-                              isLiveSessionActive
-                                ? stopLiveSession
-                                : startLiveSession
-                            }
-                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all border ${isLiveSessionActive ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/50 animate-pulse" : "text-slate-400 dark:text-[#888] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white border-transparent"}`}
-                            title={
-                              isLiveSessionActive
-                                ? "Stop Live Session"
-                                : "Start Live Session"
-                            }
-                          >
-                            <Radio
-                              className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiveSessionActive ? "animate-spin" : ""}`}
-                            />
-                          </button>
-                        )}
-
-                        {isRecording && (
-                          <div className="flex items-center gap-[2px] h-4 mr-2">
-                            {[1, 2, 3, 4].map((i) => (
-                              <motion.div
-                                key={i}
-                                animate={{
-                                  height: [
-                                    4,
-                                    4 +
-                                      audioVolume *
-                                        12 *
-                                        (i % 2 === 0 ? 1 : 0.7),
-                                    4,
-                                  ],
-                                }}
-                                transition={{ duration: 0.2, repeat: Infinity }}
-                                className="w-[2px] bg-rose-500 rounded-full"
-                              />
-                            ))}
-                          </div>
-                        )}
-
-                        {isLoading ? (
-                          <button
-                            onClick={onStopGeneration}
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-rose-100 dark:bg-rose-500/20 text-rose-500 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-500/40 border border-rose-200 dark:border-rose-400/50"
-                          >
-                            <Square className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
-                          </button>
-                        ) : input.trim() ? (
-                          <button
-                            onClick={handleSend}
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-cyan-600 dark:bg-cyan-500/20 text-white dark:text-[#00f2ff] hover:bg-cyan-500 dark:hover:bg-cyan-500/30 shadow-[0_0_12px_rgba(0,242,255,0.3)] dark:border dark:border-cyan-400/30"
-                          >
-                            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5" />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={toggleRecording}
-                            disabled={isTranscribing}
-                            style={{
-                              boxShadow: isRecording
-                                ? `0 0 ${10 + audioVolume * 30}px rgba(244,63,94,${0.2 + audioVolume * 0.4})`
-                                : undefined,
-                              transform: isRecording
-                                ? `scale(${1 + audioVolume * 0.1})`
-                                : undefined,
-                            }}
-                            className={`mic-button-trigger w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all overflow-hidden ${isRecording ? "bg-rose-500/20 text-rose-500" : "text-slate-400 dark:text-[#888] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white"}`}
-                          >
-                            {isTranscribing ? (
-                              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                            ) : isRecording ? (
-                              <StopSquare className="w-4 h-4 sm:w-5 sm:h-5" />
-                            ) : (
-                              <InfinityMic className="w-5 h-5 sm:w-6 sm:h-6" />
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
           </motion.div>
         </div>
       );

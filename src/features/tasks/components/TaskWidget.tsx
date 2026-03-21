@@ -21,7 +21,7 @@ export const TaskWidget: React.FC = () => {
   return (
     <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl p-6 w-full max-w-md shadow-2xl">
       <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <CheckCircle2 className="text-cyan-400" />
+        <CheckCircle2 className="text-white" />
         Task List
       </h2>
 
@@ -31,12 +31,12 @@ export const TaskWidget: React.FC = () => {
           value={newTaskTitle}
           onChange={(e) => setNewTaskTitle(e.target.value)}
           placeholder="Add a new task..."
-          className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
+          className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white transition-all"
         />
         <button
           type="submit"
           disabled={!newTaskTitle.trim()}
-          className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg p-2 transition-colors flex items-center justify-center"
+          className="bg-white hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-black rounded-lg p-2 transition-colors flex items-center justify-center"
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -44,7 +44,7 @@ export const TaskWidget: React.FC = () => {
 
       {isLoading ? (
         <div className="flex justify-center py-8">
-          <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
         </div>
       ) : error ? (
         <div className="text-red-400 text-center py-4">{error}</div>
@@ -67,7 +67,7 @@ export const TaskWidget: React.FC = () => {
               >
                 <button
                   onClick={() => toggleTask(task.id)}
-                  className={`shrink-0 transition-colors ${task.completed ? 'text-cyan-500' : 'text-slate-400 hover:text-cyan-400'}`}
+                  className={`shrink-0 transition-colors ${task.completed ? 'text-white' : 'text-slate-400 hover:text-white'}`}
                 >
                   {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                 </button>
