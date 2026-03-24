@@ -8,6 +8,7 @@ import {
   Circle, Maximize, Minimize, Square, Box, Palette, Droplets, Wind, Activity 
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
+import { toast } from '../contexts/ToastContext';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -642,6 +643,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                   onSave={(newName) => {
                     setCommanderName(newName);
                     setShowEditProfile(false);
+                    toast.success('Settings Saved');
                   }} 
                   onClose={() => setShowEditProfile(false)} 
                 />

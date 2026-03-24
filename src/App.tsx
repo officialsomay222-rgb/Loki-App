@@ -8,6 +8,7 @@ const CommandPalette = lazy(() => import('./components/CommandPalette').then(m =
 const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })));
 import { useSettings } from './contexts/SettingsContext';
 import { useChat } from './contexts/ChatContext';
+import { toast } from './contexts/ToastContext';
 import { InfinityLogo, HeaderInfinityLogo } from './components/Logos';
 import { format, isToday } from 'date-fns';
 const TaskWidget = lazy(() => import('./features/tasks/components/TaskWidget').then(m => ({ default: m.TaskWidget })));
@@ -22,6 +23,7 @@ import {
   User as UserIcon,
   Sun,
   Moon,
+  Zap,
   X,
   Image as ImageIcon,
   Palette,
@@ -105,6 +107,10 @@ export default function App() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<ChatInputHandle>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -246,6 +252,7 @@ export default function App() {
   const copyToClipboard = useCallback((text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
+    toast.success('Copied to Clipboard');
     setTimeout(() => setCopiedId(null), 2000);
   }, []);
 
@@ -569,6 +576,7 @@ export default function App() {
                 onClick={() => {
                   if (window.confirm('Are you sure you want to clear all timelines?')) {
                     clearAllSessions();
+                    toast.success('All Timelines Cleared');
                   }
                 }}
                 className="flex items-center gap-3 w-full px-4 py-2.5 text-xs font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all border border-transparent"
@@ -601,7 +609,7 @@ export default function App() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0 relative h-full">
           {/* Header */}
-          <header className="h-16 sm:h-20 flex items-center justify-between px-3 sm:px-8 border-b border-slate-200/30 dark:border-white/5 glass-panel premium-shadow !border-t-0 !border-l-0 !border-r-0 z-10 shrink-0">
+          <header className={`h-16 sm:h-20 flex items-center justify-between px-3 sm:px-8 glass-panel premium-shadow !border-t-0 !border-l-0 !border-r-0 shrink-0 transition-all duration-500 z-20 ${isHeaderVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 absolute w-full pointer-events-none'} ${isAwakened ? "bg-[#050b14]/80 border-b border-cyan-500/20 shadow-[0_4px_30px_rgba(0,242,255,0.1)] backdrop-blur-xl" : "bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-slate-200 dark:border-white/5"}`}>
             <div className="flex items-center gap-2 sm:gap-4 flex-1">
               {!isSidebarOpen && (
                 <button 
@@ -657,7 +665,19 @@ export default function App() {
           </header>
 
           {/* Chat Area - Scrollable */}
-          <div className={`flex-1 overflow-x-hidden custom-scrollbar relative w-full transform-gpu ${(!currentSession || currentSession.messages.length === 0) ? 'overflow-hidden' : 'overflow-y-auto overscroll-contain'}`}>
+          <div 
+            ref={scrollContainerRef}
+            onScroll={(e) => {
+              const currentScrollY = e.currentTarget.scrollTop;
+              if (currentScrollY > lastScrollY.current + 20 && currentScrollY > 100) {
+                setIsHeaderVisible(false);
+              } else if (currentScrollY < lastScrollY.current - 20 || currentScrollY < 50) {
+                setIsHeaderVisible(true);
+              }
+              lastScrollY.current = currentScrollY;
+            }}
+            className={`flex-1 overflow-x-hidden custom-scrollbar relative w-full transform-gpu pt-${isHeaderVisible ? '0' : '0'} ${(!currentSession || currentSession.messages.length === 0) ? 'overflow-hidden' : 'overflow-y-auto overscroll-contain'}`}
+          >
             <div className={`w-full ${appWidthClass} mx-auto px-3 sm:px-6 h-full flex flex-col ${(!currentSession || currentSession.messages.length === 0) ? 'justify-center items-center' : 'pt-4 space-y-6 sm:space-y-8'}`}>
               {!currentSession || currentSession.messages.length === 0 ? (
                 <motion.div 
@@ -685,6 +705,44 @@ export default function App() {
                        <div className="absolute -inset-4 bg-cyan-500/5 blur-xl rounded-full -z-10 animate-pulse"></div>
                      )}
                    </div>
+
+                   {/* Quick Action Chips */}
+                   <motion.div 
+                     initial="hidden"
+                     animate="visible"
+                     variants={{
+                       hidden: { opacity: 0 },
+                       visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } }
+                     }}
+                     className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl px-4 mt-8"
+                   >
+                     {[
+                       { icon: ImageIcon, label: "Generate an image of a cyberpunk city", color: "from-blue-500/20 to-purple-500/20", borderColor: "border-blue-500/30" },
+                       { icon: FileText, label: "Summarize a complex document", color: "from-emerald-500/20 to-teal-500/20", borderColor: "border-emerald-500/30" },
+                       { icon: Zap, label: "Explain quantum computing simply", color: "from-amber-500/20 to-orange-500/20", borderColor: "border-amber-500/30" },
+                       { icon: Type, label: "Write a professional email", color: "from-rose-500/20 to-pink-500/20", borderColor: "border-rose-500/30" }
+                     ].map((action, i) => (
+                       <motion.button
+                         key={i}
+                         variants={{
+                           hidden: { opacity: 0, y: 20 },
+                           visible: { opacity: 1, y: 0 }
+                         }}
+                         whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                         whileTap={{ scale: 0.97 }}
+                         onClick={() => handleSendMessage(action.label)}
+                         className={`flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-br ${action.color} border ${action.borderColor} backdrop-blur-md shadow-lg transition-all text-left group overflow-hidden relative`}
+                       >
+                         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                         <div className="p-3 bg-white/10 rounded-xl">
+                           <action.icon className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                         </div>
+                         <span className="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors line-clamp-2">
+                           {action.label}
+                         </span>
+                       </motion.button>
+                     ))}
+                   </motion.div>
                 </motion.div>
               ) : (
                 <>
