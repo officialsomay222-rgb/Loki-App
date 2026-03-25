@@ -38,7 +38,7 @@ const EditProfileOverlay = ({ name, onSave, onClose }: { name: string, onSave: (
         >
           <ChevronDown className={`w-5 h-5 ${isAwakened || theme === 'dark' ? 'text-white' : 'text-black'}`} />
         </motion.button>
-        <h2 className="text-lg font-bold tracking-tight">Edit Profile</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Edit Profile</h2>
       </div>
       <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar">
         <div className="space-y-4">
@@ -58,7 +58,7 @@ const EditProfileOverlay = ({ name, onSave, onClose }: { name: string, onSave: (
             type="email" 
             value="officialsomay222@gmail.com"
             readOnly
-            className="w-full bg-[#161616]/50 border border-white/5 rounded-2xl p-4 text-[#717171] text-sm focus:outline-none cursor-not-allowed"
+            className="w-full bg-[#161616]/50 border border-white/[0.05] rounded-2xl p-4 text-[#717171] text-sm focus:outline-none cursor-not-allowed"
           />
           <p className="text-[10px] text-[#444]">Email cannot be changed for this account.</p>
         </div>
@@ -87,8 +87,8 @@ const SettingSection = React.memo(({ title, children }: any) => {
       }}
       className="space-y-3"
     >
-      {title && <h3 className={`px-4 text-[11px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-white/50' : 'text-black/50'}`}>{title}</h3>}
-      <div className={`rounded-2xl overflow-hidden shadow-sm transform-gpu transition-colors ${isDark ? 'bg-black/40 border-white/10 backdrop-blur-xl' : 'bg-white/40 border-black/10 backdrop-blur-xl'}`}>
+      {title && <h3 className={`px-4 text-xs font-medium uppercase tracking-wider mb-1 ${isDark ? 'text-white/40' : 'text-black/40'}`}>{title}</h3>}
+      <div className={`rounded-2xl overflow-hidden shadow-sm transform-gpu transition-colors border ${isDark ? 'bg-[#161616] border-white/[0.05]' : 'bg-white border-black/[0.05]'}`}>
         {children}
       </div>
     </motion.div>
@@ -155,13 +155,13 @@ const SettingItem = React.memo(({ icon: Icon, label, value, subLabel, onClick, c
       whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.03)" }}
       whileTap={onClick ? { scale: 0.995 } : {}}
       onClick={onClick}
-      className={`flex items-center justify-between p-4 transition-colors ${onClick ? 'cursor-pointer' : ''} ${!noBorder ? (isDark ? 'border-b border-white/5' : 'border-b border-black/5') : ''} ${danger ? 'text-red-500' : ''}`}
+      className={`flex items-center justify-between px-4 py-3.5 sm:py-4 transition-colors ${onClick ? 'cursor-pointer' : ''} ${!noBorder ? (isDark ? 'border-b border-white/[0.05]' : 'border-b border-black/[0.05]') : ''} `}
     >
       <div className="flex items-center gap-4 flex-1 mr-4">
-        {Icon && <Icon className={`w-5 h-5 shrink-0 ${danger ? (isDark ? 'text-white' : 'text-black') : (isDark ? 'text-white/50' : 'text-black/50')}`} />}
+        {Icon && <Icon className={`w-5 h-5 shrink-0 ${danger ? 'text-red-500' : (isDark ? 'text-[#8e8e93]' : 'text-[#86868b]')}`} />}
         <div className="flex-1 min-w-0">
-          <div className={`text-sm font-bold truncate tracking-tight ${danger ? (isDark ? 'text-white' : 'text-black') : (isDark ? 'text-white' : 'text-black')}`}>{label}</div>
-          {subLabel && <div className={`text-xs line-clamp-1 ${isDark ? 'text-white/50' : 'text-black/50'}`}>{subLabel}</div>}
+          <div className={`text-[15px] font-medium truncate tracking-tight ${danger ? 'text-red-500' : (isDark ? 'text-[#E3E3E3]' : 'text-[#1d1d1f]')}`}>{label}</div>
+          {subLabel && <div className={`text-[13px] mt-0.5 line-clamp-1 ${isDark ? 'text-[#8e8e93]' : 'text-[#86868b]'}`}>{subLabel}</div>}
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -342,7 +342,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
                   }}
                   whileHover={{ scale: 1.02 }}
-                  className="${theme === 'dark' || isAwakened ? 'bg-black/40 border-white/10' : 'bg-white/40 border-black/10'} rounded-2xl p-4 flex items-center justify-between border border-white/5 shadow-xl transform-gpu"
+                  className="${theme === 'dark' || isAwakened ? 'bg-black/40 border-white/10' : 'bg-white/40 border-black/10'} rounded-2xl p-4 flex items-center justify-between border border-white/[0.05] shadow-xl transform-gpu"
                 >
                   <div className="flex items-center gap-4">
                     <div className="p-2.5 ${theme === 'dark' || isAwakened ? 'bg-white/10 rounded-xl border-white/20' : 'bg-black/10 rounded-xl border-black/20'}">
@@ -389,7 +389,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
 
                 {/* Intelligence Section */}
                 <SettingSection title="Intelligence" delay={0.25}>
-                  <div className="p-4 space-y-6 ${!noBorder ? (isDark ? 'border-b border-white/5' : 'border-b border-black/5') : ''}">
+                  <div className="p-4 space-y-6 ${!noBorder ? (isDark ? 'border-b border-white/[0.05]' : 'border-b border-black/[0.05]') : ''}">
                     <div className="flex items-center gap-4">
                       <Sparkles className="w-5 h-5 text-[#717171]" />
                       <div className="text-sm font-bold text-white">Advanced Model Config</div>
@@ -414,7 +414,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       <div>
                         <div className="flex justify-between items-center mb-3">
                           <label className="text-[10px] font-bold text-[#717171] uppercase tracking-[0.2em]">Temperature</label>
-                          <span className="text-xs font-mono text-white bg-[#222] px-2 py-0.5 rounded border border-white/5">{temperature}</span>
+                          <span className="text-xs font-mono text-white bg-[#222] px-2 py-0.5 rounded border border-white/[0.05]">{temperature}</span>
                         </div>
                         <input 
                           type="range" min="0" max="2" step="0.1" value={temperature} 
@@ -623,7 +623,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.5 }}
-                  className="text-center space-y-4 py-12 border-t border-white/5 mt-8"
+                  className="text-center space-y-4 py-12 border-t border-white/[0.05] mt-8"
                 >
                   <p className="text-[9px] text-[#717171] uppercase tracking-[0.4em] font-black opacity-40">Loki Prime X v2.5.0</p>
                   <div className="flex flex-col items-center gap-2">
@@ -849,7 +849,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                     className={`w-[210px] ${theme === 'dark' || isAwakened ? 'bg-black/90 border-white/10 shadow-[0_20px_50px_rgba(0,0,0,1)] ring-white/5' : 'bg-white/90 border-black/10 shadow-[0_20px_50px_rgba(0,0,0,0.2)] ring-black/5'} backdrop-blur-3xl rounded-[24px] p-2 border ring-1`}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className={`px-3 py-2 ${theme === 'dark' || isAwakened ? 'border-b border-white/5' : 'border-b border-black/5'} mb-1`}>
+                    <div className={`px-3 py-2 ${theme === 'dark' || isAwakened ? 'border-b border-white/[0.05]' : 'border-b border-black/[0.05]'} mb-1`}>
                       <h3 className="text-[10px] font-bold text-[#717171] uppercase tracking-wider">{showPicker.label}</h3>
                     </div>
                     <div className="space-y-0.5">

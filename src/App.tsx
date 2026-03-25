@@ -697,16 +697,18 @@ export default function App() {
                         <InfinityLogo />
                       )}
                    </div>
-                   <div className="relative">
-                     <p className={`text-slate-500 dark:text-[#6b6b80] tracking-[4px] sm:tracking-[8px] text-[0.65rem] sm:text-xs font-montserrat font-bold uppercase drop-shadow-sm px-4 transition-all duration-1000 ${isAwakened ? 'text-cyan-300 animate-pulse' : 'opacity-80 hover:opacity-100'}`} style={isAwakened ? { textShadow: '0 0 15px rgba(0,242,255,0.6)' } : {}}>
-                        {isAwakened ? 'SYSTEM AWAKENED. AWAITING INPUT.' : `AWAITING COMMAND, ${commanderName.toUpperCase()}.`}
+                   <div className="relative text-center w-full px-4">
+                     <h2 className="text-2xl sm:text-4xl font-semibold text-slate-800 dark:text-[#E3E3E3] tracking-tight leading-snug mb-2 transition-all duration-1000">
+                        {isAwakened ? 'System Awakened.' : `Good afternoon, ${commanderName}.`}
+                     </h2>
+                     <p className={`text-slate-500 dark:text-[#8e8e93] text-sm sm:text-base font-medium transition-all duration-1000 ${isAwakened ? 'text-cyan-400 animate-pulse' : ''}`}>
+                        How can I help you today?
                      </p>
                      {isAwakened && (
-                       <div className="absolute -inset-4 bg-cyan-500/5 blur-xl rounded-full -z-10 animate-pulse"></div>
+                       <div className="absolute -inset-10 bg-cyan-500/10 blur-3xl rounded-full -z-10 animate-pulse"></div>
                      )}
                    </div>
 
-                   {/* Quick Action Chips */}
                    <motion.div 
                      initial="hidden"
                      animate="visible"
@@ -714,13 +716,13 @@ export default function App() {
                        hidden: { opacity: 0 },
                        visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } }
                      }}
-                     className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl px-4 mt-8"
+                     className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 w-full max-w-3xl px-4 mt-8 sm:mt-12"
                    >
                      {[
-                       { icon: ImageIcon, label: "Generate an image of a cyberpunk city", color: "from-blue-500/20 to-purple-500/20", borderColor: "border-blue-500/30" },
-                       { icon: FileText, label: "Summarize a complex document", color: "from-emerald-500/20 to-teal-500/20", borderColor: "border-emerald-500/30" },
-                       { icon: Zap, label: "Explain quantum computing simply", color: "from-amber-500/20 to-orange-500/20", borderColor: "border-amber-500/30" },
-                       { icon: Type, label: "Write a professional email", color: "from-rose-500/20 to-pink-500/20", borderColor: "border-rose-500/30" }
+                       { icon: ImageIcon, label: "Generate an image of a cyberpunk city" },
+                       { icon: FileText, label: "Summarize a complex document" },
+                       { icon: Zap, label: "Explain quantum computing simply" },
+                       { icon: Type, label: "Write a professional email" }
                      ].map((action, i) => (
                        <motion.button
                          key={i}
@@ -728,18 +730,17 @@ export default function App() {
                            hidden: { opacity: 0, y: 20 },
                            visible: { opacity: 1, y: 0 }
                          }}
-                         whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.1)' }}
-                         whileTap={{ scale: 0.97 }}
                          onClick={() => handleSendMessage(action.label)}
-                         className={`flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-br ${action.color} border ${action.borderColor} backdrop-blur-md shadow-lg transition-all text-left group overflow-hidden relative`}
+                         className="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-white/50 dark:bg-[#161616]/60 border border-slate-200/50 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-[#1e1e1e] backdrop-blur-md transition-all text-left group overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)] dark:shadow-none"
                        >
-                         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                         <div className="p-3 bg-white/10 rounded-xl">
-                           <action.icon className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
+                         <div className="p-2 sm:p-2.5 bg-slate-100 dark:bg-white/5 rounded-xl group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors shrink-0">
+                           <action.icon className="w-5 h-5 text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
                          </div>
-                         <span className="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors line-clamp-2">
-                           {action.label}
-                         </span>
+                         <div className="flex flex-col justify-center h-full">
+                           <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors line-clamp-2 leading-relaxed">
+                             {action.label}
+                           </span>
+                         </div>
                        </motion.button>
                      ))}
                    </motion.div>

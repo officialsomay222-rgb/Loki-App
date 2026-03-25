@@ -629,7 +629,7 @@ export const ChatInput = memo(
       };
 
       return (
-        <div className="w-full pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-[calc(1rem+env(safe-area-inset-bottom))] px-3 sm:px-6 bg-transparent">
+        <div className="w-full pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] px-3 sm:px-6 md:px-8 bg-transparent relative">
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{
@@ -729,7 +729,7 @@ export const ChatInput = memo(
                   </div>
                 )}
                 <div
-                  className={`relative z-10 rounded-[30px] transition-all duration-500 flex flex-col p-2 sm:p-3 bg-white/10 dark:bg-white/5 backdrop-blur-2xl border border-white/5 group-focus-within:border-cyan-500/50 group-focus-within:shadow-[0_0_30px_rgba(0,242,255,0.2)] dark:shadow-none ${isSuccessFlash
+                  className={`relative z-10 rounded-[30px] transition-all duration-500 flex flex-col p-2 sm:p-3 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-3xl border border-black/5 dark:border-white/10 shadow-sm group-focus-within:border-cyan-500/50 group-focus-within:shadow-[0_0_30px_rgba(0,242,255,0.2)] dark:shadow-none ${isSuccessFlash
                       ? "shadow-[0_0_30px_rgba(255,255,255,0.5)] border-white/50"
                       : isRecording
                         ? "shadow-[0_0_20px_rgba(255,255,255,0.5)] animate-pulse border-white/50"
@@ -752,7 +752,7 @@ export const ChatInput = memo(
                             ? "Describe the image for LOKI..."
                             : "Ask AI..."
                     }
-                    className="w-full max-h-[200px] sm:max-h-[250px] min-h-[44px] sm:min-h-[52px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-2 py-2 sm:py-3 text-base sm:text-lg text-slate-900 dark:text-[#E3E3E3] placeholder:text-slate-400 dark:placeholder:text-[#C4C7C5] custom-scrollbar leading-relaxed font-medium"
+                    className="w-full max-h-[200px] sm:max-h-[250px] min-h-[48px] sm:min-h-[54px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-3 py-3 sm:py-4 text-base sm:text-[17px] text-slate-900 dark:text-[#E3E3E3] placeholder:text-slate-500 dark:placeholder:text-[#8E8E93] custom-scrollbar leading-relaxed font-medium"
                     rows={1}
                     readOnly={isRecording || isTranscribing}
                     disabled={isLoading}
@@ -770,7 +770,7 @@ export const ChatInput = memo(
                       />
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-slate-500 dark:text-[#C4C7C5] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-[#E3E3E3] transition-all"
+                        className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-slate-500 dark:text-[#C4C7C5] hover:bg-black/5 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-all"
                         title="Attach file"
                       >
                         <Plus className="w-6 h-6" />
@@ -779,7 +779,7 @@ export const ChatInput = memo(
                       <div className="relative options-menu-container">
                         <button
                           onClick={() => setIsOptionsOpen(!isOptionsOpen)}
-                          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all ${isOptionsOpen || isImageMode || thinkingMode || searchGrounding ? "bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-[#E3E3E3] shadow-lg" : "text-slate-500 dark:text-[#C4C7C5] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-[#E3E3E3]"}`}
+                          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all ${isOptionsOpen || isImageMode || thinkingMode || searchGrounding ? "bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-[#E3E3E3] shadow-lg" : "text-slate-500 dark:text-[#C4C7C5] hover:bg-black/5 dark:hover:bg-white/10 hover:text-black dark:hover:text-white"}`}
                         >
                           <SlidersHorizontal className="w-5 h-5" />
                         </button>
@@ -790,7 +790,7 @@ export const ChatInput = memo(
                               initial={{ opacity: 0, y: 10, scale: 0.95 }}
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                              className="absolute bottom-[calc(100%+10px)] sm:bottom-[calc(100%+14px)] left-0 bg-white dark:bg-[#1E1F20] border border-slate-200 dark:border-white/10 rounded-2xl p-3 min-w-[200px] sm:min-w-[250px] z-[999] flex flex-col gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+                              className="absolute bottom-[calc(100%+10px)] sm:bottom-[calc(100%+14px)] left-0 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-3xl border border-black/5 dark:border-white/10 rounded-2xl p-3 min-w-[200px] sm:min-w-[250px] z-[999] flex flex-col gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
                             >
                               <div className="px-2 py-1 text-[0.7rem] font-black text-slate-400 dark:text-white/50 uppercase tracking-[0.2em]">
                                 Advanced Core
@@ -926,7 +926,7 @@ export const ChatInput = memo(
                                 ? `scale(${1 + audioVolume * 0.1})`
                                 : undefined,
                             }}
-                            className={`mic-button-trigger w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all overflow-hidden ${isRecording ? "bg-rose-500/20 text-rose-500" : "text-slate-500 dark:text-[#C4C7C5] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-[#E3E3E3]"}`}
+                            className={`mic-button-trigger w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all overflow-hidden ${isRecording ? "bg-rose-500/20 text-rose-500" : "text-slate-500 dark:text-[#C4C7C5] hover:bg-black/5 dark:hover:bg-white/10 hover:text-black dark:hover:text-white"}`}
                           >
                             {isTranscribing ? (
                               <Loader2 className="w-5 h-5 animate-spin" />
@@ -943,7 +943,7 @@ export const ChatInput = memo(
                         {isLoading ? (
                           <button
                             onClick={onStopGeneration}
-                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 border border-rose-400/50 group"
+                            className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-300 bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 border border-rose-400/50 group"
                             title="Stop Generation"
                           >
                             <div className="w-6 h-6 rounded-full border-2 border-rose-400 flex items-center justify-center group-hover:scale-110 transition-transform bg-rose-400/10">
