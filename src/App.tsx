@@ -409,19 +409,18 @@ export default function App() {
           <div className="screen-flash-overlay" style={{ opacity: awakening.phase === 'shockwave' ? undefined : 0, animation: awakening.phase === 'shockwave' ? 'screen-flash 3s ease-out forwards' : 'none' }} />
           
           {awakening.phase === 'shockwave' && (
-            <>
-              <div className="shockwave-core" style={{ left: '50%', top: '35%' }} />
-              <div className="rgb-shockwave rgb-shockwave-1" style={{ left: '50%', top: '35%' }} />
-              <div className="rgb-shockwave rgb-shockwave-2" style={{ left: '50%', top: '35%' }} />
-              <div className="rgb-shockwave rgb-shockwave-3" style={{ left: '50%', top: '35%' }} />
-              <div className="rgb-shockwave rgb-shockwave-glitch" style={{ left: '50%', top: '35%' }} />
-              <div className="light-streak" style={{ left: '50%', top: '35%' }} />
-              <div className="particle-burst" style={{ left: '50%', top: '35%' }}>
-                {[...Array(16)].map((_, i) => (
-                  <div key={i} className="particle" style={{ '--angle': `${i * 22.5}deg` } as any} />
-                ))}
-              </div>
-            </>
+            <div className="absolute inset-0 z-50 overflow-hidden bg-black/90 backdrop-blur-3xl animate-in fade-in duration-500">
+              <video
+                src="https://file.garden/aaZ8z-HZC2m4M4bB/231792.mp4"
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-100"
+                style={{ filter: 'contrast(1.2) brightness(1.2)' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80 pointer-events-none" />
+            </div>
           )}
 
           <div 
