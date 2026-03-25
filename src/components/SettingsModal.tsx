@@ -153,7 +153,7 @@ const SettingItem = React.memo(({ icon: Icon, label, value, subLabel, onClick, c
   return (
     <motion.div 
       whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.03)" }}
-      whileTap={onClick ? { scale: 0.995 } : {}}
+      whileTap={onClick ? { scale: 0.985 } : {}}
       onClick={onClick}
       className={`flex items-center justify-between px-4 py-3.5 sm:py-4 transition-colors ${onClick ? 'cursor-pointer' : ''} ${!noBorder ? (isDark ? 'border-b border-white/[0.05]' : 'border-b border-black/[0.05]') : ''} `}
     >
@@ -244,11 +244,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
 
           {/* Modal Container */}
           <motion.div 
-            initial={{ opacity: 0, y: 10, scale: 0.99 }}
+            initial={{ opacity: 0, y: 40, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.99 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`w-full h-full flex flex-col overflow-hidden relative z-10 shadow-2xl transform-gpu will-change-transform ${theme === 'dark' || isAwakened ? "bg-black/60 backdrop-blur-3xl shadow-2xl ring-1 ring-white/10 text-white" : "bg-white/60 backdrop-blur-3xl shadow-2xl ring-1 ring-black/10 text-black"}`}
+            exit={{ opacity: 0, y: 40, scale: 0.96 }}
+            transition={{ type: "spring", damping: 30, stiffness: 400, mass: 0.8 }}
+            className={`w-full h-full flex flex-col overflow-hidden relative z-10 shadow-2xl transform-gpu will-change-transform ${theme === 'dark' || isAwakened ? "bg-black/60 backdrop-blur-3xl shadow-2xl ring-1 ring-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] text-white" : "bg-white/60 backdrop-blur-3xl shadow-2xl ring-1 ring-black/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] text-black"}`}
           >
             
             {/* Header */}

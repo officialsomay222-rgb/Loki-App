@@ -114,9 +114,6 @@ export default function App() {
   const inputRef = useRef<ChatInputHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const lastScrollY = useRef(0);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -540,7 +537,7 @@ export default function App() {
                       ? isAwakened 
                         ? 'bg-cyan-500/20 text-white shadow-[0_0_20px_rgba(0,242,255,0.15)] border border-cyan-500/40'
                         : 'bg-slate-200/60 dark:bg-[#1E1F20] text-slate-900 dark:text-white font-medium' 
-                      : `hover:bg-slate-100/80 dark:hover:bg-white/5 border border-transparent ${isAwakened ? 'text-slate-300 hover:text-white' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'}`
+                      : `hover:bg-slate-100/80 dark:hover:bg-white/5 border border-transparent ${isAwakened ? 'text-slate-400 hover:text-white' : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'}`
                   }`}
                 >
                   {currentSessionId === session.id && (
@@ -548,7 +545,7 @@ export default function App() {
                   )}
                   <div className="flex items-center gap-3 overflow-hidden">
                     <MessageSquare className={`w-4 h-4 shrink-0 transition-colors ${currentSessionId === session.id ? 'text-cyan-600 dark:text-[#00f2ff]' : isAwakened ? 'text-slate-400 group-hover:text-cyan-400' : 'text-slate-400 dark:text-[#6b6b80] group-hover:text-cyan-500'}`} />
-                    <div className="truncate text-sm font-semibold tracking-tight">
+                    <div className="flex-1 min-w-0 truncate text-sm font-semibold tracking-tight text-left">
                       {session.title}
                     </div>
                   </div>
@@ -614,7 +611,7 @@ export default function App() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0 relative h-full">
           {/* Header */}
-          <header className={`h-16 sm:h-20 flex items-center justify-between px-3 sm:px-8 glass-panel premium-shadow !border-t-0 !border-l-0 !border-r-0 shrink-0 transition-all duration-500 z-20 ${isHeaderVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 absolute w-full pointer-events-none'} ${isAwakened ? "bg-[#050b14]/80 border-b border-cyan-500/20 shadow-[0_4px_30px_rgba(0,242,255,0.1)] backdrop-blur-xl" : "bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-slate-200 dark:border-white/5"}`}>
+          <header className={`h-16 sm:h-20 flex items-center justify-between px-3 sm:px-8 glass-panel premium-shadow !border-t-0 !border-l-0 !border-r-0 shrink-0 transition-all duration-500 z-20  ${isAwakened ? "bg-[#050b14]/80 border-b border-cyan-500/20 shadow-[0_4px_30px_rgba(0,242,255,0.1)] backdrop-blur-xl" : "bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-slate-200 dark:border-white/5"}`}>
             <div className="flex items-center gap-2 sm:gap-4 flex-1">
               {!isSidebarOpen && (
                 <button 
@@ -672,15 +669,7 @@ export default function App() {
           {/* Chat Area - Scrollable */}
           <div 
             ref={scrollContainerRef}
-            onScroll={(e) => {
-              const currentScrollY = e.currentTarget.scrollTop;
-              if (currentScrollY > lastScrollY.current + 20 && currentScrollY > 100) {
-                setIsHeaderVisible(false);
-              } else if (currentScrollY < lastScrollY.current - 20 || currentScrollY < 50) {
-                setIsHeaderVisible(true);
-              }
-              lastScrollY.current = currentScrollY;
-            }}
+
             className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar relative w-full transform-gpu overscroll-contain"
           >
             <div className={`w-full ${appWidthClass} mx-auto px-3 sm:px-6 min-h-full flex flex-col ${(!currentSession || currentSession.messages.length === 0) ? 'justify-center items-center py-10' : 'pt-4 space-y-6 sm:space-y-8'}`}>
