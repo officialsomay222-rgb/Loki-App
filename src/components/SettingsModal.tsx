@@ -5,7 +5,7 @@ import {
   Shield, Database, LogOut, Trash2, Download, ChevronDown, ChevronRight, 
   MessageSquare, Bell, History, Info, HelpCircle, FileText, Lock, Eye, 
   MousePointer2, Smartphone, Moon, Sun, Cloud, Keyboard, XCircle, CheckCircle, 
-  Circle, Maximize, Minimize, Square, Box, Palette, Droplets, Wind, Activity 
+  Circle, Maximize, Minimize, Square, Box, Palette, Droplets, Wind, Activity, Send, ArrowRight, Rocket
 } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 
@@ -196,6 +196,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
     appWidth, setAppWidth,
     glowIntensity, setGlowIntensity,
     isAwakened, setIsAwakened,
+    effectInputBox, setEffectInputBox,
+    effectMessageBubbles, setEffectMessageBubbles,
+    effectSidebar, setEffectSidebar,
+    effectBackground, setEffectBackground,
+    effectAvatar, setEffectAvatar,
+    sidebarPosition, setSidebarPosition,
+    chatAlignment, setChatAlignment,
+    blurIntensity, setBlurIntensity,
+    timestampFormat, setTimestampFormat,
+    soundTheme, setSoundTheme,
+    codeTheme, setCodeTheme,
+    avatarShape, setAvatarShape,
+    messageShadow, setMessageShadow,
+    sendButtonIcon, setSendButtonIcon,
     resetSettings
   } = useSettings();
 
@@ -374,6 +388,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                     type="toggle"
                     checked={soundEnabled}
                     onChange={setSoundEnabled}
+                  />
+                  <SettingItem 
+                    icon={Volume2} 
+                    label="Sound Theme" 
+                    type="select"
+                    value={soundTheme}
+                    onChange={setSoundTheme}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: 'Sci-Fi', value: 'sci-fi', icon: Zap },
+                      { label: 'Minimal', value: 'minimal', icon: Circle },
+                      { label: 'Retro', value: 'retro', icon: Square }
+                    ]}
                     noBorder
                   />
                 </SettingSection>
@@ -458,6 +485,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                 <SettingSection title="Visuals" delay={0.35}>
                   <SettingItem 
                     icon={Layout} 
+                    label="Sidebar Position" 
+                    type="select"
+                    value={sidebarPosition}
+                    onChange={setSidebarPosition}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: 'Left', value: 'left', icon: Layout },
+                      { label: 'Right', value: 'right', icon: Layout }
+                    ]}
+                  />
+                  <SettingItem 
+                    icon={Layout} 
+                    label="Chat Alignment" 
+                    type="select"
+                    value={chatAlignment}
+                    onChange={setChatAlignment}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: 'Standard', value: 'standard', icon: Layout },
+                      { label: 'Left Aligned', value: 'left', icon: Layout }
+                    ]}
+                  />
+                  <SettingItem 
+                    icon={Droplets} 
+                    label="Glass Blur Intensity" 
+                    type="select"
+                    value={blurIntensity}
+                    onChange={setBlurIntensity}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: 'None', value: 'none', icon: Circle },
+                      { label: 'Low', value: 'low', icon: Cloud },
+                      { label: 'Medium', value: 'medium', icon: Cloud },
+                      { label: 'High', value: 'high', icon: Cloud }
+                    ]}
+                  />
+                  <SettingItem 
+                    icon={Layout} 
                     label="Message Density" 
                     type="select"
                     value={messageDensity}
@@ -503,11 +568,109 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                     onChange={setShowAvatars}
                   />
                   <SettingItem 
+                    icon={User} 
+                    label="Avatar Shape" 
+                    type="select"
+                    value={avatarShape}
+                    onChange={setAvatarShape}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: 'Circle', value: 'circle', icon: Circle },
+                      { label: 'Square', value: 'square', icon: Square },
+                      { label: 'Rounded', value: 'rounded', icon: Box }
+                    ]}
+                  />
+                  <SettingItem 
+                    icon={Box} 
+                    label="Message Shadow" 
+                    type="select"
+                    value={messageShadow}
+                    onChange={setMessageShadow}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: 'None', value: 'none', icon: Circle },
+                      { label: 'Small', value: 'sm', icon: Cloud },
+                      { label: 'Medium', value: 'md', icon: Cloud },
+                      { label: 'Large', value: 'lg', icon: Cloud }
+                    ]}
+                  />
+                  <SettingItem 
+                    icon={Send} 
+                    label="Send Button Icon" 
+                    type="select"
+                    value={sendButtonIcon}
+                    onChange={setSendButtonIcon}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: 'Send', value: 'send', icon: Send },
+                      { label: 'Arrow', value: 'arrow', icon: ArrowRight },
+                      { label: 'Rocket', value: 'rocket', icon: Rocket }
+                    ]}
+                  />
+                  <SettingItem 
+                    icon={Box} 
+                    label="Code Block Theme" 
+                    type="select"
+                    value={codeTheme}
+                    onChange={setCodeTheme}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: 'Default', value: 'default', icon: Box },
+                      { label: 'Matrix', value: 'matrix', icon: Box },
+                      { label: 'Neon', value: 'neon', icon: Box }
+                    ]}
+                  />
+                  <SettingItem 
                     icon={Zap} 
                     label="Animations" 
                     type="toggle"
                     checked={messageAnimation}
                     onChange={setMessageAnimation}
+                    noBorder
+                  />
+                </SettingSection>
+
+                {/* Advanced Effects */}
+                <SettingSection title="Advanced Effects (Awakened UI)" delay={0.38}>
+                  <SettingItem 
+                    icon={Sparkles} 
+                    label="Input Box Glow" 
+                    subLabel="Awakened styling for chat input"
+                    type="toggle"
+                    checked={effectInputBox}
+                    onChange={setEffectInputBox}
+                  />
+                  <SettingItem 
+                    icon={MessageSquare} 
+                    label="Message Bubbles" 
+                    subLabel="Awakened styling for chat messages"
+                    type="toggle"
+                    checked={effectMessageBubbles}
+                    onChange={setEffectMessageBubbles}
+                  />
+                  <SettingItem 
+                    icon={Layout} 
+                    label="Sidebar Effects" 
+                    subLabel="Awakened styling for sidebar items"
+                    type="toggle"
+                    checked={effectSidebar}
+                    onChange={setEffectSidebar}
+                  />
+                  <SettingItem 
+                    icon={Monitor} 
+                    label="Background Particles" 
+                    subLabel="Awakened background animations"
+                    type="toggle"
+                    checked={effectBackground}
+                    onChange={setEffectBackground}
+                  />
+                  <SettingItem 
+                    icon={User} 
+                    label="Avatar Aura" 
+                    subLabel="Spinning aura around avatars"
+                    type="toggle"
+                    checked={effectAvatar}
+                    onChange={setEffectAvatar}
                     noBorder
                   />
                 </SettingSection>
@@ -548,6 +711,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                       { label: 'Short', value: 'short', icon: Minimize },
                       { label: 'Balanced', value: 'balanced', icon: Activity },
                       { label: 'Detailed', value: 'detailed', icon: Maximize }
+                    ]}
+                  />
+                  <SettingItem 
+                    icon={History} 
+                    label="Timestamp Format" 
+                    type="select"
+                    value={timestampFormat}
+                    onChange={setTimestampFormat}
+                    setShowPicker={setShowPicker}
+                    options={[
+                      { label: '12-Hour', value: '12h', icon: History },
+                      { label: '24-Hour', value: '24h', icon: History },
+                      { label: 'Hidden', value: 'hidden', icon: XCircle }
                     ]}
                     noBorder
                   />

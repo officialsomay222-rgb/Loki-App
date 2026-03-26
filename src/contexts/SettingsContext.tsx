@@ -16,6 +16,18 @@ export type BorderRadius = 'sharp' | 'rounded' | 'pill';
 export type TextReveal = 'none' | 'fade' | 'typewriter';
 export type AppWidth = 'narrow' | 'normal' | 'wide';
 export type GlowIntensity = 'low' | 'medium' | 'high';
+export type SidebarPosition = 'left' | 'right';
+export type ChatAlignment = 'standard' | 'left';
+export type BlurIntensity = 'none' | 'low' | 'medium' | 'high';
+export type TimestampFormat = '12h' | '24h' | 'hidden';
+export type SoundTheme = 'sci-fi' | 'minimal' | 'retro';
+export type CodeTheme = 'default' | 'matrix' | 'neon';
+export type AvatarShape = 'circle' | 'square' | 'rounded';
+export type MessageShadow = 'none' | 'sm' | 'md' | 'lg';
+export type SendButtonIcon = 'send' | 'arrow' | 'rocket';
+export type MessageHoverEffect = 'none' | 'lift' | 'glow';
+export type SidebarTheme = 'default' | 'glass' | 'solid';
+export type InputBoxStyle = 'default' | 'floating' | 'minimal';
 
 interface SettingsState {
   theme: Theme;
@@ -50,6 +62,23 @@ interface SettingsState {
   appWidth: AppWidth;
   glowIntensity: GlowIntensity;
   isAwakened: boolean;
+  effectInputBox: boolean;
+  effectMessageBubbles: boolean;
+  effectSidebar: boolean;
+  effectBackground: boolean;
+  effectAvatar: boolean;
+  sidebarPosition: SidebarPosition;
+  chatAlignment: ChatAlignment;
+  blurIntensity: BlurIntensity;
+  timestampFormat: TimestampFormat;
+  soundTheme: SoundTheme;
+  codeTheme: CodeTheme;
+  avatarShape: AvatarShape;
+  messageShadow: MessageShadow;
+  sendButtonIcon: SendButtonIcon;
+  messageHoverEffect: MessageHoverEffect;
+  sidebarTheme: SidebarTheme;
+  inputBoxStyle: InputBoxStyle;
   setTheme: (theme: Theme) => void;
   setBgStyle: (bg: BgStyle) => void;
   setCommanderName: (name: string) => void;
@@ -82,10 +111,27 @@ interface SettingsState {
   setAppWidth: (width: AppWidth) => void;
   setGlowIntensity: (intensity: GlowIntensity) => void;
   setIsAwakened: (isAwakened: boolean) => void;
+  setEffectInputBox: (enabled: boolean) => void;
+  setEffectMessageBubbles: (enabled: boolean) => void;
+  setEffectSidebar: (enabled: boolean) => void;
+  setEffectBackground: (enabled: boolean) => void;
+  setEffectAvatar: (enabled: boolean) => void;
+  setSidebarPosition: (pos: SidebarPosition) => void;
+  setChatAlignment: (align: ChatAlignment) => void;
+  setBlurIntensity: (intensity: BlurIntensity) => void;
+  setTimestampFormat: (format: TimestampFormat) => void;
+  setSoundTheme: (theme: SoundTheme) => void;
+  setCodeTheme: (theme: CodeTheme) => void;
+  setAvatarShape: (shape: AvatarShape) => void;
+  setMessageShadow: (shadow: MessageShadow) => void;
+  setSendButtonIcon: (icon: SendButtonIcon) => void;
+  setMessageHoverEffect: (effect: MessageHoverEffect) => void;
+  setSidebarTheme: (theme: SidebarTheme) => void;
+  setInputBoxStyle: (style: InputBoxStyle) => void;
   resetSettings: () => void;
 }
 
-const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setCommanderName' | 'setAvatarUrl' | 'setModelMode' | 'setTone' | 'setSystemInstruction' | 'setTemperature' | 'setTopP' | 'setTopK' | 'setEnterToSend' | 'setBubbleStyle' | 'setFontSize' | 'setFontStyle' | 'setSoundEnabled' | 'setMessageAnimation' | 'setAutoScroll' | 'setTypingSpeed' | 'setShowAvatars' | 'setResponseLength' | 'setAccentColor' | 'setMessageDensity' | 'setThinkingMode' | 'setSearchGrounding' | 'setImageSize' | 'setLiveAudioEnabled' | 'setAnimationSpeed' | 'setBorderRadius' | 'setTextReveal' | 'setAppWidth' | 'setGlowIntensity' | 'setIsAwakened' | 'resetSettings'> = {
+const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setCommanderName' | 'setAvatarUrl' | 'setModelMode' | 'setTone' | 'setSystemInstruction' | 'setTemperature' | 'setTopP' | 'setTopK' | 'setEnterToSend' | 'setBubbleStyle' | 'setFontSize' | 'setFontStyle' | 'setSoundEnabled' | 'setMessageAnimation' | 'setAutoScroll' | 'setTypingSpeed' | 'setShowAvatars' | 'setResponseLength' | 'setAccentColor' | 'setMessageDensity' | 'setThinkingMode' | 'setSearchGrounding' | 'setImageSize' | 'setLiveAudioEnabled' | 'setAnimationSpeed' | 'setBorderRadius' | 'setTextReveal' | 'setAppWidth' | 'setGlowIntensity' | 'setIsAwakened' | 'setEffectInputBox' | 'setEffectMessageBubbles' | 'setEffectSidebar' | 'setEffectBackground' | 'setEffectAvatar' | 'setSidebarPosition' | 'setChatAlignment' | 'setBlurIntensity' | 'setTimestampFormat' | 'setSoundTheme' | 'setCodeTheme' | 'setAvatarShape' | 'setMessageShadow' | 'setSendButtonIcon' | 'setMessageHoverEffect' | 'setSidebarTheme' | 'setInputBoxStyle' | 'resetSettings'> = {
   theme: 'dark',
   bgStyle: 'nebula',
   commanderName: 'Commander',
@@ -118,6 +164,23 @@ const defaultSettings: Omit<SettingsState, 'setTheme' | 'setBgStyle' | 'setComma
   appWidth: 'normal',
   glowIntensity: 'medium',
   isAwakened: false,
+  effectInputBox: false,
+  effectMessageBubbles: false,
+  effectSidebar: false,
+  effectBackground: false,
+  effectAvatar: false,
+  sidebarPosition: 'left',
+  chatAlignment: 'standard',
+  blurIntensity: 'medium',
+  timestampFormat: '12h',
+  soundTheme: 'sci-fi',
+  codeTheme: 'default',
+  avatarShape: 'circle',
+  messageShadow: 'md',
+  sendButtonIcon: 'send',
+  messageHoverEffect: 'none',
+  sidebarTheme: 'glass',
+  inputBoxStyle: 'default',
 };
 
 const SettingsContext = createContext<SettingsState | undefined>(undefined);
@@ -155,6 +218,23 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [appWidth, setAppWidth] = useState<AppWidth>(defaultSettings.appWidth);
   const [glowIntensity, setGlowIntensity] = useState<GlowIntensity>(defaultSettings.glowIntensity);
   const [isAwakened, setIsAwakened] = useState<boolean>(defaultSettings.isAwakened);
+  const [effectInputBox, setEffectInputBox] = useState<boolean>(defaultSettings.effectInputBox);
+  const [effectMessageBubbles, setEffectMessageBubbles] = useState<boolean>(defaultSettings.effectMessageBubbles);
+  const [effectSidebar, setEffectSidebar] = useState<boolean>(defaultSettings.effectSidebar);
+  const [effectBackground, setEffectBackground] = useState<boolean>(defaultSettings.effectBackground);
+  const [effectAvatar, setEffectAvatar] = useState<boolean>(defaultSettings.effectAvatar);
+  const [sidebarPosition, setSidebarPosition] = useState<SidebarPosition>(defaultSettings.sidebarPosition);
+  const [chatAlignment, setChatAlignment] = useState<ChatAlignment>(defaultSettings.chatAlignment);
+  const [blurIntensity, setBlurIntensity] = useState<BlurIntensity>(defaultSettings.blurIntensity);
+  const [timestampFormat, setTimestampFormat] = useState<TimestampFormat>(defaultSettings.timestampFormat);
+  const [soundTheme, setSoundTheme] = useState<SoundTheme>(defaultSettings.soundTheme);
+  const [codeTheme, setCodeTheme] = useState<CodeTheme>(defaultSettings.codeTheme);
+  const [avatarShape, setAvatarShape] = useState<AvatarShape>(defaultSettings.avatarShape);
+  const [messageShadow, setMessageShadow] = useState<MessageShadow>(defaultSettings.messageShadow);
+  const [sendButtonIcon, setSendButtonIcon] = useState<SendButtonIcon>(defaultSettings.sendButtonIcon);
+  const [messageHoverEffect, setMessageHoverEffect] = useState<MessageHoverEffect>(defaultSettings.messageHoverEffect);
+  const [sidebarTheme, setSidebarTheme] = useState<SidebarTheme>(defaultSettings.sidebarTheme);
+  const [inputBoxStyle, setInputBoxStyle] = useState<InputBoxStyle>(defaultSettings.inputBoxStyle);
 
   const resetSettings = () => {
     setTheme(defaultSettings.theme);
@@ -188,6 +268,23 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setTextReveal(defaultSettings.textReveal);
     setAppWidth(defaultSettings.appWidth);
     setGlowIntensity(defaultSettings.glowIntensity);
+    setEffectInputBox(defaultSettings.effectInputBox);
+    setEffectMessageBubbles(defaultSettings.effectMessageBubbles);
+    setEffectSidebar(defaultSettings.effectSidebar);
+    setEffectBackground(defaultSettings.effectBackground);
+    setEffectAvatar(defaultSettings.effectAvatar);
+    setSidebarPosition(defaultSettings.sidebarPosition);
+    setChatAlignment(defaultSettings.chatAlignment);
+    setBlurIntensity(defaultSettings.blurIntensity);
+    setTimestampFormat(defaultSettings.timestampFormat);
+    setSoundTheme(defaultSettings.soundTheme);
+    setCodeTheme(defaultSettings.codeTheme);
+    setAvatarShape(defaultSettings.avatarShape);
+    setMessageShadow(defaultSettings.messageShadow);
+    setSendButtonIcon(defaultSettings.sendButtonIcon);
+    setMessageHoverEffect(defaultSettings.messageHoverEffect);
+    setSidebarTheme(defaultSettings.sidebarTheme);
+    setInputBoxStyle(defaultSettings.inputBoxStyle);
   };
 
   useEffect(() => {
@@ -233,6 +330,23 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     loadSetting('textReveal', setTextReveal as any);
     loadSetting('appWidth', setAppWidth as any);
     loadSetting('glowIntensity', setGlowIntensity as any);
+    loadSetting('effectInputBox', setEffectInputBox, (val) => val === 'true');
+    loadSetting('effectMessageBubbles', setEffectMessageBubbles, (val) => val === 'true');
+    loadSetting('effectSidebar', setEffectSidebar, (val) => val === 'true');
+    loadSetting('effectBackground', setEffectBackground, (val) => val === 'true');
+    loadSetting('effectAvatar', setEffectAvatar, (val) => val === 'true');
+    loadSetting('sidebarPosition', setSidebarPosition as any);
+    loadSetting('chatAlignment', setChatAlignment as any);
+    loadSetting('blurIntensity', setBlurIntensity as any);
+    loadSetting('timestampFormat', setTimestampFormat as any);
+    loadSetting('soundTheme', setSoundTheme as any);
+    loadSetting('codeTheme', setCodeTheme as any);
+    loadSetting('avatarShape', setAvatarShape as any);
+    loadSetting('messageShadow', setMessageShadow as any);
+    loadSetting('sendButtonIcon', setSendButtonIcon as any);
+    loadSetting('messageHoverEffect', setMessageHoverEffect as any);
+    loadSetting('sidebarTheme', setSidebarTheme as any);
+    loadSetting('inputBoxStyle', setInputBoxStyle as any);
   }, []);
 
   useEffect(() => {
@@ -268,6 +382,23 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('loki_textReveal', textReveal);
       localStorage.setItem('loki_appWidth', appWidth);
       localStorage.setItem('loki_glowIntensity', glowIntensity);
+      localStorage.setItem('loki_effectInputBox', effectInputBox.toString());
+      localStorage.setItem('loki_effectMessageBubbles', effectMessageBubbles.toString());
+      localStorage.setItem('loki_effectSidebar', effectSidebar.toString());
+      localStorage.setItem('loki_effectBackground', effectBackground.toString());
+      localStorage.setItem('loki_effectAvatar', effectAvatar.toString());
+      localStorage.setItem('loki_sidebarPosition', sidebarPosition);
+      localStorage.setItem('loki_chatAlignment', chatAlignment);
+      localStorage.setItem('loki_blurIntensity', blurIntensity);
+      localStorage.setItem('loki_timestampFormat', timestampFormat);
+      localStorage.setItem('loki_soundTheme', soundTheme);
+      localStorage.setItem('loki_codeTheme', codeTheme);
+      localStorage.setItem('loki_avatarShape', avatarShape);
+      localStorage.setItem('loki_messageShadow', messageShadow);
+      localStorage.setItem('loki_sendButtonIcon', sendButtonIcon);
+      localStorage.setItem('loki_messageHoverEffect', messageHoverEffect);
+      localStorage.setItem('loki_sidebarTheme', sidebarTheme);
+      localStorage.setItem('loki_inputBoxStyle', inputBoxStyle);
     } catch (e) {
       console.error('Failed to save settings to localStorage', e);
     }
@@ -288,13 +419,14 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     
     document.documentElement.style.setProperty('--global-radius', radiusVar);
     document.documentElement.style.setProperty('--glow-opacity', glowOpacity);
-  }, [theme, bgStyle, commanderName, avatarUrl, modelMode, tone, systemInstruction, temperature, topP, topK, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity, thinkingMode, searchGrounding, imageSize, liveAudioEnabled, animationSpeed, borderRadius, textReveal, appWidth, glowIntensity, isAwakened]);
+  }, [theme, bgStyle, commanderName, avatarUrl, modelMode, tone, systemInstruction, temperature, topP, topK, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity, thinkingMode, searchGrounding, imageSize, liveAudioEnabled, animationSpeed, borderRadius, textReveal, appWidth, glowIntensity, isAwakened, effectInputBox, effectMessageBubbles, effectSidebar, effectBackground, effectAvatar, sidebarPosition, chatAlignment, blurIntensity, timestampFormat, soundTheme, codeTheme, avatarShape, messageShadow, sendButtonIcon, messageHoverEffect, sidebarTheme, inputBoxStyle]);
 
   return (
     <SettingsContext.Provider value={{
-      theme, bgStyle, commanderName, avatarUrl, modelMode, tone, systemInstruction, temperature, topP, topK, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity, thinkingMode, searchGrounding, imageSize, liveAudioEnabled, animationSpeed, borderRadius, textReveal, appWidth, glowIntensity, isAwakened,
-      setTheme, setBgStyle, setCommanderName, setAvatarUrl, setModelMode, setTone, setSystemInstruction, setTemperature, setTopP, setTopK, setEnterToSend, setBubbleStyle, setFontSize, setFontStyle, setSoundEnabled, setMessageAnimation, setAutoScroll, setTypingSpeed, setShowAvatars, setResponseLength, setAccentColor, setMessageDensity, setThinkingMode, setSearchGrounding, setImageSize, setLiveAudioEnabled, setAnimationSpeed, setBorderRadius, setTextReveal, setAppWidth, setGlowIntensity, setIsAwakened, resetSettings
-    }}>
+      theme, bgStyle, commanderName, avatarUrl, modelMode, tone, systemInstruction, temperature, topP, topK, enterToSend, bubbleStyle, fontSize, fontStyle, soundEnabled, messageAnimation, autoScroll, typingSpeed, showAvatars, responseLength, accentColor, messageDensity, thinkingMode, searchGrounding, imageSize, liveAudioEnabled, animationSpeed, borderRadius, textReveal, appWidth, glowIntensity, isAwakened, effectInputBox, effectMessageBubbles, effectSidebar, effectBackground, effectAvatar, sidebarPosition, chatAlignment, blurIntensity, timestampFormat, soundTheme, codeTheme, avatarShape, messageShadow, sendButtonIcon, messageHoverEffect, sidebarTheme, inputBoxStyle,
+      setTheme, setBgStyle, setCommanderName, setAvatarUrl, setModelMode, setTone, setSystemInstruction, setTemperature, setTopP, setTopK, setEnterToSend, setBubbleStyle, setFontSize, setFontStyle, setSoundEnabled, setMessageAnimation, setAutoScroll, setTypingSpeed, setShowAvatars, setResponseLength, setAccentColor, setMessageDensity, setThinkingMode, setSearchGrounding, setImageSize, setLiveAudioEnabled, setAnimationSpeed, setBorderRadius, setTextReveal, setAppWidth, setGlowIntensity, setIsAwakened, resetSettings,
+      setEffectInputBox, setEffectMessageBubbles, setEffectSidebar, setEffectBackground, setEffectAvatar, setSidebarPosition, setChatAlignment, setBlurIntensity, setTimestampFormat, setSoundTheme, setCodeTheme, setAvatarShape, setMessageShadow, setSendButtonIcon
+    } as any}>
       {children}
     </SettingsContext.Provider>
   );

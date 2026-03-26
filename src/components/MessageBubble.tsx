@@ -28,12 +28,22 @@ import { Message } from "../contexts/ChatContext";
 import { useSmoothStream } from "../hooks/useSmoothStream";
 
 // Extract components to prevent re-creation on every render
-const MarkdownCode = ({ node, inline, className, children, ...props }: any) => {
+const MarkdownCode = ({ node, inline, className, children, codeTheme = 'default', ...props }: any) => {
   const match = /language-(\w+)/.exec(className || "");
+  
+  const themeClasses = {
+    default: "bg-black/80 text-slate-400 border-white/5",
+    matrix: "bg-[#0d1a0d] text-[#00ff00] border-[#00ff00]/20",
+    neon: "bg-[#0a0a1a] text-[#00f0ff] border-[#00f0ff]/20"
+  };
+  
+  const headerClass = themeClasses[codeTheme as keyof typeof themeClasses] || themeClasses.default;
+  const bgClass = codeTheme === 'matrix' ? '#0d1a0d' : codeTheme === 'neon' ? '#0a0a1a' : '#0d0d12';
+
   return !inline && match ? (
-    <div className="rounded-md overflow-hidden my-4 border border-white/10 shadow-lg">
-      <div className="bg-black/80 text-xs text-slate-400 px-4 py-1.5 flex justify-between items-center border-b border-white/5">
-        <span>{match[1]}</span>
+    <div className={`rounded-md overflow-hidden my-4 border shadow-lg ${codeTheme === 'matrix' ? 'border-[#00ff00]/20' : codeTheme === 'neon' ? 'border-[#00f0ff]/20' : 'border-white/10'}`}>
+      <div className={`text-xs px-4 py-1.5 flex justify-between items-center border-b ${headerClass}`}>
+        <span className={codeTheme === 'matrix' || codeTheme === 'neon' ? 'font-bold tracking-wider' : ''}>{match[1]}</span>
       </div>
       <SyntaxHighlighter
         {...props}
@@ -41,13 +51,13 @@ const MarkdownCode = ({ node, inline, className, children, ...props }: any) => {
         style={vscDarkPlus}
         language={match[1]}
         PreTag="div"
-        customStyle={{ margin: 0, background: "#0d0d12", padding: "1rem" }}
+        customStyle={{ margin: 0, background: bgClass, padding: "1rem" }}
       />
     </div>
   ) : (
     <code
       {...props}
-      className={`${className} bg-black/20 dark:bg-white/10 px-1.5 py-0.5 rounded-md text-white font-mono text-sm`}
+      className={`${className} ${codeTheme === 'matrix' ? 'bg-[#00ff00]/10 text-[#00ff00]' : codeTheme === 'neon' ? 'bg-[#00f0ff]/10 text-[#00f0ff]' : 'bg-black/20 dark:bg-white/10 text-white'} px-1.5 py-0.5 rounded-md font-mono text-sm`}
     >
       {children}
     </code>
@@ -215,10 +225,13 @@ const MarkdownImage = ({ node, ...props }: any) => {
 const getMarkdownComponents = (
   textReveal: TextReveal,
   animationSpeed: AnimationSpeed,
+  codeTheme: 'default' | 'matrix' | 'neon' = 'default'
 ) => {
+  const CodeComponent = (props: any) => <MarkdownCode {...props} codeTheme={codeTheme} />;
+
   if (textReveal === "none") {
     return {
-      code: MarkdownCode,
+      code: CodeComponent,
       img: MarkdownImage,
       p({ node, children }: any) {
         return <div className="mb-4 last:mb-0 leading-relaxed">{children}</div>;
@@ -243,7 +256,7 @@ const getMarkdownComponents = (
   const isTypewriter = textReveal === "typewriter";
 
   return {
-    code: MarkdownCode,
+    code: CodeComponent,
     img: MarkdownImage,
     p({ node, children }: any) {
       return (
@@ -334,14 +347,16 @@ const MemoizedMarkdown = memo(
     content,
     textReveal,
     animationSpeed,
+    codeTheme,
   }: {
     content: string;
     textReveal: TextReveal;
     animationSpeed: AnimationSpeed;
+    codeTheme: 'default' | 'matrix' | 'neon';
   }) => {
     const components = useMemo(
-      () => getMarkdownComponents(textReveal, animationSpeed),
-      [textReveal, animationSpeed],
+      () => getMarkdownComponents(textReveal, animationSpeed, codeTheme),
+      [textReveal, animationSpeed, codeTheme],
     );
     const displayedContent = useSmoothStream(
       content,
@@ -591,6 +606,13 @@ interface MessageBubbleProps {
   accentColor: AccentColor;
   messageDensity: MessageDensity;
   showAvatars: boolean;
+  isAwakened?: boolean;
+  chatAlignment?: 'standard' | 'left';
+  blurIntensity?: 'none' | 'low' | 'medium' | 'high';
+  timestampFormat?: '12h' | '24h' | 'hidden';
+  codeTheme?: 'default' | 'matrix' | 'neon';
+  avatarShape?: 'circle' | 'square' | 'rounded';
+  messageShadow?: 'none' | 'sm' | 'md' | 'lg';
 }
 
 export const MessageBubble = memo(
@@ -611,6 +633,13 @@ export const MessageBubble = memo(
     accentColor,
     messageDensity,
     showAvatars,
+    isAwakened,
+    chatAlignment = 'standard',
+    blurIntensity = 'medium',
+    timestampFormat = '12h',
+    codeTheme = 'default',
+    avatarShape = 'circle',
+    messageShadow = 'md',
   }: MessageBubbleProps) => {
     const fontSizeClass =
       fontSize === "small"
@@ -634,6 +663,12 @@ export const MessageBubble = memo(
     const bgAccentClass = 'bg-white/10';
     const borderAccentClass = 'border-white/20';
 
+    const blurClass = blurIntensity === 'none' ? '' : blurIntensity === 'low' ? 'backdrop-blur-sm' : blurIntensity === 'high' ? 'backdrop-blur-xl' : 'backdrop-blur-md';
+    const alignmentClass = chatAlignment === 'left' ? 'items-start' : 'items-end';
+
+    const avatarShapeClass = avatarShape === 'circle' ? 'rounded-full' : avatarShape === 'square' ? 'rounded-none' : 'rounded-md';
+    const shadowClass = messageShadow === 'none' ? 'shadow-none' : messageShadow === 'sm' ? 'shadow-sm hover:shadow-md' : messageShadow === 'md' ? 'shadow-md hover:shadow-lg' : 'shadow-lg hover:shadow-xl';
+
     if (message.role === "model") {
       return (
         <motion.div
@@ -653,9 +688,11 @@ export const MessageBubble = memo(
               <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase font-mono">
                 Loki Prime
               </span>
-              <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 dark:text-slate-500 opacity-60">
-                {formatDate(message.timestamp)}
-              </span>
+              {timestampFormat !== 'hidden' && (
+                <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 dark:text-slate-500 opacity-60">
+                  {timestampFormat === '24h' ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : formatDate(message.timestamp)}
+                </span>
+              )}
             {!message.content && !message.audioUrl && (
               <span className={`text-[9px] sm:text-[10px] font-mono ${accentClass} animate-pulse`}>
                 {message.isImage ? "GENERATING..." : "THINKING..."}
@@ -715,6 +752,7 @@ export const MessageBubble = memo(
                       content={message.content}
                       textReveal={textReveal}
                       animationSpeed={animationSpeed}
+                      codeTheme={codeTheme}
                     />
                   )
                 ) : message.isImage ? (
@@ -774,23 +812,25 @@ export const MessageBubble = memo(
         initial={messageAnimation ? { opacity: 0, y: 20, scale: 0.95 } : false}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.8 }}
-        className={`flex justify-end w-full px-2 sm:px-4 gpu-accelerate`}
+        className={`flex ${chatAlignment === 'left' ? 'justify-start' : 'justify-end'} w-full px-2 sm:px-4 gpu-accelerate`}
       >
-        <div className={`flex flex-col ${gapClass} max-w-[95%] sm:max-w-[85%] items-end`}>
-          <div className="flex items-center gap-2 px-1.5">
+        <div className={`flex flex-col ${gapClass} max-w-[95%] sm:max-w-[85%] ${alignmentClass}`}>
+          <div className={`flex items-center gap-2 px-1.5 ${chatAlignment === 'left' ? 'flex-row-reverse' : ''}`}>
             <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-slate-500 dark:text-[#888] uppercase">
               {commanderName}
             </span>
-            <span className="text-[8px] sm:text-[9px] font-mono text-slate-400 dark:text-[#6b6b80]">
-              {formatDate(message.timestamp)}
-            </span>
+            {timestampFormat !== 'hidden' && (
+              <span className="text-[8px] sm:text-[9px] font-mono text-slate-400 dark:text-[#6b6b80]">
+                {timestampFormat === '24h' ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : formatDate(message.timestamp)}
+              </span>
+            )}
             {message.status === "pending" && (
               <span className={`text-[8px] sm:text-[9px] font-mono ${accentClass} animate-pulse`}>
                 PENDING
               </span>
             )}
             {showAvatars && (
-              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center shrink-0 ml-1 overflow-hidden border border-slate-300 dark:border-slate-700">
+              <div className={`w-5 h-5 sm:w-6 sm:h-6 ${avatarShapeClass} bg-slate-200 dark:bg-slate-800 flex items-center justify-center shrink-0 ${chatAlignment === 'left' ? 'mr-1' : 'ml-1'} overflow-hidden border border-slate-300 dark:border-slate-700`}>
                 {avatarUrl ? (
                   <img src={avatarUrl} alt={commanderName} className="w-full h-full object-cover" />
                 ) : (
@@ -804,10 +844,10 @@ export const MessageBubble = memo(
 
           <div className="relative group w-full">
             <div
-              className={`relative group/bubble content-auto transition-all duration-500 ${bubblePadding} backdrop-blur-2xl border shadow-lg hover:shadow-xl overflow-hidden ${
+              className={`relative group/bubble content-auto transition-all duration-500 ${bubblePadding} ${blurClass} border ${shadowClass} overflow-hidden ${
                 bubbleStyle === "glass"
-                  ? "bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 text-slate-900/90 dark:text-white/90 rounded-2xl sm:rounded-3xl rounded-tr-sm"
-                  : "bg-slate-100/40 dark:bg-white/10 border-slate-200/50 dark:border-white/10 text-slate-900/90 dark:text-white/90 rounded-xl sm:rounded-2xl rounded-tr-sm"
+                  ? `bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 text-slate-900/90 dark:text-white/90 rounded-2xl sm:rounded-3xl ${chatAlignment === 'left' ? 'rounded-tl-sm' : 'rounded-tr-sm'}`
+                  : `bg-slate-100/40 dark:bg-white/10 border-slate-200/50 dark:border-white/10 text-slate-900/90 dark:text-white/90 rounded-xl sm:rounded-2xl ${chatAlignment === 'left' ? 'rounded-tl-sm' : 'rounded-tr-sm'}`
               }`}
             >
               {message.audioUrl && (
@@ -895,7 +935,8 @@ export const MessageBubble = memo(
       prevProps.animationSpeed === nextProps.animationSpeed &&
       prevProps.accentColor === nextProps.accentColor &&
       prevProps.messageDensity === nextProps.messageDensity &&
-      prevProps.showAvatars === nextProps.showAvatars
+      prevProps.showAvatars === nextProps.showAvatars &&
+      prevProps.isAwakened === nextProps.isAwakened
     );
   }
 );

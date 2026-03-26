@@ -5,6 +5,7 @@ import { MessageBubble } from './components/MessageBubble';
 import { AwakenedBackground } from './components/AwakenedBackground';
 import { CommandPalette } from './components/CommandPalette';
 import { SettingsModal } from './components/SettingsModal';
+import { AppsModal } from './components/AppsModal';
 import { useSettings } from './contexts/SettingsContext';
 import { useChat } from './contexts/ChatContext';
 import { InfinityLogo, HeaderInfinityLogo } from './components/Logos';
@@ -29,7 +30,7 @@ import {
   RotateCcw,
   Type,
   Volume2,
-  CheckCircle2,
+  Rocket,
   LogOut,
   LogIn
 } from 'lucide-react';
@@ -50,7 +51,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : false);
   
   const isSettingsOpen = activeModal === 'settings';
-  const isTasksOpen = activeModal === 'tasks';
+  const isAppsOpen = activeModal === 'apps';
   const isCommandPaletteOpen = activeModal === 'commands';
 
   const openModal = useCallback((modalName: string) => {
@@ -97,6 +98,19 @@ export default function App() {
     textReveal, setTextReveal,
     appWidth, setAppWidth,
     glowIntensity, setGlowIntensity,
+    effectInputBox,
+    effectMessageBubbles,
+    effectSidebar,
+    effectBackground,
+    effectAvatar,
+    sidebarPosition,
+    chatAlignment,
+    blurIntensity,
+    timestampFormat,
+    soundTheme,
+    codeTheme,
+    avatarShape,
+    messageShadow,
     resetSettings
   } = useSettings();
   const { sessions, currentSessionId, isLoading, createNewSession, deleteSession, deleteMessage, clearAllSessions, clearSessionMessages, setCurrentSessionId, sendMessage, stopGeneration } = useChat();
@@ -332,9 +346,16 @@ export default function App() {
         accentColor={accentColor}
         messageDensity={messageDensity}
         showAvatars={showAvatars}
+        isAwakened={isAwakened || effectMessageBubbles}
+        chatAlignment={chatAlignment}
+        blurIntensity={blurIntensity}
+        timestampFormat={timestampFormat}
+        codeTheme={codeTheme}
+        avatarShape={avatarShape}
+        messageShadow={messageShadow}
       />
     ));
-  }, [currentSession?.messages, isAwakened, commanderName, avatarUrl, copiedId, copyToClipboard, formatDate, bubbleStyle, fontSize, messageAnimation, textReveal, animationSpeed, accentColor, messageDensity, showAvatars, currentSessionId, deleteMessage]);
+  }, [currentSession?.messages, isAwakened, effectMessageBubbles, commanderName, avatarUrl, copiedId, copyToClipboard, formatDate, bubbleStyle, fontSize, messageAnimation, textReveal, animationSpeed, accentColor, messageDensity, showAvatars, currentSessionId, deleteMessage, chatAlignment, blurIntensity, timestampFormat, codeTheme, avatarShape, messageShadow]);
 
   if (isBooting) {
     return (
@@ -386,7 +407,7 @@ export default function App() {
     >
       <CommandPalette isOpen={isCommandPaletteOpen} onClose={closeModal} />
       {/* 1. Background Layer (Fixed, never moves) */}
-      <AwakenedBackground isAwakened={isAwakened} bgStyle={bgStyle} theme={theme} />
+      <AwakenedBackground isAwakened={isAwakened || effectBackground} bgStyle={bgStyle} theme={theme} />
 
       {/* 2. Awakening Overlays */}
       {awakening && (
@@ -420,26 +441,18 @@ export default function App() {
               height: awakening.height,
             } as any}
           >
-             <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-[spin-aura_3s_linear_infinite] bg-cyan-500/50 shadow-[0_0_15px_rgba(0,242,255,0.5)]"></div>
+             <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-spin-aura bg-cyan-500/50 shadow-[0_0_15px_rgba(0,242,255,0.5)]"></div>
              <img src={"https://i.ibb.co/ns3LTFwp/Picsart-26-02-28-11-29-26-443.jpg"} className="absolute inset-0 w-full h-full rounded-full object-cover z-[2] border-2 border-white dark:border-[#08080c]" alt="Commander" />
           </div>
         </div>
       )}
 
-      {/* Tasks Modal */}
-      {isTasksOpen && (
-        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative w-full max-w-md">
-            <button 
-              onClick={closeModal}
-              className="absolute -top-12 right-0 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-            <TaskWidget />
-          </div>
-        </div>
-      )}
+      {/* Apps Modal */}
+      <AppsModal 
+        isOpen={isAppsOpen} 
+        onClose={closeModal} 
+        commanderName={commanderName}
+      />
 
       {/* Settings Modal - Full Screen Refined */}
       <SettingsModal 
@@ -449,8 +462,8 @@ export default function App() {
         onClearAllChats={clearAllSessions}
       />
 
-      {/* 3. Main Content Layer (Flex Column) */}
-      <div className={`flex-1 flex flex-col min-h-0 z-10 relative ${isSidebarOpen ? 'md:pl-72' : ''} transition-all duration-300`}>
+      {/* 3. Main Content Layer (Flex Row/Column) */}
+      <div className={`flex-1 flex min-h-0 z-10 relative ${isSidebarOpen ? (sidebarPosition === 'right' ? 'md:pr-72' : 'md:pl-72') : ''} ${sidebarPosition === 'right' ? 'flex-row-reverse' : 'flex-row'} transition-all duration-300`}>
         {/* Sidebar Overlay for Mobile */}
         <AnimatePresence>
           {isSidebarOpen && (
@@ -468,9 +481,9 @@ export default function App() {
         {/* Sidebar */}
         <motion.div 
           initial={false}
-          animate={{ x: isSidebarOpen ? 0 : '-100%' }}
+          animate={{ x: isSidebarOpen ? 0 : (sidebarPosition === 'right' ? '100%' : '-100%') }}
           transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.5 }}
-          className="fixed inset-y-0 left-0 z-50 w-72 bg-[#f8fafc] dark:bg-[#0a0a0a] shadow-2xl border-y-0 border-l-0 border-r border-slate-200/30 dark:border-white/5 flex flex-col transform-gpu content-auto gpu-accelerate"
+          className={`fixed inset-y-0 ${sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r'} z-50 w-72 bg-[#f8fafc] dark:bg-[#0a0a0a] shadow-2xl border-y-0 border-slate-200/30 dark:border-white/5 flex flex-col transform-gpu content-auto gpu-accelerate`}
         >
           <div className="p-4 flex items-center justify-between border-b border-slate-200/50 dark:border-white/5">
             <div className="flex items-center gap-2 font-montserrat font-bold text-slate-900 dark:text-white">
@@ -515,24 +528,24 @@ export default function App() {
                   }}
                   className={`group relative flex items-center justify-between px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 ${
                     currentSessionId === session.id 
-                      ? isAwakened 
+                      ? (isAwakened || effectSidebar)
                         ? 'bg-cyan-500/20 text-white shadow-[0_0_15px_rgba(0,242,255,0.15)] border border-cyan-500/40'
                         : 'bg-white dark:bg-white/10 text-cyan-700 dark:text-white shadow-md border border-cyan-200/50 dark:border-white/10' 
-                      : `hover:bg-white/50 dark:hover:bg-white/5 border border-transparent ${isAwakened ? 'text-slate-300 hover:text-white' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'}`
+                      : `hover:bg-white/50 dark:hover:bg-white/5 border border-transparent ${(isAwakened || effectSidebar) ? 'text-slate-300 hover:text-white' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'}`
                   }`}
                 >
                   {currentSessionId === session.id && (
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-cyan-500 rounded-r-full shadow-[0_0_10px_rgba(0,242,255,1)]" />
                   )}
                   <div className="flex items-center gap-3 overflow-hidden">
-                    <MessageSquare className={`w-4 h-4 shrink-0 transition-colors ${currentSessionId === session.id ? 'text-cyan-600 dark:text-[#00f2ff]' : isAwakened ? 'text-slate-400 group-hover:text-cyan-400' : 'text-slate-400 dark:text-[#6b6b80] group-hover:text-cyan-500'}`} />
+                    <MessageSquare className={`w-4 h-4 shrink-0 transition-colors ${currentSessionId === session.id ? 'text-cyan-600 dark:text-[#00f2ff]' : (isAwakened || effectSidebar) ? 'text-slate-400 group-hover:text-cyan-400' : 'text-slate-400 dark:text-[#6b6b80] group-hover:text-cyan-500'}`} />
                     <div className="truncate text-sm font-semibold tracking-tight">
                       {session.title}
                     </div>
                   </div>
                   <button 
                     onClick={(e) => handleDeleteSession(e, session.id)}
-                    className={`p-1.5 hover:bg-slate-200 dark:hover:bg-black/50 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 ${isAwakened ? 'text-slate-400 hover:text-red-400' : 'text-slate-400 dark:text-[#6b6b80] hover:text-red-500 dark:hover:text-red-400'}`}
+                    className={`p-1.5 hover:bg-slate-200 dark:hover:bg-black/50 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 ${(isAwakened || effectSidebar) ? 'text-slate-400 hover:text-red-400' : 'text-slate-400 dark:text-[#6b6b80] hover:text-red-500 dark:hover:text-red-400'}`}
                     title="Delete timeline"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -570,11 +583,11 @@ export default function App() {
             <motion.button 
               whileTap={{ scale: 0.97 }}
               whileHover={{ filter: "brightness(1.2)" }}
-              onClick={() => openModal('tasks')}
+              onClick={() => openModal('apps')}
               className="flex items-center gap-3 w-full px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-[#888] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-white/50 dark:hover:bg-white/5 rounded-lg transition-all border border-transparent hover:border-slate-200/50 dark:hover:border-white/5"
             >
-              <CheckCircle2 className="w-4 h-4" />
-              TASK LIST
+              <Rocket className="w-4 h-4" />
+              TRY OUR APPS
             </motion.button>
             <motion.button 
               whileTap={{ scale: 0.97 }}
@@ -635,10 +648,12 @@ export default function App() {
                 title={commanderName}
                 onClick={triggerAwakening}
               >
-                 <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-[spin-aura_3s_linear_infinite]" style={{
-                   background: 'conic-gradient(from 0deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00f0ff, #bd00ff, #ff00ff, #ff0000)',
-                   boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)'
-                 }}></div>
+                 {(isAwakened || effectAvatar) && (
+                   <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-spin-aura" style={{
+                     background: 'conic-gradient(from 0deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00f0ff, #bd00ff, #ff00ff, #ff0000)',
+                     boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)'
+                   }}></div>
+                 )}
                  <div className="w-full h-full rounded-full overflow-hidden z-[2] border-2 border-white dark:border-[#08080c] relative">
                    <img src="https://i.ibb.co/ns3LTFwp/Picsart-26-02-28-11-29-26-443.jpg" className="w-full h-full object-cover" alt="Commander" />
                  </div>

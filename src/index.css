@@ -283,6 +283,15 @@ html.awakened-mode-active {
   background-color: #050508;
 }
 
+@keyframes spin-aura {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-aura {
+  animation: spin-aura 3s linear infinite;
+}
+
 @keyframes rgb-text {
   0% {
     background-position: 0% 50%;
@@ -290,6 +299,23 @@ html.awakened-mode-active {
   100% {
     background-position: 200% 50%;
   }
+}
+
+@keyframes gradient-x {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease infinite;
 }
 
 /* Custom Scrollbar - Ultra Sleek */
