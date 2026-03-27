@@ -24,10 +24,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Gradle 8.7 (The Bug Fix Version)
+      - name: Setup Gradle 8.14
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: '8.14'
           cache-disabled: true
           validate-wrappers: false
 
@@ -40,7 +40,11 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build APK (Magic of 8.7)
+      - name: Update Wrapper Properties (Extra Safety)
+        working-directory: android
+        run: gradle wrapper --gradle-version 8.14
+
+      - name: Build APK (Final Victory)
         working-directory: android
         run: gradle assembleDebug --no-daemon --refresh-dependencies
 
