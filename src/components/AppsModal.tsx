@@ -43,7 +43,7 @@ export const AppsModal: React.FC<AppsModalProps> = ({ isOpen, onClose, commander
             </button>
 
             {/* Content Container */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 sm:p-12">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 sm:p-12 transform-gpu" style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)', willChange: 'transform' }}>
               <div className="flex flex-col items-center text-center space-y-8">
                 {/* Krishna Avtaar Image */}
                 <motion.div

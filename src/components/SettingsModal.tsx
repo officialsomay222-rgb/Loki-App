@@ -38,7 +38,7 @@ const EditProfileOverlay = ({ name, onSave, onClose }: { name: string, onSave: (
         </motion.button>
         <h2 className="text-lg font-bold text-white tracking-tight">Edit Profile</h2>
       </div>
-      <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar">
+      <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar transform-gpu" style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)', willChange: 'transform' }}>
         <div className="space-y-4">
           <label className="block text-[10px] font-bold text-[#717171] uppercase tracking-[0.2em]">Display Name</label>
           <input 
@@ -291,7 +291,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                   }
                 }}
                 className="flex-1 overflow-y-auto p-6 sm:p-12 custom-scrollbar min-h-0 overscroll-contain transform-gpu"
-                style={{ WebkitOverflowScrolling: 'touch' }}
+                style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)', willChange: 'transform' }}
               >
               <div className="max-w-3xl mx-auto space-y-12 pb-32">
             

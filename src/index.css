@@ -249,8 +249,9 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden; /* Prevent scroll on body itself */
-  overscroll-behavior: none; /* Prevent bounce */
+  overscroll-behavior-y: auto; /* Enable native bounce/stretch effect */
   scroll-behavior: smooth;
+  @apply bg-white dark:bg-[#050508];
 }
 
 ::selection {
@@ -269,16 +270,14 @@ body {
   height: 100%;
   width: 100%;
   isolation: isolate;
-  overscroll-behavior: none;
+  overscroll-behavior: auto; /* Enable native bounce/stretch effect */
 }
 
 /* Ensure background matches theme to prevent white flashes during any potential overscroll */
-html.dark body,
 html.awakened-mode-active body {
   background-color: #050508;
 }
 
-html.dark,
 html.awakened-mode-active {
   background-color: #050508;
 }
