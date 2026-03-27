@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
@@ -24,6 +24,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Exact Gradle 8.2 (Official)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2'
+          cache-disabled: true
+          validate-wrappers: false
+
       - name: Install Dependencies
         run: npm install
 
@@ -33,25 +40,12 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Fix All Permissions (The Magic Trick)
-        run: sudo chmod -R 777 android/
-
-      - name: Generate Fresh Wrapper & Wipe Cache
+      - name: Build APK (Bypass Wrapper & Cache Entirely)
         working-directory: android
-        run: |
-          rm -rf ~/.gradle/caches/
-          rm -f gradle/wrapper/gradle-wrapper.jar
-          gradle wrapper --gradle-version 8.2
-          chmod +x gradlew
+        # Yahan hum './gradlew' ki jagah direct 'gradle' use kar rahe hain
+        # Aur '--gradle-user-home' se cache ko completely isolate kar rahe hain!
+        run: gradle assembleDebug --no-daemon --gradle-user-home ./.gradle-local-cache
 
-      - name: Clean Old Build Junk
-        working-directory: android
-        run: ./gradlew clean --no-daemon
-
-      - name: Build APK (Final Stand)
-        working-directory: android
-        run: ./gradlew assembleDebug --no-daemon --no-parallel --max-workers=1
-        
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
