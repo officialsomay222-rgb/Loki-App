@@ -672,7 +672,6 @@ export const MessageBubble = memo(
     if (message.role === "model") {
       return (
         <motion.div
-          layout
           initial={messageAnimation ? { opacity: 0, y: 20, scale: 0.95 } : false}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.8 }}
@@ -703,7 +702,7 @@ export const MessageBubble = memo(
 
           <div className="relative group w-full">
             <div
-              className={`relative content-auto transition-all duration-300 ${densityClass} text-slate-800/90 dark:text-white/90`}
+              className={`relative transition-all duration-300 ${densityClass} text-slate-800/90 dark:text-white/90`}
             >
               <div className={`markdown-body ${fontSizeClass} bg-transparent p-1`}>
                 {message.audioUrl && (
@@ -808,7 +807,6 @@ export const MessageBubble = memo(
 
     return (
       <motion.div
-        layout
         initial={messageAnimation ? { opacity: 0, y: 20, scale: 0.95 } : false}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.8 }}
@@ -844,7 +842,7 @@ export const MessageBubble = memo(
 
           <div className="relative group w-full">
             <div
-              className={`relative group/bubble content-auto transition-all duration-500 ${bubblePadding} ${blurClass} border ${shadowClass} overflow-hidden ${
+              className={`relative group/bubble transition-all duration-500 ${bubblePadding} ${blurClass} border ${shadowClass} overflow-hidden ${
                 bubbleStyle === "glass"
                   ? `bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 text-slate-900/90 dark:text-white/90 rounded-2xl sm:rounded-3xl ${chatAlignment === 'left' ? 'rounded-tl-sm' : 'rounded-tr-sm'}`
                   : `bg-slate-100/40 dark:bg-white/10 border-slate-200/50 dark:border-white/10 text-slate-900/90 dark:text-white/90 rounded-xl sm:rounded-2xl ${chatAlignment === 'left' ? 'rounded-tl-sm' : 'rounded-tr-sm'}`

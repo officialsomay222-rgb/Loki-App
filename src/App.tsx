@@ -62,6 +62,21 @@ export default function App() {
     setActiveModal(null);
   }, []);
 
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [awakening, setAwakening] = useState<{id: number, phase: string, startX: number, startY: number, width: number, height: number, isDeactivating?: boolean} | null>(null);
   
@@ -483,7 +498,7 @@ export default function App() {
           initial={false}
           animate={{ x: isSidebarOpen ? 0 : (sidebarPosition === 'right' ? '100%' : '-100%') }}
           transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.5 }}
-          className={`fixed inset-y-0 ${sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r'} z-50 w-72 bg-[#f8fafc] dark:bg-[#0a0a0a] shadow-2xl border-y-0 border-slate-200/30 dark:border-white/5 flex flex-col transform-gpu content-auto gpu-accelerate`}
+          className={`fixed inset-y-0 ${sidebarPosition === 'right' ? 'right-0 border-l' : 'left-0 border-r'} z-50 w-72 bg-[#f8fafc] dark:bg-[#0a0a0a] shadow-2xl border-y-0 border-slate-200/30 dark:border-white/5 flex flex-col transform-gpu gpu-accelerate`}
         >
           <div className="p-4 flex items-center justify-between border-b border-slate-200/50 dark:border-white/5">
             <div className="flex items-center gap-2 font-montserrat font-bold text-slate-900 dark:text-white">
@@ -662,7 +677,7 @@ export default function App() {
           </header>
 
           {/* Chat Area - Scrollable */}
-          <div className={`flex-1 overflow-x-hidden custom-scrollbar relative w-full transform-gpu ${(!currentSession || currentSession.messages.length === 0) ? 'overflow-hidden' : 'overflow-y-auto overscroll-contain'}`} style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)', willChange: 'transform' }}>
+          <div className={`flex-1 overflow-x-hidden custom-scrollbar relative w-full transform-gpu ${(!currentSession || currentSession.messages.length === 0) ? 'overflow-hidden' : 'overflow-y-auto overscroll-auto'}`} style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)', willChange: 'transform' }}>
             <div className={`w-full ${appWidthClass} mx-auto px-3 sm:px-6 h-full flex flex-col ${(!currentSession || currentSession.messages.length === 0) ? 'justify-center items-center' : 'pt-4 space-y-6 sm:space-y-8'}`}>
               {!currentSession || currentSession.messages.length === 0 ? (
                 <motion.div 
@@ -702,6 +717,23 @@ export default function App() {
 
           {/* Input Area - Flex Item (Not Absolute) */}
           <div className={`shrink-0 z-20 w-full ${appWidthClass} mx-auto`}>
+            {/* Offline Banner */}
+            <AnimatePresence>
+              {isOffline && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="w-full max-w-3xl mx-auto mb-2 px-4"
+                >
+                  <div className="bg-rose-500/10 border border-rose-500/20 backdrop-blur-md rounded-xl py-2 px-4 flex items-center justify-center gap-2 text-rose-500 dark:text-rose-400 text-sm font-medium shadow-[0_0_15px_rgba(244,63,94,0.1)]">
+                    <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                    No Internet Connection - Chat Disabled
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <ChatInput
               ref={inputRef}
               isAwakened={isAwakened}
@@ -713,6 +745,7 @@ export default function App() {
               currentSessionId={currentSessionId}
               onStopGeneration={stopGeneration}
               enterToSend={enterToSend}
+              isOffline={isOffline}
             />
           </div>
         </div>

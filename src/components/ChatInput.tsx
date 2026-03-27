@@ -51,6 +51,7 @@ interface ChatInputProps {
   onStopGeneration?: () => void;
   enterToSend: boolean;
   isAwakened?: boolean;
+  isOffline?: boolean;
 }
 
 export const ChatInput = memo(
@@ -66,6 +67,7 @@ export const ChatInput = memo(
         onStopGeneration,
         enterToSend,
         isAwakened,
+        isOffline,
       },
       ref,
     ) => {
@@ -467,11 +469,11 @@ export const ChatInput = memo(
             err?.message?.includes("Permission denied")
           ) {
             setMicError(
-              "Microphone access denied. Please click the microphone icon in your browser's address bar to allow access, then refresh this page.",
+              "Microphone access denied. Please allow microphone permissions in your app settings.",
             );
           } else {
             setMicError(
-              "Could not access the microphone. Please ensure a microphone is connected and refresh the page.",
+              "Could not access the microphone. Please ensure a microphone is connected.",
             );
           }
           setTimeout(() => setMicError(null), 8000);
@@ -526,7 +528,7 @@ export const ChatInput = memo(
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           setMicError(
-            "Microphone access is not supported by your browser or is blocked by security policies.",
+            "Microphone access is not supported or is blocked by security policies.",
           );
           return;
         }
@@ -605,7 +607,7 @@ export const ChatInput = memo(
             err?.message?.includes("Permission denied")
           ) {
             setMicError(
-              "Microphone access denied. Please click the microphone icon in your browser's address bar to allow access, then refresh this page.",
+              "Microphone access denied. Please allow microphone permissions in your app settings.",
             );
           }
           if (liveSessionRef.current) {
@@ -695,29 +697,6 @@ export const ChatInput = memo(
                   </svg>
                   {micError}
                 </div>
-                {micError.includes("denied") && (
-                  <button
-                    onClick={() => window.open(window.location.href, "_blank")}
-                    className="mt-1 px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-md transition-colors flex items-center gap-2 font-medium"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                    Open App in New Tab to Fix
-                  </button>
-                )}
               </div>
             )}
             {transcriptionError && (
@@ -796,7 +775,9 @@ export const ChatInput = memo(
                       onFocus={() => setIsFocused(true)}
                       onBlur={() => setIsFocused(false)}
                       placeholder={
-                        isTranscribing
+                        isOffline
+                          ? "Offline Mode"
+                          : isTranscribing
                           ? "Transcribing..."
                           : isRecording
                             ? "Listening..."
@@ -804,15 +785,15 @@ export const ChatInput = memo(
                               ? "Describe the image for LOKI..."
                               : "Ask AI..."
                       }
-                      className={`w-full max-h-[200px] sm:max-h-[250px] min-h-[44px] sm:min-h-[52px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-2 py-2 sm:py-3 text-base sm:text-lg text-slate-900 dark:text-[#E3E3E3] placeholder:text-slate-400 dark:placeholder:text-[#C4C7C5] custom-scrollbar leading-relaxed font-medium transition-all duration-300 ${isAwakened || effectInputBox ? 'dark:text-white drop-shadow-[0_0_8px_rgba(0,242,255,0.3)]' : ''}`}
+                      className={`w-full max-h-[200px] sm:max-h-[250px] min-h-[44px] sm:min-h-[52px] bg-transparent border-0 focus:ring-0 focus:outline-none resize-none px-2 py-2 sm:py-3 text-base sm:text-lg text-slate-900 dark:text-[#E3E3E3] placeholder:text-slate-400 dark:placeholder:text-[#C4C7C5] custom-scrollbar leading-relaxed font-medium transition-all duration-300 ${isAwakened || effectInputBox ? 'dark:text-white drop-shadow-[0_0_8px_rgba(0,242,255,0.3)]' : ''} ${isOffline ? 'opacity-50 cursor-not-allowed' : ''}`}
                       rows={1}
-                      readOnly={isRecording || isTranscribing}
-                      disabled={isLoading}
+                      readOnly={isRecording || isTranscribing || isOffline}
+                      disabled={isLoading || isOffline}
                     />
                     
                     <div className="flex items-center justify-between mt-1 sm:mt-2 px-1 relative">
                       {/* Left Side Actions */}
-                      <div className="flex items-center gap-1">
+                      <div className={`flex items-center gap-1 ${isOffline ? 'opacity-50 pointer-events-none' : ''}`}>
                         <input
                           type="file"
                           ref={fileInputRef}
@@ -915,7 +896,7 @@ export const ChatInput = memo(
                       </div>
 
                       {/* Right Side Actions */}
-                      <motion.div layout className="flex items-center justify-end gap-1 sm:gap-2 min-w-[140px] sm:min-w-[180px]">
+                      <motion.div layout className={`flex items-center justify-end gap-1 sm:gap-2 min-w-[140px] sm:min-w-[180px] ${isOffline ? 'opacity-50 pointer-events-none' : ''}`}>
                         <motion.div layout className="relative model-menu-container">
                           <button
                             onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}

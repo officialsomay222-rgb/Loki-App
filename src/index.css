@@ -28,11 +28,6 @@
     will-change: transform, opacity;
   }
   
-  .content-auto {
-    content-visibility: auto;
-    contain-intrinsic-size: 100px;
-  }
-  
   /* When content is rendered, we can hide the skeleton by using a child selector, but content-visibility doesn't have a pseudo-class. 
      However, the inner content will just render over it. To make it look like a bubble, we can limit its width. */
   
