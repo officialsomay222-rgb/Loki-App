@@ -51,11 +51,15 @@ jobs:
         rm -rf ~/.gradle/caches
         rm -rf ~/.gradle/wrapper
 
+    - name: Fix Corrupt Gradle Wrapper
+      run: |
+        rm android/gradle/wrapper/gradle-wrapper.jar
+        curl -L https://raw.githubusercontent.com/gradle/gradle/v8.2/gradle/wrapper/gradle-wrapper.jar -o android/gradle/wrapper/gradle-wrapper.jar
+
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: 8.2
-        validate-wrappers: false
         cache-disabled: true # Completely disable to avoid using corrupted cache
 
     - name: Sync Capacitor
