@@ -29,6 +29,7 @@ jobs:
         with:
           gradle-version: '8.7'
           cache-disabled: true
+          validate-wrappers: false
 
       - name: Install Dependencies
         run: npm install
@@ -41,7 +42,6 @@ jobs:
 
       - name: Build APK (Magic of 8.7)
         working-directory: android
-        # Naya Gradle version use karke ekdum fresh start
         run: gradle assembleDebug --no-daemon --refresh-dependencies
 
       - name: Upload APK
