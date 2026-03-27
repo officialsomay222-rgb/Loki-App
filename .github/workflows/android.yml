@@ -22,7 +22,8 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          # YAHAN CHANGE HAI: 17 se 21 kar diya
+          java-version: '21'
 
       - name: Setup Gradle 8.14
         uses: gradle/actions/setup-gradle@v4
