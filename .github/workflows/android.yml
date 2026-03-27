@@ -1,7 +1,10 @@
 name: Android CI
 
 on:
-  # Ab sirf tere ishare par chalega (Manual Button)
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -30,9 +33,6 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '8.14'
-        # Security scan bypass karne ke liye
-        validate-wrappers: false
-        cache-disabled: true
 
     - name: Install Web Dependencies
       run: npm install

@@ -143,6 +143,10 @@ export default defineConfig(({mode}) => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true,
+    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''),
       'process.env.GOOGLE_AI_KEY': JSON.stringify(env.GOOGLE_AI_KEY || process.env.GOOGLE_AI_KEY || ''),

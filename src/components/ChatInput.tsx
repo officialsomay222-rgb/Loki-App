@@ -29,6 +29,8 @@ import { useGlobalInteraction } from "../contexts/GlobalInteractionContext";
 import { transcribeAudio, connectLiveSession } from "../services/geminiService";
 import { motion, AnimatePresence } from "framer-motion";
 import { InfinityMic } from "./Logos";
+import { Capacitor } from '@capacitor/core';
+import { VoiceRecorder } from 'capacitor-voice-recorder';
 
 export interface ChatInputHandle {
   focus: () => void;
@@ -250,6 +252,16 @@ export const ChatInput = memo(
         let stream: MediaStream;
         let mediaRecorder: MediaRecorder;
         try {
+          if (Capacitor.isNativePlatform()) {
+            const hasPermission = await VoiceRecorder.hasAudioRecordingPermission();
+            if (!hasPermission.value) {
+              const request = await VoiceRecorder.requestAudioRecordingPermission();
+              if (!request.value) {
+                throw new Error("Permission denied");
+              }
+            }
+          }
+
           if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error(
               "Microphone access is not supported in this browser or environment.",
@@ -290,22 +302,12 @@ export const ChatInput = memo(
             }
           };
 
-          // 2. Setup Web Speech API for live transcription (if available)
-          const SpeechRecognition =
-            (window as any).SpeechRecognition ||
-            (window as any).webkitSpeechRecognition;
-          let finalTranscript = "";
+          // 2. We only use MediaRecorder for audio capture, no SpeechRecognition to avoid Android popup
           let isFinishing = false;
 
           const finishRecording = async () => {
             if (isFinishing) return;
             isFinishing = true;
-
-            if (recognitionRef.current) {
-              try {
-                recognitionRef.current.stop();
-              } catch (e) {}
-            }
 
             if (mediaRecorder.state === "recording") {
               mediaRecorder.stop();
@@ -315,7 +317,7 @@ export const ChatInput = memo(
           mediaRecorder.onstop = () => {
             setTimeout(async () => {
               // If no audio was detected at all, just cancel
-              if (!hasSpokenRef.current && !finalTranscript && !input.trim()) {
+              if (!hasSpokenRef.current && !input.trim()) {
                 setIsRecording(false);
                 stopRecording();
                 return;
@@ -344,7 +346,7 @@ export const ChatInput = memo(
                     setTimeout(() => setIsSuccessFlash(false), 1000);
                     onSendMessage(text, isImageMode, audioUrl);
                   } else {
-                    const fallbackText = finalTranscript.trim() || currentInput;
+                    const fallbackText = currentInput;
                     if (fallbackText) {
                       playBlip();
                       setIsSuccessFlash(true);
@@ -356,7 +358,7 @@ export const ChatInput = memo(
                   console.error("Error transcribing audio:", error);
                   setTranscriptionError("Error transcribing audio.");
                   setTimeout(() => setTranscriptionError(null), 8000);
-                  const fallbackText = finalTranscript.trim() || currentInput;
+                  const fallbackText = currentInput;
                   if (fallbackText) {
                     playBlip();
                     setIsSuccessFlash(true);
@@ -371,44 +373,6 @@ export const ChatInput = memo(
               stopRecording();
             }, 500);
           };
-
-          if (SpeechRecognition) {
-            try {
-              const recognition = new SpeechRecognition();
-              recognitionRef.current = recognition;
-              recognition.continuous = true;
-              recognition.interimResults = true;
-              recognition.lang = "en-IN"; // Optimized for Hinglish
-
-              recognition.onresult = (event: any) => {
-                let interimTranscript = "";
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                  if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript + " ";
-                  } else {
-                    interimTranscript += event.results[i][0].transcript;
-                  }
-                }
-
-                const currentText = (
-                  finalTranscript + interimTranscript
-                ).trim();
-                if (currentText) {
-                  // The user requested NOT to automatically type on the textpad while speaking.
-                  // We just record the fact that they have spoken.
-                  hasSpokenRef.current = true;
-                }
-              };
-
-              recognition.onerror = (event: any) => {
-                console.error("Speech recognition error:", event.error);
-              };
-
-              recognition.start();
-            } catch (err) {
-              console.error("Speech recognition initialization failed", err);
-            }
-          }
 
           mediaRecorder.start();
           setIsRecording(true);
@@ -533,14 +497,24 @@ export const ChatInput = memo(
       const startLiveSession = async () => {
         if (isLiveSessionActive) return;
 
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          setMicError(
-            "Microphone access is not supported or is blocked by security policies.",
-          );
-          return;
-        }
-
         try {
+          if (Capacitor.isNativePlatform()) {
+            const hasPermission = await VoiceRecorder.hasAudioRecordingPermission();
+            if (!hasPermission.value) {
+              const request = await VoiceRecorder.requestAudioRecordingPermission();
+              if (!request.value) {
+                throw new Error("Permission denied");
+              }
+            }
+          }
+
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setMicError(
+              "Microphone access is not supported or is blocked by security policies.",
+            );
+            return;
+          }
+
           playNotification();
           setIsLiveSessionActive(true);
 
@@ -604,7 +578,7 @@ export const ChatInput = memo(
               String.fromCharCode(...new Uint8Array(pcmData.buffer)),
             );
             session.sendRealtimeInput({
-              media: { data: base64, mimeType: "audio/pcm;rate=16000" },
+              audio: { data: base64, mimeType: "audio/pcm;rate=16000" },
             });
           };
         } catch (err: any) {
