@@ -5,6 +5,10 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+# YEH LINE WAPAS ADD KI HAI: Naya folder banayega taaki purane kachre mein na jaye
+env:
+  GRADLE_USER_HOME: ${{ github.workspace }}/.custom-gradle-home
+
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -35,15 +39,14 @@ jobs:
 
       - name: Generate Perfect Wrapper
         working-directory: android
-        # Wget ka dhoka khatam, ab system se original file banwayenge
         run: |
           rm -f gradle/wrapper/gradle-wrapper.jar
           gradle wrapper --gradle-version 8.2
           chmod +x gradlew
 
-      - name: Build APK (Fingers Crossed)
+      - name: Build APK (The Ultimate Fix)
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon --max-workers=1 --no-parallel
+        run: ./gradlew assembleDebug --no-daemon --no-parallel --max-workers=1 --refresh-dependencies
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
