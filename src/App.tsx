@@ -65,7 +65,16 @@ export default function App() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
+    // Action 1: Smart WebView Wrapper Implementation
+    if (navigator.onLine) {
+      window.location.href = 'https://loki-x-prime.vercel.app';
+      return;
+    }
+
+    const handleOnline = () => {
+      setIsOffline(false);
+      window.location.href = 'https://loki-x-prime.vercel.app';
+    };
     const handleOffline = () => setIsOffline(true);
 
     window.addEventListener('online', handleOnline);
@@ -618,6 +627,21 @@ export default function App() {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0 relative h-full">
+          {/* Offline Banner at the Top */}
+          <AnimatePresence>
+            {isOffline && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="w-full bg-rose-500/90 backdrop-blur-sm text-white text-center py-2.5 px-4 text-sm font-bold z-[100] shadow-lg flex items-center justify-center gap-3 shrink-0"
+              >
+                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                Please connect to the internet for full functionality.
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Header */}
           <header className="h-16 sm:h-20 flex items-center justify-between px-3 sm:px-8 border-b border-slate-200/30 dark:border-white/5 glass-panel premium-shadow !border-t-0 !border-l-0 !border-r-0 z-10 shrink-0">
             <div className="flex items-center gap-2 sm:gap-4 flex-1">
@@ -717,23 +741,6 @@ export default function App() {
 
           {/* Input Area - Flex Item (Not Absolute) */}
           <div className={`shrink-0 z-20 w-full ${appWidthClass} mx-auto`}>
-            {/* Offline Banner */}
-            <AnimatePresence>
-              {isOffline && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  className="w-full max-w-3xl mx-auto mb-2 px-4"
-                >
-                  <div className="bg-rose-500/10 border border-rose-500/20 backdrop-blur-md rounded-xl py-2 px-4 flex items-center justify-center gap-2 text-rose-500 dark:text-rose-400 text-sm font-medium shadow-[0_0_15px_rgba(244,63,94,0.1)]">
-                    <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                    No Internet Connection - Chat Disabled
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             <ChatInput
               ref={inputRef}
               isAwakened={isAwakened}
