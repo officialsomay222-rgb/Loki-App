@@ -46,7 +46,7 @@ jobs:
       - name: Build Android App
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --refresh-dependencies
+          gradle assembleDebug --no-daemon --refresh-dependencies
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
