@@ -4,6 +4,9 @@ const config: CapacitorConfig = {
   appId: 'com.lokiprimex.app',
   appName: 'Loki Prime X',
   webDir: 'dist',
+  server: {
+    allowNavigation: ['loki-x-prime.vercel.app']
+  },
   plugins: {
     CapacitorHttp: {
       enabled: true,
