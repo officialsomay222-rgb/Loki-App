@@ -424,8 +424,8 @@ export default function App() {
               <div className="rgb-shockwave rgb-shockwave-glitch" style={{ left: '50%', top: '35%' }} />
               <div className="light-streak" style={{ left: '50%', top: '35%' }} />
               <div className="particle-burst" style={{ left: '50%', top: '35%' }}>
-                {[...Array(16)].map((_, i) => (
-                  <div key={i} className="particle" style={{ '--angle': `${i * 22.5}deg` } as any} />
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="particle" style={{ '--angle': `${i * 60}deg` } as any} />
                 ))}
               </div>
             </>

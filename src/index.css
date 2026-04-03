@@ -614,7 +614,7 @@ a:focus-visible {
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) translateZ(0) scale(35);
+    transform: translate(-50%, -50%) translateZ(0) scale(12);
     opacity: 0;
   }
 }
@@ -625,7 +625,7 @@ a:focus-visible {
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) translateZ(0) scale(45);
+    transform: translate(-50%, -50%) translateZ(0) scale(14);
     opacity: 0;
   }
 }
@@ -745,7 +745,6 @@ a:focus-visible {
   top: 0;
   left: 0;
   z-index: 100000;
-  will-change: transform;
   border-radius: 50%;
   box-shadow: 0 0 40px rgba(0, 242, 255, 0.4);
   transform: translateZ(0);
@@ -766,7 +765,6 @@ a:focus-visible {
   border-radius: 50%;
   pointer-events: none;
   z-index: 5;
-  will-change: transform, opacity;
   transform: translateZ(0);
 }
 
@@ -869,7 +867,6 @@ a:focus-visible {
   background: rgba(255, 255, 255, 0.05);
   pointer-events: none;
   z-index: 99996;
-  will-change: opacity;
   animation: screen-flash 3s ease-out forwards;
   transform: translateZ(0);
 }
@@ -884,7 +881,6 @@ a:focus-visible {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transform: translateZ(0);
-  will-change: transform;
 }
 
 .premium-shadow {
@@ -937,8 +933,8 @@ a:focus-visible {
   box-shadow:
     0 8px 32px rgba(0, 242, 255, 0.08),
     inset 0 0 20px rgba(0, 242, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border-radius: var(--radius-3xl);
   transition: all 0.3s ease;
 }
@@ -1048,19 +1044,30 @@ a:focus-visible {
     rgba(189, 0, 255, 0.25) 100%
   );
   opacity: 0.8;
-  animation: cosmic-aura-pulse 2s ease-in-out infinite alternate;
+  animation: none !important;
   mix-blend-mode: screen;
 }
 
 @keyframes cosmic-aura-pulse {
-  0% {
-    opacity: 0.5;
+  0%, 100% {
+    opacity: 0.8;
     filter: hue-rotate(0deg);
   }
-  100% {
-    opacity: 1;
-    filter: hue-rotate(15deg);
+  50% {
+    opacity: 0.9;
+    filter: hue-rotate(8deg);
   }
+}
+
+.awakened-bg-aura {
+  background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0, 242, 255, 0.1) 70%, rgba(189, 0, 255, 0.05) 100%);
+}
+
+.awakened-bg-nebula {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.08), transparent 70%),
+    radial-gradient(circle at 100% 100%, rgba(189, 0, 255, 0.05), transparent 50%),
+    linear-gradient(to bottom, #050508, #0a0a12);
 }
 
 .awakened-mode .bg-slate-50,
@@ -1085,12 +1092,13 @@ body.awakened-mode-active {
 .awakened-mode .text-slate-700,
 .awakened-mode .text-slate-600 {
   color: #fff !important;
-  text-shadow: 0 0 8px rgba(0, 242, 255, 0.6);
+  text-shadow: none !important;
 }
 
 .awakened-mode .text-slate-500,
 .awakened-mode .text-slate-400 {
   color: rgba(255, 255, 255, 0.8) !important;
+  text-shadow: none !important;
 }
 
 .awakened-mode .border-slate-200,
@@ -1102,8 +1110,8 @@ body.awakened-mode-active {
   background: rgba(5, 5, 10, 0.7) !important;
   border: 1px solid rgba(0, 242, 255, 0.15) !important;
   box-shadow: 0 12px 48px rgba(0, 242, 255, 0.1) !important;
-  backdrop-filter: blur(32px) !important;
-  -webkit-backdrop-filter: blur(32px) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   transform: translateZ(0);
 }
 
@@ -1147,7 +1155,6 @@ body.awakened-mode-active {
   display: flex;
   justify-content: center;
   align-items: center;
-  will-change: transform;
   filter: drop-shadow(0 0 25px rgba(0, 242, 255, 0.4));
 }
 
@@ -1166,7 +1173,6 @@ body.awakened-mode-active {
   /* Removed the RGB overlay background and animation as requested */
   background: transparent;
   transform-origin: center;
-  will-change: transform;
 }
 
 @keyframes rgb-pulse-spread {
