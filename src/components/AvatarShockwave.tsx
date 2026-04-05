@@ -4,86 +4,55 @@ interface AvatarShockwaveProps {
   isActive: boolean;
 }
 
-class Wave {
-  phase: number;
-  offset: number;
-  frequency: number;
-  amplitude: number;
-
-  constructor(phase: number, offset: number, frequency: number, amplitude: number) {
-    this.phase = phase;
-    this.offset = offset;
-    this.frequency = frequency;
-    this.amplitude = amplitude;
-  }
-
-  update() {
-    this.phase += this.frequency;
-  }
-
-  draw(ctx: CanvasRenderingContext2D, width: number, height: number, centerY: number) {
-    ctx.beginPath();
-    ctx.moveTo(0, centerY);
-
-    for (let x = 0; x < width; x++) {
-      const y = Math.sin((x / width) * Math.PI * 2 + this.phase) * this.amplitude + centerY + this.offset;
-      ctx.lineTo(x, y);
-    }
-
-    ctx.lineTo(width, height);
-    ctx.lineTo(0, height);
-    ctx.closePath();
-    ctx.fill();
-  }
-}
-
-class CircularWave {
+class BlastRing {
   radius: number;
-  phase: number;
-  frequency: number;
-  amplitude: number;
+  maxRadius: number;
+  thickness: number;
+  alpha: number;
   colorStops: string[];
+  active: boolean;
 
-  constructor(radius: number, phase: number, frequency: number, amplitude: number, colorStops: string[]) {
-    this.radius = radius;
-    this.phase = phase;
-    this.frequency = frequency;
-    this.amplitude = amplitude;
+  constructor(startX: number, startY: number, colorStops: string[]) {
+    this.radius = 0;
+    this.maxRadius = 150; // Max expansion radius
+    this.thickness = 15;
+    this.alpha = 1;
     this.colorStops = colorStops;
+    this.active = false;
+  }
+
+  reset() {
+    this.radius = 0;
+    this.alpha = 1;
+    this.active = true;
   }
 
   update() {
-    this.phase += this.frequency;
-  }
+    if (!this.active) return;
 
-  draw(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, intensity: number) {
-    ctx.beginPath();
+    // Quick expansion (explosion style)
+    this.radius += (this.maxRadius - this.radius) * 0.15;
 
-    const points = 100;
-    for (let i = 0; i <= points; i++) {
-      const angle = (i / points) * Math.PI * 2;
-
-      // Complex wave composition for organic look
-      const wave1 = Math.sin(angle * 3 + this.phase);
-      const wave2 = Math.cos(angle * 5 - this.phase * 1.2);
-      const wave3 = Math.sin(angle * 2 + this.phase * 0.8);
-
-      const displacement = (wave1 + wave2 * 0.5 + wave3 * 0.25) * this.amplitude * intensity;
-      const currentRadius = this.radius + displacement;
-
-      const x = centerX + Math.cos(angle) * currentRadius;
-      const y = centerY + Math.sin(angle) * currentRadius;
-
-      if (i === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
+    // Fade out as it expands
+    if (this.radius > this.maxRadius * 0.5) {
+      this.alpha -= 0.05;
     }
 
-    ctx.closePath();
+    // Deactivate when faded
+    if (this.alpha <= 0) {
+      this.active = false;
+      this.alpha = 0;
+    }
+  }
 
-    // Create dynamic gradient
+  draw(ctx: CanvasRenderingContext2D, centerX: number, centerY: number) {
+    if (!this.active || this.alpha <= 0) return;
+
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+
+    // Create conical/angular gradient for RGB explosion effect
+    // We simulate it using a linear gradient across the ring for performance
     const gradient = ctx.createLinearGradient(
       centerX - this.radius,
       centerY - this.radius,
@@ -95,21 +64,38 @@ class CircularWave {
     gradient.addColorStop(0.5, this.colorStops[1]);
     gradient.addColorStop(1, this.colorStops[2]);
 
+    // Draw the outer ring
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, this.radius + this.thickness, 0, Math.PI * 2);
+    // Draw the inner hole (counter-clockwise to subtract)
+    ctx.arc(centerX, centerY, Math.max(0, this.radius), 0, Math.PI * 2, true);
+    ctx.closePath();
+
     ctx.fillStyle = gradient;
     ctx.fill();
+    ctx.restore();
   }
 }
 
 export const AvatarShockwave: React.FC<AvatarShockwaveProps> = ({ isActive }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const intensityRef = useRef(0);
-  const expansionRef = useRef(0); // Add a ref for tracking the outwards expansion on exit
   const isActiveRef = useRef(isActive);
+  const wasActiveRef = useRef(isActive);
   const animationRef = useRef<number | undefined>(undefined);
 
-  // Sync prop to ref
+  // Store our explosion blast ring
+  const blastRef = useRef<BlastRing | null>(null);
+
+  // Sync prop to ref and trigger explosion on state change
   useEffect(() => {
     isActiveRef.current = isActive;
+
+    // Trigger blast when active state transitions from false -> true
+    if (isActive && !wasActiveRef.current && blastRef.current) {
+      blastRef.current.reset();
+    }
+
+    wasActiveRef.current = isActive;
   }, [isActive]);
 
   useEffect(() => {
@@ -130,67 +116,41 @@ export const AvatarShockwave: React.FC<AvatarShockwaveProps> = ({ isActive }) =>
     // Normalize coordinate system to use css pixels
     ctx.scale(dpr, dpr);
 
-    const width = rect.width;
-    const height = rect.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
+    let width = rect.width;
+    let height = rect.height;
+    let centerX = width / 2;
+    let centerY = height / 2;
 
     const baseRadius = Math.min(width, height) * 0.35;
 
-    // Gemini-style colors: electric blue, cyan, soft purple, light pink
-    const waves = [
-      new CircularWave(baseRadius * 1.1, 0, 0.02, 10, ['rgba(0, 242, 255, 0.4)', 'rgba(59, 130, 246, 0.4)', 'rgba(168, 85, 247, 0.4)']), // Cyan -> Blue -> Purple
-      new CircularWave(baseRadius * 0.9, Math.PI / 2, 0.03, 15, ['rgba(236, 72, 153, 0.4)', 'rgba(168, 85, 247, 0.4)', 'rgba(0, 242, 255, 0.4)']), // Pink -> Purple -> Cyan
-      new CircularWave(baseRadius * 1.2, Math.PI, 0.015, 8, ['rgba(59, 130, 246, 0.3)', 'rgba(0, 242, 255, 0.3)', 'rgba(236, 72, 153, 0.3)']), // Blue -> Cyan -> Pink
-      new CircularWave(baseRadius * 1.0, Math.PI * 1.5, 0.025, 12, ['rgba(168, 85, 247, 0.5)', 'rgba(236, 72, 153, 0.5)', 'rgba(59, 130, 246, 0.5)']) // Purple -> Pink -> Blue
-    ];
+    // Initialize the blast ring
+    blastRef.current = new BlastRing(centerX, centerY, [
+      'rgba(255, 0, 100, 1)',   // Red/Pink
+      'rgba(0, 255, 200, 1)',   // Cyan/Green
+      'rgba(100, 50, 255, 1)'   // Purple/Blue
+    ]);
 
-    let lastTime = performance.now();
+    // Scale blast size based on canvas size
+    blastRef.current.maxRadius = Math.max(width, height) * 0.6;
+    blastRef.current.thickness = Math.max(width, height) * 0.15;
 
-    const render = (time: number) => {
-      // Delta time for smooth animation regardless of frame rate (optional, but good practice)
-      const dt = time - lastTime;
-      lastTime = time;
+    let wasActive = false;
 
-      ctx.clearRect(0, 0, width, height);
-
-      // Smoothly interpolate intensity
-      const targetIntensity = isActiveRef.current ? 1 : 0;
-      intensityRef.current += (targetIntensity - intensityRef.current) * 0.1;
-
-      // Handle the expansion on exit
-      if (!isActiveRef.current && intensityRef.current > 0) {
-        // Expand outwards when released
-        expansionRef.current += 1.5;
-      } else if (isActiveRef.current) {
-        // Smoothly retract to normal radius when active
-        expansionRef.current += (0 - expansionRef.current) * 0.1;
-      }
-
-      // Only draw if there's some intensity to show, saving CPU
-      if (intensityRef.current > 0.01) {
-        // Apply global glow/blend
+    const render = () => {
+      if (blastRef.current && blastRef.current.active) {
+        ctx.clearRect(0, 0, width, height);
+        // Apply global glow/blend for the explosion
         ctx.globalCompositeOperation = 'screen';
 
-        // Map intensity to global alpha for a smooth fade out
-        ctx.globalAlpha = intensityRef.current;
-
-        // Draw waves
-        waves.forEach(wave => {
-          wave.update();
-          // Temporarily store the original radius to apply the expansion offset safely
-          const originalRadius = wave.radius;
-          wave.radius = originalRadius + expansionRef.current;
-
-          wave.draw(ctx, centerX, centerY, intensityRef.current);
-
-          // Restore the radius
-          wave.radius = originalRadius;
-        });
+        blastRef.current.update();
+        blastRef.current.draw(ctx, centerX, centerY);
 
         // Reset state
         ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = 1;
+        wasActive = true;
+      } else if (wasActive) {
+        ctx.clearRect(0, 0, width, height);
+        wasActive = false;
       }
 
       animationRef.current = requestAnimationFrame(render);
@@ -204,6 +164,16 @@ export const AvatarShockwave: React.FC<AvatarShockwaveProps> = ({ isActive }) =>
       canvas.width = newRect.width * dpr;
       canvas.height = newRect.height * dpr;
       ctx.scale(dpr, dpr);
+
+      width = newRect.width;
+      height = newRect.height;
+      centerX = width / 2;
+      centerY = height / 2;
+
+      if (blastRef.current) {
+        blastRef.current.maxRadius = Math.max(width, height) * 0.6;
+        blastRef.current.thickness = Math.max(width, height) * 0.15;
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -217,7 +187,7 @@ export const AvatarShockwave: React.FC<AvatarShockwaveProps> = ({ isActive }) =>
   }, []); // Empty dependency array so initialization happens only once
 
   return (
-    <div className="absolute -inset-8 z-[0] pointer-events-none" style={{ filter: 'blur(12px)' }}>
+    <div className="absolute -inset-12 z-[0] pointer-events-none" style={{ filter: 'blur(8px)' }}>
       <canvas
         ref={canvasRef}
         className="w-full h-full"
