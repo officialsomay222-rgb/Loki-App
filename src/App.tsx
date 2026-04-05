@@ -212,13 +212,11 @@ export default function App() {
         setShowScrollToBottom(!isNearBottom);
       }
 
-      if (!document.body.classList.contains('is-scrolling')) {
-        document.body.classList.add('is-scrolling');
-      }
+      // Removed DOM class manipulation on body during scroll to prevent layout thrashing and severe lag
       
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        document.body.classList.remove('is-scrolling');
+        // Debounce empty callback placeholder
       }, 150); // 150ms debounce
     };
 
