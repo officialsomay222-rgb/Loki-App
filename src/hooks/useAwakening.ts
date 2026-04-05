@@ -19,31 +19,32 @@ export function useAwakening(isAwakened: boolean, setIsAwakened: (value: boolean
     const startX = rect.left;
     const startY = rect.top;
 
+    // Moving in feels faster and more premium
     setAwakening({ id: Date.now(), phase: 'moving-in', startX, startY, width: rect.width, height: rect.height, isDeactivating: isAwakened });
 
     setTimeout(() => {
       if (isAwakened) {
-           // Deactivating
+           // Deactivating - smooth collapse
            setAwakening(prev => prev ? { ...prev, phase: 'shockwave' } : null);
            setTimeout(() => {
               setIsAwakened(false);
               setAwakening(prev => prev ? { ...prev, phase: 'moving-out' } : null);
-           }, 2500);
+           }, 2200);
            setTimeout(() => {
               setAwakening(null);
-           }, 4000);
+           }, 3500);
         } else {
-           // Activating - Skip prompt, go straight to shockwave
+           // Activating - cinematic cinematic shockwave timing
            setAwakening(prev => prev ? { ...prev, phase: 'shockwave' } : null);
            setTimeout(() => {
              setIsAwakened(true);
              setAwakening(prev => prev ? { ...prev, phase: 'moving-out' } : null);
-           }, 2500);
+           }, 2800); // Wait longer for the massive god-level rings to expand fully
            setTimeout(() => {
              setAwakening(null);
-           }, 4000);
+           }, 4200);
         }
-    }, 1500);
+    }, 1200);
   }, [awakening, isAwakened, setIsAwakened]);
 
   const handleAwakeningResponse = useCallback((ready: boolean) => {
