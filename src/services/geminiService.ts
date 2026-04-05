@@ -18,7 +18,7 @@ const getHfToken = () => {
   return key;
 };
 
-export const generateChatResponse = async (params: {
+export interface ChatResponseParams {
   message: string;
   history: any[];
   mode: 'fast' | 'pro' | 'happy';
@@ -29,7 +29,154 @@ export const generateChatResponse = async (params: {
   topP?: number;
   topK?: number;
   attachments?: { data: string, mimeType: string }[];
-}) => {
+}
+
+const generateGeminiStream = async (params: ChatResponseParams, apiKey: string) => {
+  const hasAttachments = params.attachments && params.attachments.length > 0;
+  const ai = new GoogleGenAI({ apiKey });
+  let modelName = "gemini-3.1-flash-lite-preview";
+
+  const config: any = {
+    systemInstruction: params.systemInstruction,
+    temperature: params.temperature || 0.7,
+    topP: params.topP || 0.95,
+    topK: params.topK || 64,
+  };
+
+  if (params.searchGrounding) {
+    modelName = "gemini-3-flash-preview";
+    config.tools = [{ googleSearch: {} }];
+  }
+
+  if (params.thinkingMode) {
+    config.thinkingConfig = { thinkingLevel: "HIGH" };
+  }
+
+  const contents: any[] = [];
+  if (params.history && Array.isArray(params.history)) {
+    params.history.forEach((msg: any) => {
+      if (msg.content) {
+        contents.push({
+          role: msg.role === 'model' ? 'model' : 'user',
+          parts: [{ text: msg.content }]
+        });
+      }
+    });
+  }
+
+  const userParts: any[] = [];
+  if (hasAttachments) {
+    params.attachments!.forEach((att: any) => {
+      userParts.push({
+        inlineData: {
+          data: att.data,
+          mimeType: att.mimeType
+        }
+      });
+    });
+  }
+  if (params.message && params.message.trim().length > 0) {
+    userParts.push({ text: params.message });
+  } else if (hasAttachments) {
+    userParts.push({ text: "Please analyze this image." });
+  } else {
+    userParts.push({ text: " " });
+  }
+
+  contents.push({ role: 'user', parts: userParts });
+
+  const responseStream = await ai.models.generateContentStream({
+    model: modelName,
+    contents: contents,
+    config: config
+  });
+
+  async function* streamResponse() {
+    for await (const chunk of responseStream) {
+      if (chunk.text) {
+        yield { text: chunk.text };
+      }
+    }
+  }
+  return streamResponse();
+};
+
+const generateBackendStream = async (params: ChatResponseParams) => {
+  // Pro and Happy modes use the Express backend to securely connect to Groq
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: params.message,
+      history: params.history?.map((msg: any) => ({
+        role: msg.role,
+        parts: [{ text: msg.content }] // Backend expects this format
+      })),
+      mode: params.mode,
+      systemInstruction: params.systemInstruction,
+      temperature: params.temperature,
+      topP: params.topP,
+    }),
+  });
+
+  if (!response.ok) {
+    // If there's an error, try to parse the error message, or fallback to generic
+    try {
+      const errData = await response.json();
+      throw new Error(errData.error || "Failed to generate chat response.");
+    } catch (e) {
+      throw new Error("Failed to generate chat response. Server returned " + response.status);
+    }
+  }
+
+  if (!response.body) {
+    throw new Error("No response body returned from server.");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  async function* streamResponse() {
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n\n');
+
+      // Keep the last partial event in the buffer
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.slice(6);
+          if (dataStr === '[DONE]') {
+            return;
+          }
+          try {
+            const data = JSON.parse(dataStr);
+            if (data.error) {
+              if (data.error.includes("Groq API Key is missing")) {
+                yield { text: "Commander, your Groq API key is missing. Please add 'GROQ_API_KEY' to your AI Studio Secrets to enable Pro/Happy models." };
+                return;
+              }
+              throw new Error(data.error);
+            }
+            if (data.text) {
+              yield { text: data.text };
+            }
+          } catch (e) {
+            console.error("Error parsing SSE data:", e, "Raw data:", dataStr);
+          }
+        }
+      }
+    }
+  }
+  return streamResponse();
+};
+
+export const generateChatResponse = async (params: ChatResponseParams) => {
   const hasAttachments = params.attachments && params.attachments.length > 0;
 
   if (params.mode === "fast" || hasAttachments) {
@@ -41,147 +188,9 @@ export const generateChatResponse = async (params: {
       }
       return mockStream();
     }
-
-    const ai = new GoogleGenAI({ apiKey });
-    let modelName = "gemini-3.1-flash-lite-preview";
-    
-    const config: any = {
-      systemInstruction: params.systemInstruction,
-      temperature: params.temperature || 0.7,
-      topP: params.topP || 0.95,
-      topK: params.topK || 64,
-    };
-
-    if (params.searchGrounding) {
-      modelName = "gemini-3-flash-preview";
-      config.tools = [{ googleSearch: {} }];
-    }
-
-    if (params.thinkingMode) {
-      config.thinkingConfig = { thinkingLevel: "HIGH" };
-    }
-
-    const contents: any[] = [];
-    if (params.history && Array.isArray(params.history)) {
-      params.history.forEach((msg: any) => {
-        if (msg.content) {
-          contents.push({
-            role: msg.role === 'model' ? 'model' : 'user',
-            parts: [{ text: msg.content }]
-          });
-        }
-      });
-    }
-    
-    const userParts: any[] = [];
-    if (hasAttachments) {
-      params.attachments!.forEach((att: any) => {
-        userParts.push({
-          inlineData: {
-            data: att.data,
-            mimeType: att.mimeType
-          }
-        });
-      });
-    }
-    if (params.message && params.message.trim().length > 0) {
-      userParts.push({ text: params.message });
-    } else if (hasAttachments) {
-      userParts.push({ text: "Please analyze this image." });
-    } else {
-      userParts.push({ text: " " });
-    }
-    
-    contents.push({ role: 'user', parts: userParts });
-
-    const responseStream = await ai.models.generateContentStream({
-      model: modelName,
-      contents: contents,
-      config: config
-    });
-
-    async function* streamResponse() {
-      for await (const chunk of responseStream) {
-        if (chunk.text) {
-          yield { text: chunk.text };
-        }
-      }
-    }
-    return streamResponse();
-
+    return generateGeminiStream(params, apiKey);
   } else if (params.mode === "pro" || params.mode === "happy") {
-    // Pro and Happy modes use the Express backend to securely connect to Groq
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: params.message,
-        history: params.history?.map((msg: any) => ({
-          role: msg.role,
-          parts: [{ text: msg.content }] // Backend expects this format
-        })),
-        mode: params.mode,
-        systemInstruction: params.systemInstruction,
-        temperature: params.temperature,
-        topP: params.topP,
-      }),
-    });
-
-    if (!response.ok) {
-      // If there's an error, try to parse the error message, or fallback to generic
-      try {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to generate chat response.");
-      } catch (e) {
-        throw new Error("Failed to generate chat response. Server returned " + response.status);
-      }
-    }
-
-    if (!response.body) {
-      throw new Error("No response body returned from server.");
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-
-    async function* streamResponse() {
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n\n');
-
-        // Keep the last partial event in the buffer
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.slice(6);
-            if (dataStr === '[DONE]') {
-              return;
-            }
-            try {
-              const data = JSON.parse(dataStr);
-              if (data.error) {
-                if (data.error.includes("Groq API Key is missing")) {
-                  yield { text: "Commander, your Groq API key is missing. Please add 'GROQ_API_KEY' to your AI Studio Secrets to enable Pro/Happy models." };
-                  return;
-                }
-                throw new Error(data.error);
-              }
-              if (data.text) {
-                yield { text: data.text };
-              }
-            } catch (e) {
-              console.error("Error parsing SSE data:", e, "Raw data:", dataStr);
-            }
-          }
-        }
-      }
-    }
-    return streamResponse();
+    return generateBackendStream(params);
   }
   
   throw new Error("Invalid mode selected");
