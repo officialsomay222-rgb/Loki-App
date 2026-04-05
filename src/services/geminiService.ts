@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, ThinkingLevel, Modality } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel, Modality, Content, Part, GenerateContentConfig } from "@google/genai";
 import { HfInference } from "@huggingface/inference";
 
 const getApiKey = () => {
@@ -20,7 +20,7 @@ const getHfToken = () => {
 
 export const generateChatResponse = async (params: {
   message: string;
-  history: any[];
+  history: { role: string, content: string }[];
   mode: 'fast' | 'pro' | 'happy';
   thinkingMode: boolean;
   searchGrounding: boolean;
@@ -45,7 +45,7 @@ export const generateChatResponse = async (params: {
     const ai = new GoogleGenAI({ apiKey });
     let modelName = "gemini-3.1-flash-lite-preview";
     
-    const config: any = {
+    const config: GenerateContentConfig = {
       systemInstruction: params.systemInstruction,
       temperature: params.temperature || 0.7,
       topP: params.topP || 0.95,
@@ -58,12 +58,12 @@ export const generateChatResponse = async (params: {
     }
 
     if (params.thinkingMode) {
-      config.thinkingConfig = { thinkingLevel: "HIGH" };
+      config.thinkingConfig = { thinkingLevel: ThinkingLevel.HIGH };
     }
 
-    const contents: any[] = [];
+    const contents: Content[] = [];
     if (params.history && Array.isArray(params.history)) {
-      params.history.forEach((msg: any) => {
+      params.history.forEach((msg) => {
         if (msg.content) {
           contents.push({
             role: msg.role === 'model' ? 'model' : 'user',
@@ -73,9 +73,9 @@ export const generateChatResponse = async (params: {
       });
     }
     
-    const userParts: any[] = [];
+    const userParts: Part[] = [];
     if (hasAttachments) {
-      params.attachments!.forEach((att: any) => {
+      params.attachments!.forEach((att) => {
         userParts.push({
           inlineData: {
             data: att.data,
@@ -116,7 +116,7 @@ export const generateChatResponse = async (params: {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: params.message,
-        history: params.history?.map((msg: any) => ({
+        history: params.history?.map((msg) => ({
           role: msg.role,
           parts: [{ text: msg.content }] // Backend expects this format
         })),
