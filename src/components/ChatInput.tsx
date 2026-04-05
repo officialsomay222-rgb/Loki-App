@@ -33,6 +33,9 @@ import { Capacitor } from '@capacitor/core';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { LiveVoiceOverlay } from "./LiveVoiceOverlay";
 
+const sharedPcmData = new Int16Array(4096);
+const sharedUint8Data = new Uint8Array(sharedPcmData.buffer);
+
 export interface ChatInputHandle {
   focus: () => void;
   setInput: (text: string) => void;
@@ -567,14 +570,24 @@ export const ChatInput = memo(
           processor.onaudioprocess = (e) => {
             if (!isLiveSessionActive) return;
             const inputData = e.inputBuffer.getChannelData(0);
+            const l = inputData.length;
             // Convert Float32 to Int16
-            const pcmData = new Int16Array(inputData.length);
-            for (let i = 0; i < inputData.length; i++) {
-              pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
+            const pcmData = l === 4096 ? sharedPcmData : new Int16Array(l);
+            const uint8Data = l === 4096 ? sharedUint8Data : new Uint8Array(pcmData.buffer);
+
+            for (let i = 0; i < l; i++) {
+              let s = inputData[i];
+              s = s < -1 ? -1 : (s > 1 ? 1 : s);
+              pcmData[i] = s * 0x7fff;
             }
-            const base64 = btoa(
-              String.fromCharCode(...new Uint8Array(pcmData.buffer)),
-            );
+
+            let binary = '';
+            const chunkSize = 0x8000;
+            for (let i = 0; i < uint8Data.length; i += chunkSize) {
+              binary += String.fromCharCode.apply(null, uint8Data.subarray(i, i + chunkSize) as any);
+            }
+
+            const base64 = btoa(binary);
             session.sendRealtimeInput({
               audio: { data: base64, mimeType: "audio/pcm;rate=16000" },
             });
