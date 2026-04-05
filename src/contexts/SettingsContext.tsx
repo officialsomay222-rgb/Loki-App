@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { encryptData, decryptData } from '../utils/secureStorage';
 
 export type Theme = 'light' | 'dark';
 export type BgStyle = 'default' | 'nebula' | 'cyber-grid';
@@ -290,8 +291,9 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const loadSetting = <T,>(key: string, setter: (val: T) => void, parser?: (val: string) => T) => {
       try {
-        const saved = localStorage.getItem(`loki_${key}`);
-        if (saved) {
+        const savedRaw = localStorage.getItem(`loki_${key}`);
+        if (savedRaw) {
+          const saved = decryptData(savedRaw);
           setter(parser ? parser(saved) : saved as unknown as T);
         }
       } catch (e) {
@@ -351,54 +353,54 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem('loki_theme', theme);
-      localStorage.setItem('loki_bgStyle', bgStyle);
-      localStorage.setItem('loki_commanderName', commanderName);
-      localStorage.setItem('loki_avatarUrl', avatarUrl);
-      localStorage.setItem('loki_modelMode', modelMode);
-      localStorage.setItem('loki_tone', tone);
-      localStorage.setItem('loki_systemInstruction', systemInstruction);
-      localStorage.setItem('loki_temperature', temperature.toString());
-      localStorage.setItem('loki_topP', topP.toString());
-      localStorage.setItem('loki_topK', topK.toString());
-      localStorage.setItem('loki_enterToSend', enterToSend.toString());
-      localStorage.setItem('loki_bubbleStyle', bubbleStyle);
-      localStorage.setItem('loki_fontSize', fontSize);
-      localStorage.setItem('loki_fontStyle', fontStyle);
-      localStorage.setItem('loki_soundEnabled', soundEnabled.toString());
-      localStorage.setItem('loki_messageAnimation', messageAnimation.toString());
-      localStorage.setItem('loki_autoScroll', autoScroll.toString());
-      localStorage.setItem('loki_typingSpeed', typingSpeed.toString());
-      localStorage.setItem('loki_showAvatars', showAvatars.toString());
-      localStorage.setItem('loki_responseLength', responseLength);
-      localStorage.setItem('loki_accentColor', accentColor);
-      localStorage.setItem('loki_messageDensity', messageDensity);
-      localStorage.setItem('loki_thinkingMode', thinkingMode.toString());
-      localStorage.setItem('loki_searchGrounding', searchGrounding.toString());
-      localStorage.setItem('loki_imageSize', imageSize);
-      localStorage.setItem('loki_liveAudioEnabled', liveAudioEnabled.toString());
-      localStorage.setItem('loki_animationSpeed', animationSpeed);
-      localStorage.setItem('loki_borderRadius', borderRadius);
-      localStorage.setItem('loki_textReveal', textReveal);
-      localStorage.setItem('loki_appWidth', appWidth);
-      localStorage.setItem('loki_glowIntensity', glowIntensity);
-      localStorage.setItem('loki_effectInputBox', effectInputBox.toString());
-      localStorage.setItem('loki_effectMessageBubbles', effectMessageBubbles.toString());
-      localStorage.setItem('loki_effectSidebar', effectSidebar.toString());
-      localStorage.setItem('loki_effectBackground', effectBackground.toString());
-      localStorage.setItem('loki_effectAvatar', effectAvatar.toString());
-      localStorage.setItem('loki_sidebarPosition', sidebarPosition);
-      localStorage.setItem('loki_chatAlignment', chatAlignment);
-      localStorage.setItem('loki_blurIntensity', blurIntensity);
-      localStorage.setItem('loki_timestampFormat', timestampFormat);
-      localStorage.setItem('loki_soundTheme', soundTheme);
-      localStorage.setItem('loki_codeTheme', codeTheme);
-      localStorage.setItem('loki_avatarShape', avatarShape);
-      localStorage.setItem('loki_messageShadow', messageShadow);
-      localStorage.setItem('loki_sendButtonIcon', sendButtonIcon);
-      localStorage.setItem('loki_messageHoverEffect', messageHoverEffect);
-      localStorage.setItem('loki_sidebarTheme', sidebarTheme);
-      localStorage.setItem('loki_inputBoxStyle', inputBoxStyle);
+      localStorage.setItem('loki_theme', encryptData(theme));
+      localStorage.setItem('loki_bgStyle', encryptData(bgStyle));
+      localStorage.setItem('loki_commanderName', encryptData(commanderName));
+      localStorage.setItem('loki_avatarUrl', encryptData(avatarUrl));
+      localStorage.setItem('loki_modelMode', encryptData(modelMode));
+      localStorage.setItem('loki_tone', encryptData(tone));
+      localStorage.setItem('loki_systemInstruction', encryptData(systemInstruction));
+      localStorage.setItem('loki_temperature', encryptData(temperature.toString()));
+      localStorage.setItem('loki_topP', encryptData(topP.toString()));
+      localStorage.setItem('loki_topK', encryptData(topK.toString()));
+      localStorage.setItem('loki_enterToSend', encryptData(enterToSend.toString()));
+      localStorage.setItem('loki_bubbleStyle', encryptData(bubbleStyle));
+      localStorage.setItem('loki_fontSize', encryptData(fontSize));
+      localStorage.setItem('loki_fontStyle', encryptData(fontStyle));
+      localStorage.setItem('loki_soundEnabled', encryptData(soundEnabled.toString()));
+      localStorage.setItem('loki_messageAnimation', encryptData(messageAnimation.toString()));
+      localStorage.setItem('loki_autoScroll', encryptData(autoScroll.toString()));
+      localStorage.setItem('loki_typingSpeed', encryptData(typingSpeed.toString()));
+      localStorage.setItem('loki_showAvatars', encryptData(showAvatars.toString()));
+      localStorage.setItem('loki_responseLength', encryptData(responseLength));
+      localStorage.setItem('loki_accentColor', encryptData(accentColor));
+      localStorage.setItem('loki_messageDensity', encryptData(messageDensity));
+      localStorage.setItem('loki_thinkingMode', encryptData(thinkingMode.toString()));
+      localStorage.setItem('loki_searchGrounding', encryptData(searchGrounding.toString()));
+      localStorage.setItem('loki_imageSize', encryptData(imageSize));
+      localStorage.setItem('loki_liveAudioEnabled', encryptData(liveAudioEnabled.toString()));
+      localStorage.setItem('loki_animationSpeed', encryptData(animationSpeed));
+      localStorage.setItem('loki_borderRadius', encryptData(borderRadius));
+      localStorage.setItem('loki_textReveal', encryptData(textReveal));
+      localStorage.setItem('loki_appWidth', encryptData(appWidth));
+      localStorage.setItem('loki_glowIntensity', encryptData(glowIntensity));
+      localStorage.setItem('loki_effectInputBox', encryptData(effectInputBox.toString()));
+      localStorage.setItem('loki_effectMessageBubbles', encryptData(effectMessageBubbles.toString()));
+      localStorage.setItem('loki_effectSidebar', encryptData(effectSidebar.toString()));
+      localStorage.setItem('loki_effectBackground', encryptData(effectBackground.toString()));
+      localStorage.setItem('loki_effectAvatar', encryptData(effectAvatar.toString()));
+      localStorage.setItem('loki_sidebarPosition', encryptData(sidebarPosition));
+      localStorage.setItem('loki_chatAlignment', encryptData(chatAlignment));
+      localStorage.setItem('loki_blurIntensity', encryptData(blurIntensity));
+      localStorage.setItem('loki_timestampFormat', encryptData(timestampFormat));
+      localStorage.setItem('loki_soundTheme', encryptData(soundTheme));
+      localStorage.setItem('loki_codeTheme', encryptData(codeTheme));
+      localStorage.setItem('loki_avatarShape', encryptData(avatarShape));
+      localStorage.setItem('loki_messageShadow', encryptData(messageShadow));
+      localStorage.setItem('loki_sendButtonIcon', encryptData(sendButtonIcon));
+      localStorage.setItem('loki_messageHoverEffect', encryptData(messageHoverEffect));
+      localStorage.setItem('loki_sidebarTheme', encryptData(sidebarTheme));
+      localStorage.setItem('loki_inputBoxStyle', encryptData(inputBoxStyle));
     } catch (e) {
       console.error('Failed to save settings to localStorage', e);
     }
