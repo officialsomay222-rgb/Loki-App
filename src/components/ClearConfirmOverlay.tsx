@@ -1,9 +1,5 @@
 import React from 'react';
-
 import { motion } from 'framer-motion';
-
-
-
 import { Trash2 } from 'lucide-react';
 
 interface ClearConfirmOverlayProps {
