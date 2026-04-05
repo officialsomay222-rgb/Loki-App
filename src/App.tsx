@@ -48,7 +48,6 @@ declare global {
 export default function App() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
-  const [isAvatarActive, setIsAvatarActive] = useState(false);
   const [isBooting, setIsBooting] = useState(true);
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : false);
@@ -358,8 +357,6 @@ export default function App() {
       {/* 2. Awakening Overlays */}
       {awakening && (
         <div className="fixed inset-0 z-[100000] pointer-events-none">
-          <div className="bootloader-border" />
-          
           <div className="screen-flash-overlay" style={{ opacity: awakening.phase === 'shockwave' ? undefined : 0, animation: awakening.phase === 'shockwave' ? 'screen-flash 3s ease-out forwards' : 'none' }} />
           
           {awakening.phase === 'shockwave' && (
@@ -389,6 +386,7 @@ export default function App() {
               height: awakening.height,
             } as any}
           >
+             <AvatarShockwave isActive={awakening.phase === 'shockwave'} />
              <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-spin-aura bg-cyan-500/50 shadow-[0_0_15px_rgba(0,242,255,0.5)]"></div>
              <img src={"https://i.ibb.co/ns3LTFwp/Picsart-26-02-28-11-29-26-443.jpg"} className="absolute inset-0 w-full h-full rounded-full object-cover z-[2] border-2 border-white dark:border-[#08080c]" alt="Commander" />
           </div>
@@ -595,13 +593,7 @@ export default function App() {
                 className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full cursor-pointer flex justify-center items-center hover:scale-110 transition-transform ${awakening ? 'opacity-0' : 'opacity-100'}`} 
                 title={commanderName}
                 onClick={triggerAwakening}
-                onMouseDown={() => setIsAvatarActive(true)}
-                onMouseUp={() => setIsAvatarActive(false)}
-                onMouseLeave={() => setIsAvatarActive(false)}
-                onTouchStart={() => setIsAvatarActive(true)}
-                onTouchEnd={() => setIsAvatarActive(false)}
               >
-                 <AvatarShockwave isActive={isAvatarActive} />
                  {(isAwakened || effectAvatar) && (
                    <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-spin-aura" style={{
                      background: 'conic-gradient(from 0deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00f0ff, #bd00ff, #ff00ff, #ff0000)',
