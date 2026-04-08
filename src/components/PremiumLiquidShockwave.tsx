@@ -92,13 +92,15 @@ export const PremiumLiquidShockwave: React.FC = () => {
     updateSize();
     window.addEventListener('resize', updateSize);
 
-    // Premium Gemini/Cosmic inspired palette
+    // Premium Vibrant Multi-color inspired palette
     const colors = [
-      'rgba(0, 242, 255, ',   // Cyan (Gemini Core)
-      'rgba(66, 133, 244, ',  // Google Blue
-      'rgba(189, 0, 255, ',   // Deep Purple
+      'rgba(0, 242, 255, ',   // Cyan
+      'rgba(66, 133, 244, ',  // Blue
+      'rgba(189, 0, 255, ',   // Purple
       'rgba(255, 0, 127, ',   // Magenta
-      'rgba(141, 198, 255, '  // Bright Liquid Blue
+      'rgba(255, 0, 0, ',     // Red
+      'rgba(255, 255, 0, ',   // Yellow
+      'rgba(0, 255, 0, ',     // Green
     ];
 
     const duration = 5000; // 5 seconds of continuous liquid god-level flow
@@ -115,7 +117,7 @@ export const PremiumLiquidShockwave: React.FC = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
+      const centerY = window.innerHeight * 0.35; // EXACT MATCH TO 35vh in App.tsx
 
       // Silky smooth easing (easeOutQuart)
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
@@ -143,10 +145,11 @@ export const PremiumLiquidShockwave: React.FC = () => {
         // Fluid color shifting based on frameCount and progress
         const timeOffset = Math.sin(frameCount * 0.05);
 
-        auraGradient.addColorStop(0, `rgba(0, 242, 255, ${globalAlpha * (0.4 + timeOffset * 0.1)})`); // Cyan center
-        auraGradient.addColorStop(0.2, `rgba(189, 0, 255, ${globalAlpha * 0.3})`); // Purple mid
-        auraGradient.addColorStop(0.5, `rgba(66, 133, 244, ${globalAlpha * 0.2})`); // Deep Blue outer
-        auraGradient.addColorStop(0.8, `rgba(255, 0, 127, ${globalAlpha * 0.05})`); // Magenta edges
+        auraGradient.addColorStop(0, `rgba(255, 0, 0, ${globalAlpha * (0.3 + timeOffset * 0.1)})`); // Red center
+        auraGradient.addColorStop(0.2, `rgba(255, 255, 0, ${globalAlpha * 0.25})`); // Yellow mid
+        auraGradient.addColorStop(0.4, `rgba(0, 255, 0, ${globalAlpha * 0.2})`); // Green mid
+        auraGradient.addColorStop(0.6, `rgba(0, 242, 255, ${globalAlpha * 0.15})`); // Cyan mid
+        auraGradient.addColorStop(0.8, `rgba(66, 133, 244, ${globalAlpha * 0.05})`); // Blue edges
         auraGradient.addColorStop(1, `rgba(0, 0, 0, 0)`); // Transparent fade
 
         ctx.beginPath();
@@ -157,12 +160,12 @@ export const PremiumLiquidShockwave: React.FC = () => {
 
       // 2. High-performance liquid particles (spawning continuous dense cluster)
       if (progress < 0.85) {
-        const spawnCount = Math.floor(Math.random() * 4) + 6; // Dense spawn rate
+        const spawnCount = Math.floor(Math.random() * 6) + 8; // Denser spawn rate
         for (let i = 0; i < spawnCount; i++) {
           const color = colors[Math.floor(Math.random() * colors.length)];
           // Spawn tightly around center to explode outward
           const angle = Math.random() * Math.PI * 2;
-          const dist = Math.random() * 30; // Tight cluster
+          const dist = Math.random() * 40; // Tight cluster
           particlesRef.current.push(new Particle(centerX + Math.cos(angle)*dist, centerY + Math.sin(angle)*dist, color));
         }
       }
