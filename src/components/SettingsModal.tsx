@@ -170,6 +170,17 @@ const SettingItem = ({ icon: Icon, label, value, subLabel, onClick, children, da
 };
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onExportChat, onClearAllChats }) => {
+  const [quotaData, setQuotaData] = useState<{fast_count: number, generate_count: number, ultra_count: number} | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/quota')
+        .then(res => res.json())
+        .then(data => setQuotaData(data))
+        .catch(err => console.error("Failed to fetch quota data", err));
+    }
+  }, [isOpen]);
+
   const {
     theme, setTheme,
     bgStyle, setBgStyle,
@@ -454,6 +465,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                     type="toggle"
                     checked={searchGrounding}
                     onChange={setSearchGrounding}
+                    noBorder
+                  />
+                </SettingSection>
+
+                {/* Rate Limits Breakdown Section */}
+                <SettingSection title="Rate limits breakdown" delay={0.28}>
+                  <SettingItem
+                    icon={Activity}
+                    label="Imagen 4 Fast"
+                    subLabel="Daily Quota (Tier 1)"
+                    value={`${quotaData ? quotaData.fast_count : 0}/25`}
+                    type="text"
+                    onChange={() => {}}
+                  />
+                  <SettingItem
+                    icon={Activity}
+                    label="Imagen 4 Generate"
+                    subLabel="Daily Quota (Tier 2)"
+                    value={`${quotaData ? quotaData.generate_count : 0}/25`}
+                    type="text"
+                    onChange={() => {}}
+                  />
+                  <SettingItem
+                    icon={Activity}
+                    label="Imagen 4 Ultra"
+                    subLabel="Daily Quota (Tier 3)"
+                    value={`${quotaData ? quotaData.ultra_count : 0}/25`}
+                    type="text"
+                    onChange={() => {}}
+                  />
+                  <SettingItem
+                    icon={Zap}
+                    label="Peak requests per day (RPD)"
+                    value="25"
+                    type="text"
+                    onChange={() => {}}
                     noBorder
                   />
                 </SettingSection>

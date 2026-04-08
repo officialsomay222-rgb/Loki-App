@@ -181,61 +181,76 @@ export const generateChatResponse = async (params: {
 };
 
 export const generateImage = async (prompt: string, _size: '1K' | '2K' | '4K' = '1K') => {
-  const apiKey = getApiKey();
-  
-  if (!apiKey) throw new Error("Google AI Key is missing.");
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: prompt,
+      mode: 'image'
+    }),
+  });
 
-  const ai = new GoogleGenAI({ apiKey });
-  
-  let detailedPrompt = prompt;
-  try {
-    const refinementResponse = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite-preview",
-      contents: `[IMAGE_MODE] Create a stunning visual description for: ${prompt}`,
-      config: {
-        systemInstruction: "Tum ek expert Image Prompt Engineer ho. Jab user '[IMAGE_MODE]' flag ke saath koi request bheje, toh tum us text ko ek detailed, artistic, aur high-quality visual description mein badal do. Description ko Imagen 4 model ke liye optimize karo (lighting, style, aur camera angles add karo). Sirf description likhna, koi extra baat mat karna."
-      }
-    });
-    detailedPrompt = refinementResponse.text || prompt;
-  } catch (e) {
-    console.error("Gemini refinement failed, using original prompt:", e);
-  }
-
-  const modelsToTry = [
-    "imagen-4.0-fast-generate-001",
-    "imagen-4.0-generate-001",
-    "imagen-4.0-ultra-generate-001",
-    "imagen-3.0-generate-001"
-  ];
-
-  let lastError: any = null;
-
-  for (const model of modelsToTry) {
+  if (!response.ok) {
     try {
-      const response = await ai.models.generateImages({
-        model: model,
-        prompt: detailedPrompt,
-        config: {
-          numberOfImages: 1,
-          outputMimeType: "image/jpeg"
-        }
-      });
-
-      const generatedImage = response.generatedImages?.[0];
-      if (!generatedImage || !generatedImage.image || !generatedImage.image.imageBytes) {
-        throw new Error(`Model ${model} returned empty image data`);
-      }
-
-      // The imageBytes is returned as a base64 string
-      const base64Data = generatedImage.image.imageBytes;
-      return `data:image/jpeg;base64,${base64Data}`;
-    } catch (e: any) {
-      console.warn(`Failed with model ${model}:`, e);
-      lastError = e;
+      const errData = await response.json();
+      throw new Error(errData.error || "Failed to generate image.");
+    } catch (e) {
+      throw new Error("Failed to generate image. Server returned " + response.status);
     }
   }
 
-  throw new Error(`All Google Imagen models failed. Last error: ${lastError?.message || 'Unknown error'}`);
+  if (!response.body) {
+    throw new Error("No response body returned from server.");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let base64Result = "";
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n\n');
+
+    // Keep the last partial event in the buffer
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const dataStr = line.slice(6);
+        if (dataStr === '[DONE]') {
+          break;
+        }
+        try {
+          const data = JSON.parse(dataStr);
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          if (data.text) {
+            // Extract the base64 URL from the markdown ![Generated Image](url)
+            const match = data.text.match(/\!\[.*?\]\((.*?)\)/);
+            if (match && match[1]) {
+              base64Result = match[1];
+            } else {
+               // Fallback if the raw text is the URL
+               base64Result = data.text;
+            }
+          }
+        } catch (e) {
+          // Ignore parsing errors for empty or keep-alive lines
+        }
+      }
+    }
+  }
+
+  if (!base64Result) {
+    throw new Error("Failed to extract image data from server response.");
+  }
+
+  return base64Result;
 };
 
 export const transcribeAudio = async (audioBase64: string, mimeType: string) => {
