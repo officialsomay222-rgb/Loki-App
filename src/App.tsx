@@ -12,6 +12,7 @@ import { AppsModal } from './components/AppsModal';
 import { useSettings } from './contexts/SettingsContext';
 import { useChat } from './contexts/ChatContext';
 import { InfinityLogo, HeaderInfinityLogo } from './components/Logos';
+import { TimelineItem } from './components/TimelineItem';
 import { format, isToday } from 'date-fns';
 import { TaskWidget } from './features/tasks/components/TaskWidget';
 import { 
@@ -28,6 +29,12 @@ import {
   Image as ImageIcon,
   Palette,
   Sliders,
+  MoreVertical,
+  Pin,
+  PinOff,
+  Edit2,
+  Check,
+  Search,
   FileText,
   Download,
   Type,
@@ -53,6 +60,7 @@ export default function App() {
   const [isBooting, setIsBooting] = useState(true);
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : false);
+  const [timelineSearchQuery, setTimelineSearchQuery] = useState('');
   
   const isSettingsOpen = activeModal === 'settings';
   const isAppsOpen = activeModal === 'apps';
@@ -117,7 +125,7 @@ export default function App() {
     resetSettings
   } = useSettings();
   const { awakening, triggerAwakening, handleAwakeningResponse } = useAwakening(isAwakened, setIsAwakened);
-  const { sessions, currentSessionId, isLoading, createNewSession, deleteSession, deleteMessage, clearAllSessions, clearSessionMessages, setCurrentSessionId, sendMessage, stopGeneration } = useChat();
+  const { sessions, currentSessionId, isLoading, createNewSession, deleteSession, deleteMessage, clearAllSessions, clearSessionMessages, setCurrentSessionId, sendMessage, stopGeneration, togglePinSession, renameSession } = useChat();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<ChatInputHandle>(null);
@@ -196,6 +204,25 @@ export default function App() {
   }, []);
 
   const currentSession = sessions.find(s => s.id === currentSessionId);
+
+  // Search and sort timelines
+  const sortedAndFilteredSessions = React.useMemo(() => {
+    let result = [...sessions];
+
+    if (timelineSearchQuery.trim()) {
+      const lowerQuery = timelineSearchQuery.toLowerCase();
+      result = result.filter(s => s.title.toLowerCase().includes(lowerQuery));
+    }
+
+    // Sort by pinned status first
+    result.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return 0; // Maintain recent updatedAt order from DB
+    });
+
+    return result;
+  }, [sessions, timelineSearchQuery]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -443,52 +470,49 @@ export default function App() {
             <div className="text-[0.65rem] font-bold text-slate-500 dark:text-[#6b6b80] uppercase tracking-[0.3em] mb-3 px-4 mt-2">
               Recent Timelines
             </div>
+
+            <div className="px-3 mb-3 relative">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search timelines..."
+                value={timelineSearchQuery}
+                onChange={(e) => setTimelineSearchQuery(e.target.value)}
+                className={`w-full pl-9 pr-3 py-2 text-xs rounded-lg transition-all border outline-none
+                  ${(isAwakened || effectSidebar)
+                    ? 'bg-black/20 border-white/10 text-white placeholder-slate-400 focus:border-cyan-500/50 focus:bg-black/40'
+                    : 'bg-white/50 dark:bg-black/20 border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:border-cyan-500/30 focus:bg-white dark:focus:bg-black/40 shadow-sm'
+                  }
+                `}
+              />
+            </div>
+
             <AnimatePresence>
-              {sessions.map((session, index) => (
-                <motion.div 
+              {sortedAndFilteredSessions.map((session, index) => (
+                <TimelineItem
                   key={session.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.4, delay: index * 0.03, ease: [0.16, 1, 0.3, 1] }}
+                  session={session}
+                  index={index}
+                  isActive={currentSessionId === session.id}
+                  isAwakened={isAwakened}
+                  effectSidebar={effectSidebar}
                   onClick={() => {
                     setCurrentSessionId(session.id);
                     if (window.innerWidth < 768) setIsSidebarOpen(false);
                   }}
-                  className={`group relative flex items-center justify-between px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 ${
-                    currentSessionId === session.id 
-                      ? (isAwakened || effectSidebar)
-                        ? 'bg-cyan-500/20 text-white shadow-[0_0_15px_rgba(0,242,255,0.15)] border border-cyan-500/40'
-                        : 'bg-white dark:bg-white/10 text-cyan-700 dark:text-white shadow-md border border-cyan-200/50 dark:border-white/10' 
-                      : `hover:bg-white/50 dark:hover:bg-white/5 border border-transparent ${(isAwakened || effectSidebar) ? 'text-slate-300 hover:text-white' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'}`
-                  }`}
-                >
-                  {currentSessionId === session.id && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-cyan-500 rounded-r-full shadow-[0_0_10px_rgba(0,242,255,1)]" />
-                  )}
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <MessageSquare className={`w-4 h-4 shrink-0 transition-colors ${currentSessionId === session.id ? 'text-cyan-600 dark:text-[#00f2ff]' : (isAwakened || effectSidebar) ? 'text-slate-400 group-hover:text-cyan-400' : 'text-slate-400 dark:text-[#6b6b80] group-hover:text-cyan-500'}`} />
-                    <div className="truncate text-sm font-semibold tracking-tight">
-                      {session.title}
-                    </div>
-                  </div>
-                  <button 
-                    onClick={(e) => handleDeleteSession(e, session.id)}
-                    className={`p-1.5 hover:bg-slate-200 dark:hover:bg-black/50 rounded-lg transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 ${(isAwakened || effectSidebar) ? 'text-slate-400 hover:text-red-400' : 'text-slate-400 dark:text-[#6b6b80] hover:text-red-500 dark:hover:text-red-400'}`}
-                    title="Delete timeline"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </motion.div>
+                  onDelete={handleDeleteSession}
+                  onPin={togglePinSession}
+                  onRename={renameSession}
+                />
               ))}
             </AnimatePresence>
-            {sessions.length === 0 && (
+              {sortedAndFilteredSessions.length === 0 && (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-center text-slate-500 dark:text-[#6b6b80] text-sm py-12 px-6 font-medium"
               >
-                No timelines yet. Initiate an awakening.
+                  {sessions.length === 0 ? "No timelines yet. Initiate an awakening." : "No matching timelines found."}
               </motion.div>
             )}
           </div>
