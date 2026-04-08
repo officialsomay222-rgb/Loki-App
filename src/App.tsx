@@ -369,9 +369,14 @@ export default function App() {
               height: awakening.height,
             } as any}
           >
-             {awakening.phase === 'shockwave' && <PremiumLiquidShockwave />}
-             <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[1] opacity-100 animate-spin-aura bg-cyan-500/50 shadow-[0_0_15px_rgba(0,242,255,0.5)]"></div>
-             <img src={"https://i.ibb.co/ns3LTFwp/Picsart-26-02-28-11-29-26-443.jpg"} className="absolute inset-0 w-full h-full rounded-full object-cover z-[2] border-2 border-white dark:border-[#08080c]" alt="Commander" />
+             {awakening.phase === 'shockwave' && (
+                 // Render completely outside the avatar container stacking context visually using fixed positioning
+                 <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-[99999]">
+                     <PremiumLiquidShockwave />
+                 </div>
+             )}
+             <div className="absolute -inset-[2px] sm:-inset-[3px] rounded-full z-[100002] opacity-100 animate-spin-aura bg-cyan-500/50 shadow-[0_0_15px_rgba(0,242,255,0.5)]"></div>
+             <img src={"https://i.ibb.co/ns3LTFwp/Picsart-26-02-28-11-29-26-443.jpg"} className="absolute inset-0 w-full h-full rounded-full object-cover z-[100003] border-2 border-white dark:border-[#08080c]" alt="Commander" />
           </div>
         </div>
       )}
