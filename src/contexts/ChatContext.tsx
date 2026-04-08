@@ -268,7 +268,7 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
     const session = await localDb.sessions.get(id);
     if (session) {
       session.title = title;
-      session.updatedAt = new Date();
+      // Intentionally not updating updatedAt so it doesn't jump to the top
       await localDb.sessions.put(session);
     }
   }, []);
@@ -277,7 +277,7 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
     const session = await localDb.sessions.get(id);
     if (session) {
       session.isPinned = !session.isPinned;
-      session.updatedAt = new Date();
+      // Intentionally not updating updatedAt so it doesn't jump to the top (aside from pinning sort logic)
       await localDb.sessions.put(session);
     }
   }, []);
@@ -320,8 +320,21 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
     const session = await localDb.sessions.get(currentSessionId);
     if (!session) return;
 
+    const getNewTitle = () => {
+      if (userMessage.content) {
+        return userMessage.content.length > 30 ? userMessage.content.substring(0, 30) + '...' : userMessage.content;
+      }
+      if (isImageMode || (attachments && attachments.length > 0)) {
+        return "Image Upload";
+      }
+      if (audioUrl) {
+        return "Voice Note";
+      }
+      return "New Awakening";
+    };
+
     const title = session.title === 'New Awakening' 
-      ? (userMessage.content.length > 30 ? userMessage.content.substring(0, 30) + '...' : userMessage.content)
+      ? getNewTitle()
       : session.title;
 
     session.title = title;
