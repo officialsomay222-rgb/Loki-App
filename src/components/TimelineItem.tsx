@@ -63,6 +63,7 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({
   };
 
   const submitRename = () => {
+    if (!isEditing) return;
     if (editTitle.trim() && editTitle !== session.title) {
       onRename(session.id, editTitle.trim());
     } else {
@@ -144,7 +145,7 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({
               e.stopPropagation();
               onDelete(e, session.id);
             }}
-            className={`p-1.5 hover:bg-slate-200 dark:hover:bg-black/50 rounded-lg transition-all opacity-0 md:group-hover:opacity-100 ${(isAwakened || effectSidebar) ? 'text-slate-400 hover:text-red-400' : 'text-slate-400 dark:text-[#6b6b80] hover:text-red-500 dark:hover:text-red-400'} ${isMenuOpen ? 'hidden' : ''}`}
+            className={`hidden md:flex p-1.5 hover:bg-slate-200 dark:hover:bg-black/50 rounded-lg transition-all opacity-0 md:group-hover:opacity-100 ${(isAwakened || effectSidebar) ? 'text-slate-400 hover:text-red-400' : 'text-slate-400 dark:text-[#6b6b80] hover:text-red-500 dark:hover:text-red-400'} ${isMenuOpen ? 'hidden' : ''}`}
             title="Delete timeline"
           >
             <Trash2 className="w-4 h-4" />
@@ -156,7 +157,7 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({
               e.stopPropagation();
               setIsMenuOpen(!isMenuOpen);
             }}
-            className={`p-1.5 hover:bg-slate-200 dark:hover:bg-black/50 rounded-lg transition-all md:opacity-0 ${isMenuOpen ? 'opacity-100 md:opacity-100 bg-slate-200 dark:bg-black/50' : 'opacity-100'} ${(isAwakened || effectSidebar) ? 'text-slate-400 hover:text-white' : 'text-slate-400 dark:text-[#6b6b80] hover:text-slate-800 dark:hover:text-white'}`}
+            className={`p-1.5 hover:bg-slate-200 dark:hover:bg-black/50 rounded-lg transition-all md:opacity-0 ${isMenuOpen ? 'opacity-100 md:opacity-100 bg-slate-200 dark:bg-black/50' : 'opacity-100 md:pointer-events-none'} ${(isAwakened || effectSidebar) ? 'text-slate-400 hover:text-white' : 'text-slate-400 dark:text-[#6b6b80] hover:text-slate-800 dark:hover:text-white'}`}
           >
             <MoreVertical className="w-4 h-4" />
           </button>
