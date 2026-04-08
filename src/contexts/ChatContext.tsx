@@ -25,6 +25,7 @@ export type ChatSession = {
   title: string;
   messages: Message[];
   updatedAt: Date;
+  isPinned?: boolean;
 };
 
 interface ChatState {
@@ -40,6 +41,7 @@ interface ChatState {
   sendMessage: (text: string, isImageMode?: boolean, audioUrl?: string, attachments?: { data: string, mimeType: string }[]) => void;
   stopGeneration: () => void;
   renameSession: (id: string, title: string) => void;
+  togglePinSession: (id: string) => void;
 }
 
 const ChatContext = createContext<ChatState | undefined>(undefined);
@@ -271,6 +273,15 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
     }
   }, []);
 
+  const togglePinSession = useCallback(async (id: string) => {
+    const session = await localDb.sessions.get(id);
+    if (session) {
+      session.isPinned = !session.isPinned;
+      session.updatedAt = new Date();
+      await localDb.sessions.put(session);
+    }
+  }, []);
+
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -433,8 +444,8 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
 
   const contextValue = React.useMemo(() => ({
     sessions: modifiedSessions, currentSessionId, isLoading,
-    createNewSession, deleteSession, deleteMessage, clearAllSessions, clearSessionMessages, setCurrentSessionId, sendMessage, stopGeneration, renameSession
-  }), [modifiedSessions, currentSessionId, isLoading, createNewSession, deleteSession, deleteMessage, clearAllSessions, clearSessionMessages, setCurrentSessionId, sendMessage, stopGeneration, renameSession]);
+    createNewSession, deleteSession, deleteMessage, clearAllSessions, clearSessionMessages, setCurrentSessionId, sendMessage, stopGeneration, renameSession, togglePinSession
+  }), [modifiedSessions, currentSessionId, isLoading, createNewSession, deleteSession, deleteMessage, clearAllSessions, clearSessionMessages, setCurrentSessionId, sendMessage, stopGeneration, renameSession, togglePinSession]);
 
   return (
     <ChatContext.Provider value={contextValue}>
