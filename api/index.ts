@@ -324,7 +324,9 @@ app.post("/api/chat", async (req, res) => {
         }
 
         if (!base64EncodeString) {
-          throw new Error(`All Google Imagen models failed. Last error: ${lastError?.message || 'Unknown error'}`);
+          console.error("All Google Imagen models failed.", lastError);
+          // Friendly fallback error instead of raw API error dump
+          throw new Error("Loki could not generate the image at this moment. The Google Image generation quota might be exceeded or the network is unstable. Please try again later.");
         }
 
         // Use a cleaner response format - Only send the image markdown

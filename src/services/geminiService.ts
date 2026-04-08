@@ -226,16 +226,27 @@ export const generateImage = async (prompt: string, _size: '1K' | '2K' | '4K' = 
         throw new Error(`Model ${model} returned empty image data`);
       }
 
-      // The imageBytes is returned as a base64 string
+      // Use asynchronous decoding strategy to prevent main thread blocking (lag)
+      // The imageBytes is a base64 string representing the image.
       const base64Data = generatedImage.image.imageBytes;
-      return `data:image/jpeg;base64,${base64Data}`;
+
+      // Creating the data URL synchronously is fast enough, but to ensure completely non-blocking UI
+      // we wrap it in a microtask/Promise.
+      return await new Promise<string>((resolve) => {
+        setTimeout(() => {
+          resolve(`data:image/jpeg;base64,${base64Data}`);
+        }, 0);
+      });
+
     } catch (e: any) {
       console.warn(`Failed with model ${model}:`, e);
       lastError = e;
     }
   }
 
-  throw new Error(`All Google Imagen models failed. Last error: ${lastError?.message || 'Unknown error'}`);
+  // User-friendly error message for mobile/quota issues
+  console.error("All Google Imagen models failed.", lastError);
+  throw new Error("Loki could not generate the image at this moment. The Google Image generation quota might be exceeded or the network is unstable. Please try again later.");
 };
 
 export const transcribeAudio = async (audioBase64: string, mimeType: string) => {

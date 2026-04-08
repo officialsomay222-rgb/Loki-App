@@ -378,52 +378,57 @@ const MemoizedMarkdown = memo(
 );
 
 const ImageGenerationPlaceholder = () => {
-  const [showCanvas, setShowCanvas] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowCanvas(true);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!showCanvas) {
-    return (
-      <div className="flex items-center gap-1 h-4 sm:h-5">
-        <span
-          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-bounce shadow-[0_0_6px_rgba(255,255,255,0.8)]"
-          style={{ animationDelay: "0ms" }}
-        ></span>
-        <span
-          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-bounce shadow-[0_0_6px_rgba(255,255,255,0.8)]"
-          style={{ animationDelay: "150ms" }}
-        ></span>
-        <span
-          className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-bounce shadow-[0_0_6px_rgba(255,255,255,0.8)]"
-          style={{ animationDelay: "300ms" }}
-        ></span>
-      </div>
-    );
-  }
-
   return (
-    <div className="my-4 aspect-square w-full max-w-[512px] mx-auto rounded-lg overflow-hidden border border-white/30 shadow-[0_0_30px_rgba(255,255,255,0.15)] bg-black/60 relative animate-in fade-in zoom-in-95 duration-500">
-      {/* Scanning Line */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-transparent h-[200%] -translate-y-full animate-[scanline_3s_linear_infinite]"></div>
+    <div className="my-4 aspect-square w-full max-w-[512px] mx-auto rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-black relative animate-in fade-in zoom-in-95 duration-500 isolation-auto">
+      {/* Premium Apple-style blurred glass background */}
+      <div className="absolute inset-0 backdrop-blur-3xl bg-white/30 dark:bg-black/30"></div>
 
-      {/* Corner Accents */}
-      <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/50 rounded-tl-2xl"></div>
-      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/50 rounded-tr-2xl"></div>
-      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/50 rounded-bl-2xl"></div>
-      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/50 rounded-br-2xl"></div>
+      {/* Subtle ambient light sweep */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 dark:via-white/5 to-transparent h-[200%] w-[200%] -translate-x-1/2 -translate-y-1/2 animate-[spin_8s_linear_infinite]"></div>
 
-      {/* Center Logo & Text */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-        <div className="w-32 h-16 mb-6">
-          <InfinityLogo />
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 gap-6">
+        <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center">
+          {/* Logo container with float animation */}
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+            className="w-full h-full relative"
+          >
+            {/* Glow behind logo */}
+            <div className="absolute inset-0 bg-white/20 dark:bg-white/10 blur-2xl rounded-full scale-150 animate-pulse"></div>
+
+            {/* Actual Logo */}
+            <InfinityLogo className="w-full h-full drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+          </motion.div>
         </div>
-        <div className="text-xs font-mono text-white tracking-[0.4em] uppercase animate-pulse drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">
-          Rendering Canvas
+
+        <div className="flex flex-col items-center">
+          <motion.span
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-slate-800 dark:text-white/90 font-mono text-sm sm:text-base font-bold tracking-[0.25em] drop-shadow-md"
+          >
+            LOKI IS GENERATING
+          </motion.span>
+          <div className="flex gap-1.5 mt-3">
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.5, 1, 0.5]
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1.5,
+                  delay: i * 0.2,
+                  ease: "easeInOut"
+                }}
+                className="w-1.5 h-1.5 bg-slate-800 dark:bg-white rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+              ></motion.span>
+            ))}
+          </div>
         </div>
       </div>
     </div>
