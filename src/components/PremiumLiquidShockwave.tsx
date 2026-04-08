@@ -110,8 +110,6 @@ export const PremiumLiquidShockwave: React.FC = () => {
           height: '800px',
       }}
     >
-      {/* Test background just to ensure the div is visible */}
-      <div style={{position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '50%'}}></div>
       <canvas
         ref={canvasRef}
         className="w-full h-full"
