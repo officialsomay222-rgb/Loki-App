@@ -58,7 +58,7 @@ Loki X Prime isn't just a chatbot; it's a fully-fledged productivity and explora
 
 <div align="center">
   <img src="https://i.ibb.co/ns3LTFwp/Picsart-26-02-28-11-29-26-443.jpg" alt="Somay Avatar" width="150" height="150" style="border-radius: 50%; border: 4px solid #00f2ff; box-shadow: 0 0 15px rgba(0,242,255,0.5);" />
-  <h3>Somay</h3>
+  <h3>Somay a.k.a. Owner</h3>
   <p><em>Lead Architect & Developer</em></p>
   <p>Passionate about crafting "God-level" UI/UX experiences, bleeding-edge AI integrations, and high-performance software engineering.</p>
 </div>
