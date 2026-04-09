@@ -122,12 +122,18 @@ export const generateChatResponse = async (params: {
 
     if (!response.ok) {
       // If there's an error, try to parse the error message, or fallback to generic
+      let errorMsg = `Server returned ${response.status}`;
       try {
         const errData = await response.json();
-        throw new Error(errData.error || "Failed to generate chat response.");
+        if (errData.error) {
+          errorMsg = typeof errData.error === 'string' ? errData.error : JSON.stringify(errData.error);
+        } else if (errData.message) {
+          errorMsg = errData.message;
+        }
       } catch (e) {
-        throw new Error("Failed to generate chat response. Server returned " + response.status);
+        // Failed to parse JSON, stick with generic
       }
+      throw new Error(errorMsg);
     }
 
     if (!response.body) {
@@ -194,12 +200,18 @@ export const generateImage = async (prompt: string, _size: '1K' | '2K' | '4K' = 
   });
 
   if (!response.ok) {
+    let errorMsg = `Server returned ${response.status}`;
     try {
       const errData = await response.json();
-      throw new Error(errData.error || "Failed to generate image.");
+      if (errData.error) {
+        errorMsg = typeof errData.error === 'string' ? errData.error : JSON.stringify(errData.error);
+      } else if (errData.message) {
+        errorMsg = errData.message;
+      }
     } catch (e) {
-      throw new Error("Failed to generate image. Server returned " + response.status);
+      // Failed to parse JSON, stick with generic
     }
+    throw new Error(errorMsg);
   }
 
   if (!response.body) {

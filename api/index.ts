@@ -281,16 +281,20 @@ app.post("/api/chat", async (req, res) => {
         // Happy: llama-3.1-8b-instant
         const modelName = mode === "pro" ? "llama-3.3-70b-versatile" : "llama-3.1-8b-instant";
 
-        const messages = [
-          { role: "system", content: systemInstruction },
-          ...(history || [])
-            .filter((msg: any) => msg?.parts?.[0]?.text)
-            .map((msg: any) => ({
-              role: msg.role === "model" ? "assistant" : "user",
-              content: msg.parts?.[0]?.text || ""
-            })),
-          { role: "user", content: message }
-        ];
+        const messages: any[] = [];
+        if (systemInstruction && systemInstruction.trim() !== "") {
+          messages.push({ role: "system", content: systemInstruction });
+        }
+
+        const historyMessages = (history || [])
+          .filter((msg: any) => msg?.parts?.[0]?.text)
+          .map((msg: any) => ({
+            role: msg.role === "model" ? "assistant" : "user",
+            content: msg.parts?.[0]?.text || ""
+          }));
+
+        messages.push(...historyMessages);
+        messages.push({ role: "user", content: message });
 
         const stream = await groq.chat.completions.create({
           messages: messages as any,
