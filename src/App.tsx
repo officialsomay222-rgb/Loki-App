@@ -9,6 +9,7 @@ import { AwakenedBackground } from './components/AwakenedBackground';
 import { CommandPalette } from './components/CommandPalette';
 import { SettingsModal } from './components/SettingsModal';
 import { AppsModal } from './components/AppsModal';
+import { WelcomeModal } from './components/WelcomeModal';
 import { useSettings } from './contexts/SettingsContext';
 import { useChat } from './contexts/ChatContext';
 import { InfinityLogo, HeaderInfinityLogo } from './components/Logos';
@@ -62,6 +63,9 @@ export default function App() {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 768 : false);
   const [timelineSearchQuery, setTimelineSearchQuery] = useState('');
+  const [showWelcome, setShowWelcome] = useState(() => {
+    return typeof window !== 'undefined' ? !localStorage.getItem('loki_hasSeenWelcome') : false;
+  });
   
   const isSettingsOpen = activeModal === 'settings';
   const isAppsOpen = activeModal === 'apps';
@@ -421,6 +425,9 @@ export default function App() {
         onExportChat={handleExportChat}
         onClearAllChats={clearAllSessions}
       />
+
+      {/* Welcome Modal for First-time Users */}
+      <WelcomeModal isOpen={showWelcome} onClose={() => setShowWelcome(false)} />
 
       {/* 3. Main Content Layer (Flex Row/Column) */}
       <div className={`flex-1 flex min-h-0 z-10 relative ${isSidebarOpen ? (sidebarPosition === 'right' ? 'md:pr-72' : 'md:pl-72') : ''} ${sidebarPosition === 'right' ? 'flex-row-reverse' : 'flex-row'} transition-all duration-300`}>
