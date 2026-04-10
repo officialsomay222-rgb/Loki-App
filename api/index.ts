@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { GoogleGenAI } from "@google/genai";
 import Groq from "groq-sdk";
+import { HfInference } from "@huggingface/inference";
 import Database from "better-sqlite3";
 
 const app = express();
@@ -184,11 +185,13 @@ app.post("/api/chat", async (req, res) => {
       let geminiKey = process.env.GEMINI_API_KEY || process.env.GC;
       let googleKey = process.env.GOOGLE_AI_KEY;
       let groqKey = process.env.GROQ_API_KEY || process.env.GR;
+      let hfKey = process.env.HF_TOKEN || process.env.HF;
       
       // Filter out placeholder keys
       if (geminiKey && (geminiKey.includes("MY_GEMINI") || geminiKey.includes("YOUR_"))) geminiKey = undefined;
       if (googleKey && (googleKey.includes("MY_GOOGLE") || googleKey.includes("YOUR_"))) googleKey = undefined;
       if (groqKey && (groqKey.includes("MY_GROQ") || groqKey.includes("YOUR_"))) groqKey = undefined;
+      if (hfKey && (hfKey.includes("MY_HF") || hfKey.includes("YOUR_"))) hfKey = undefined;
 
       const apiKey = googleKey || geminiKey || process.env.API_KEY;
 
@@ -270,14 +273,10 @@ app.post("/api/chat", async (req, res) => {
         res.end();
 
       } else if (mode === "fast" || mode === "pro" || mode === "happy") {
-        // Fast, Pro and Happy modes use Groq as requested
-        if (!groqKey) {
-          return res.status(400).json({ error: "Groq API Key is missing. Please add 'GROQ_API_KEY' or 'GR' to your AI Studio Secrets to enable Fast/Pro/Happy models." });
+        // Fast, Pro and Happy modes use Groq or HuggingFace as fallback
+        if (!groqKey && !hfKey) {
+          return res.status(400).json({ error: "Groq or HuggingFace API Key is missing. Please add 'GROQ_API_KEY' or 'HF_TOKEN' to your AI Studio Secrets to enable Fast/Pro/Happy models." });
         }
-
-        const groq = new Groq({ apiKey: groqKey });
-        
-        const modelName = mode === "pro" ? "openai/gpt-oss-120b" : mode === "fast" ? "groq/compound-mini" : "llama-3.1-8b-instant";
 
         const messages: any[] = [];
         if (systemInstruction && systemInstruction.trim() !== "") {
@@ -299,20 +298,44 @@ app.post("/api/chat", async (req, res) => {
           messages.push({ role: "user", content: " " });
         }
 
-        const stream = await groq.chat.completions.create({
-          messages: messages as any,
-          model: modelName,
-          temperature: temperature || 0.7,
-          top_p: topP || 0.95,
-          max_tokens: 4000,
-          stream: true,
-        });
-
         setupSSE();
-        for await (const chunk of stream) {
-          const content = chunk.choices[0]?.delta?.content || "";
-          if (content) {
-            res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
+
+        if (groqKey) {
+          const groq = new Groq({ apiKey: groqKey });
+          const modelName = mode === "pro" ? "openai/gpt-oss-120b" : mode === "fast" ? "groq/compound-mini" : "llama-3.1-8b-instant";
+
+          const stream = await groq.chat.completions.create({
+            messages: messages as any,
+            model: modelName,
+            temperature: temperature || 0.7,
+            top_p: topP || 0.95,
+            max_tokens: 4000,
+            stream: true,
+          });
+
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+              res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
+            }
+          }
+        } else if (hfKey) {
+          const hf = new HfInference(hfKey);
+          const modelName = mode === "pro" ? "mistralai/Mistral-7B-Instruct-v0.2" : mode === "fast" ? "HuggingFaceH4/zephyr-7b-beta" : "microsoft/Phi-3-mini-4k-instruct";
+
+          const stream = hf.chatCompletionStream({
+            model: modelName,
+            messages: messages,
+            temperature: temperature || 0.7,
+            top_p: topP || 0.95,
+            max_tokens: 4000,
+          });
+
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+              res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
+            }
           }
         }
         res.write(`data: [DONE]\n\n`);

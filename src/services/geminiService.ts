@@ -170,7 +170,10 @@ export const generateChatResponse = async (params: {
             }
 
             if (data.error) {
-              if (typeof data.error === 'string' && data.error.includes("Groq API Key is missing")) {
+              if (typeof data.error === 'string' && data.error.includes("Groq or HuggingFace API Key is missing")) {
+                yield { text: "Commander, your Groq or HuggingFace API key is missing. Please add 'GROQ_API_KEY' or 'HF_TOKEN' to your AI Studio Secrets to enable Pro/Happy models." };
+                return;
+              } else if (typeof data.error === 'string' && data.error.includes("Groq API Key is missing")) {
                 yield { text: "Commander, your Groq API key is missing. Please add 'GROQ_API_KEY' to your AI Studio Secrets to enable Pro/Happy models." };
                 return;
               }
