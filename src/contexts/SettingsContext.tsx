@@ -412,8 +412,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
-      document.body.style.backgroundColor = '#08080c';
-      document.documentElement.style.backgroundColor = '#08080c';
+      document.body.style.backgroundColor = isAwakened ? '#050508' : '#08080c';
+      document.documentElement.style.backgroundColor = isAwakened ? '#050508' : '#08080c';
     } else {
       document.documentElement.classList.remove('dark');
       document.body.style.backgroundColor = '#f8fafc';
