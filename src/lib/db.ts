@@ -1,11 +1,29 @@
 import Dexie, { Table } from 'dexie';
 import { ChatSession } from '../contexts/ChatContext';
 
+import { Message } from '../contexts/ChatContext';
+
 export class ChatDatabase extends Dexie {
-  sessions!: Table<ChatSession, string>;
+  sessions!: Table<Omit<ChatSession, 'messages'>, string>;
+  messages!: Table<Message & { sessionId: string }, string>;
 
   constructor() {
     super('LokiChatDB');
+    this.version(2).stores({
+      sessions: 'id, title, updatedAt',
+      messages: 'id, sessionId, timestamp'
+    }).upgrade(tx => {
+      // Migration: split messages out of sessions
+      return tx.table('sessions').toCollection().modify(session => {
+        if (session.messages && Array.isArray(session.messages)) {
+          const messagesToInsert = session.messages.map(m => ({ ...m, sessionId: session.id }));
+          if (messagesToInsert.length > 0) {
+            tx.table('messages').bulkAdd(messagesToInsert).catch(console.error);
+          }
+          delete session.messages;
+        }
+      });
+    });
     this.version(1).stores({
       sessions: 'id, title, updatedAt'
     });
@@ -26,7 +44,8 @@ class DummyTable {
 }
 
 class DummyDb {
-  sessions = new DummyTable() as unknown as Table<ChatSession, string>;
+  sessions = new DummyTable() as unknown as Table<Omit<ChatSession, 'messages'>, string>;
+  messages = new DummyTable() as unknown as Table<Message & { sessionId: string }, string>;
 }
 
 let dbInstance: ChatDatabase | DummyDb;
