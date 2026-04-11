@@ -68,16 +68,13 @@ const processAudioUrl = async (audioUrl?: string): Promise<string | undefined> =
 };
 
 const updateSessionMessage = async (sessionId: string, messageId: string, content: string, reasoning?: string): Promise<void> => {
-  const session = await localDb.sessions.get(sessionId);
-  if (session) {
-    const msgIndex = session.messages.findIndex(m => m.id === messageId);
-    if (msgIndex !== -1) {
-      session.messages[msgIndex].content = content;
-      if (reasoning !== undefined) {
-        session.messages[msgIndex].reasoning = reasoning;
-      }
-      await localDb.sessions.put(session);
+  const message = await localDb.messages.get(messageId);
+  if (message && message.sessionId === sessionId) {
+    message.content = content;
+    if (reasoning !== undefined) {
+      message.reasoning = reasoning;
     }
+    await localDb.messages.put(message);
   }
 };
 
@@ -134,7 +131,26 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
-  const sessions = rawSessions || [];
+  const rawMessages = useLiveQuery(
+    async () => {
+      if (!currentSessionId) return [];
+      try {
+        return await localDb.messages.where('sessionId').equals(currentSessionId).sortBy('timestamp');
+      } catch (error) {
+        console.warn('Failed to load messages from IndexedDB:', error);
+        return [];
+      }
+    },
+    [currentSessionId],
+    []
+  );
+
+  const sessions = React.useMemo(() => {
+    return (rawSessions || []).map(s => ({
+      ...s,
+      messages: currentSessionId === s.id ? (rawMessages || []) : []
+    })) as ChatSession[];
+  }, [rawSessions, rawMessages, currentSessionId]);
 
   const sessionsRef = useRef(sessions);
   useEffect(() => {
@@ -147,7 +163,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       await localDb.sessions.add({
         id: sessionId,
         title: 'New Awakening',
-        messages: [],
         updatedAt: new Date()
       });
     } catch (e) {
@@ -251,6 +266,7 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
 
   const deleteSession = useCallback(async (id: string) => {
     await localDb.sessions.delete(id);
+    await localDb.messages.where('sessionId').equals(id).delete();
     if (currentSessionId === id) {
       const remainingSessions = await localDb.sessions.orderBy('updatedAt').reverse().toArray();
       if (remainingSessions.length > 0) {
@@ -262,23 +278,16 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
   }, [currentSessionId, createNewSession]);
 
   const deleteMessage = useCallback(async (sessionId: string, messageId: string) => {
-    const session = await localDb.sessions.get(sessionId);
-    if (session) {
-      session.messages = session.messages.filter(m => m.id !== messageId);
-      await localDb.sessions.put(session);
-    }
+    await localDb.messages.delete(messageId);
   }, []);
 
   const clearSessionMessages = useCallback(async (id: string) => {
-    const session = await localDb.sessions.get(id);
-    if (session) {
-      session.messages = [];
-      await localDb.sessions.put(session);
-    }
+    await localDb.messages.where('sessionId').equals(id).delete();
   }, []);
 
   const clearAllSessions = useCallback(async () => {
     await localDb.sessions.clear();
+    await localDb.messages.clear();
     createNewSession();
   }, [createNewSession]);
 
@@ -357,8 +366,8 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
 
     session.title = title;
     session.updatedAt = new Date();
-    session.messages.push(userMessage);
     await localDb.sessions.put(session);
+    await localDb.messages.add({ ...userMessage, sessionId: currentSessionId });
 
     setIsLoading(true);
     const controller = new AbortController();
@@ -374,11 +383,11 @@ ${modeInstruction} ${toneInstruction} ${lengthInstruction} ${systemInstruction}`
       isImage: isImageMode
     };
 
-    session.messages.push(modelMessage);
-    await localDb.sessions.put(session);
+    await localDb.messages.add({ ...modelMessage, sessionId: currentSessionId });
 
     try {
-      const history = session.messages.slice(0, -1).map(m => ({
+      const currentMessages = await localDb.messages.where('sessionId').equals(currentSessionId).sortBy('timestamp');
+      const history = currentMessages.slice(0, -1).map(m => ({
         role: m.role,
         content: m.content
       }));
