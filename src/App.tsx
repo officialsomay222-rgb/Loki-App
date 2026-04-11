@@ -644,9 +644,13 @@ export default function App() {
                 >
                    <div className={`relative flex justify-center items-center transition-all duration-700 ${isAwakened ? 'w-full max-w-[480px] sm:max-w-[700px] aspect-[2/1]' : 'w-full max-w-[200px] sm:max-w-[280px] aspect-[2/1]'}`}>
                       {isAwakened ? (
-                        <div className="relative w-full h-full krishna-awakened-sticker flex items-center justify-center">
-                          <div className="absolute inset-0 devil-sticker-border opacity-100"></div>
-                          <img src="/assets/icon.png" alt="Loki Prime Logo" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_25px_rgba(0,242,255,0.4)]" />
+                        <div className="relative w-full h-full awakened-logo-container flex items-center justify-center">
+                          {/* Hardware-accelerated RGB Aura Border */}
+                          <div className="absolute inset-0 awakened-logo-aura"></div>
+                          {/* Sweeping Shine Overlay */}
+                          <div className="absolute inset-0 awakened-logo-shine"></div>
+                          {/* Main Transparent Logo */}
+                          <img src="https://i.ibb.co/ch1LzzTD/Picsart-26-03-05-20-52-27-601.png" alt="Loki Prime Logo" className="w-full h-full object-contain relative z-10 awakened-logo-image" />
                         </div>
                       ) : (
                         <InfinityLogo />
