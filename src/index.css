@@ -269,11 +269,11 @@ body {
 }
 
 /* Ensure background matches theme to prevent white flashes during any potential overscroll */
-html.awakened-mode-active body {
+html.awakened-mode-active.dark body {
   background-color: #050508;
 }
 
-html.awakened-mode-active {
+html.awakened-mode-active.dark {
   background-color: #050508;
 }
 
@@ -931,43 +931,48 @@ a:focus-visible {
     linear-gradient(to bottom, #050508, #0a0a12);
 }
 
-.awakened-mode .bg-slate-50,
-.awakened-mode .bg-white {
+.dark .awakened-mode .bg-slate-50,
+.dark .awakened-mode .bg-white {
   background-color: transparent !important;
+}
+
+html.awakened-mode-active.dark,
+body.awakened-mode-active.dark {
+  background-color: #050508 !important;
 }
 
 html.awakened-mode-active,
 body.awakened-mode-active {
-  background-color: #050508 !important;
   overscroll-behavior: none;
 }
 
-.awakened-mode-active ::-webkit-scrollbar-track {
+.dark .awakened-mode-active ::-webkit-scrollbar-track {
   background-color: #050508 !important;
 }
 
-.awakened-mode-active ::-webkit-scrollbar-thumb {
+.dark .awakened-mode-active ::-webkit-scrollbar-thumb {
   background-color: #333 !important;
   border: 2px solid #050508;
 }
-.awakened-mode .text-slate-700,
-.awakened-mode .text-slate-600 {
+
+.dark .awakened-mode .text-slate-700,
+.dark .awakened-mode .text-slate-600 {
   color: #fff !important;
   text-shadow: none !important;
 }
 
-.awakened-mode .text-slate-500,
-.awakened-mode .text-slate-400 {
+.dark .awakened-mode .text-slate-500,
+.dark .awakened-mode .text-slate-400 {
   color: rgba(255, 255, 255, 0.8) !important;
   text-shadow: none !important;
 }
 
-.awakened-mode .border-slate-200,
-.awakened-mode .border-slate-100 {
+.dark .awakened-mode .border-slate-200,
+.dark .awakened-mode .border-slate-100 {
   border-color: rgba(0, 242, 255, 0.3) !important;
 }
 
-.awakened-mode .glass-panel {
+.dark .awakened-mode .glass-panel {
   background: rgba(5, 5, 10, 0.7) !important;
   border: 1px solid rgba(0, 242, 255, 0.15) !important;
   box-shadow: 0 12px 48px rgba(0, 242, 255, 0.1) !important;
@@ -976,13 +981,28 @@ body.awakened-mode-active {
   transform: translateZ(0);
 }
 
-.awakened-mode .bg-cyber-grid {
+/* Light Theme Awakened Mode Styles */
+html:not(.dark) .awakened-mode .glass-panel {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 242, 255, 0.3) !important;
+  box-shadow: 0 12px 48px rgba(0, 242, 255, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  transform: translateZ(0);
+}
+
+html:not(.dark) .awakened-mode .border-slate-200,
+html:not(.dark) .awakened-mode .border-slate-100 {
+  border-color: rgba(0, 242, 255, 0.2) !important;
+}
+
+.dark .awakened-mode .bg-cyber-grid {
   background-image: none !important;
   filter: none !important; /* Removed drop-shadow filter */
 }
 
 /* Dynamic Cosmic Nebula Background - Static Optimized */
-.awakened-mode .bg-nebula {
+.dark .awakened-mode .bg-nebula {
   background:
     radial-gradient(
       circle at 50% 50%,
@@ -995,7 +1015,7 @@ body.awakened-mode-active {
   animation: none !important; /* Removed heavy background animation */
 }
 
-.awakened-mode .glass-button {
+.dark .awakened-mode .glass-button {
   background: rgba(0, 242, 255, 0.05) !important;
   border: 1px solid rgba(0, 242, 255, 0.3) !important;
   color: #fff !important;
@@ -1003,10 +1023,25 @@ body.awakened-mode-active {
   backdrop-filter: none; /* Removed blur on buttons for performance */
 }
 
-.awakened-mode .glass-button:hover {
+.dark .awakened-mode .glass-button:hover {
   background: rgba(0, 242, 255, 0.15) !important;
   border-color: rgba(0, 242, 255, 0.8) !important;
   box-shadow: 0 0 15px rgba(0, 242, 255, 0.3) !important;
+}
+
+/* Light theme awakened button */
+html:not(.dark) .awakened-mode .glass-button {
+  background: rgba(0, 242, 255, 0.1) !important;
+  border: 1px solid rgba(0, 242, 255, 0.4) !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+html:not(.dark) .awakened-mode .glass-button:hover {
+  background: rgba(0, 242, 255, 0.2) !important;
+  border-color: rgba(0, 242, 255, 0.8) !important;
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
 }
 
 /* Loki X Prime Awakened Sticker - Premium RGB Aura */
@@ -1119,31 +1154,31 @@ body.awakened-mode-active {
 }
 
 /* Revert awakened mode overrides for settings modal */
-.awakened-mode .settings-modal.bg-white,
-.awakened-mode .settings-modal .bg-white {
+.dark .awakened-mode .settings-modal.bg-white,
+.dark .awakened-mode .settings-modal .bg-white {
   background-color: #ffffff !important;
 }
-.awakened-mode .settings-modal.bg-slate-50,
-.awakened-mode .settings-modal .bg-slate-50 {
+.dark .awakened-mode .settings-modal.bg-slate-50,
+.dark .awakened-mode .settings-modal .bg-slate-50 {
   background-color: #f8fafc !important;
 }
-.awakened-mode .settings-modal .text-slate-700 {
+.dark .awakened-mode .settings-modal .text-slate-700 {
   color: #334155 !important;
   text-shadow: none !important;
 }
-.awakened-mode .settings-modal .text-slate-600 {
+.dark .awakened-mode .settings-modal .text-slate-600 {
   color: #475569 !important;
   text-shadow: none !important;
 }
-.awakened-mode .settings-modal .text-slate-500 {
+.dark .awakened-mode .settings-modal .text-slate-500 {
   color: #64748b !important;
 }
-.awakened-mode .settings-modal .text-slate-400 {
+.dark .awakened-mode .settings-modal .text-slate-400 {
   color: #94a3b8 !important;
 }
-.awakened-mode .settings-modal .border-slate-200 {
+.dark .awakened-mode .settings-modal .border-slate-200 {
   border-color: #e2e8f0 !important;
 }
-.awakened-mode .settings-modal .border-slate-100 {
+.dark .awakened-mode .settings-modal .border-slate-100 {
   border-color: #f1f5f9 !important;
 }
