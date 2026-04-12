@@ -28,9 +28,8 @@ const queryClient = new QueryClient({
 
 try {
   if (Capacitor.isNativePlatform()) {
-    StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
     StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {});
-    NavigationBar.setTransparency({ isTransparent: true }).catch(() => {});
+    // NavigationBar.setTransparency is handled dynamically in SettingsContext
   }
 } catch (e) {
   console.warn('System Bar configuration failed', e);
