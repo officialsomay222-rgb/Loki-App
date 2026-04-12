@@ -1,9 +1,11 @@
 import React, { memo } from 'react';
 
+import { Theme } from '../contexts/SettingsContext';
+
 interface AwakenedBackgroundProps {
   isAwakened: boolean;
   bgStyle: 'nebula' | 'cyber-grid' | 'default';
-  theme: 'dark' | 'light';
+  theme: Theme;
 }
 
 export const AwakenedBackground = memo(({ isAwakened, bgStyle, theme }: AwakenedBackgroundProps) => {

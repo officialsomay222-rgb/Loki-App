@@ -159,6 +159,7 @@ const MarkdownImage = ({ node, ...props }: any) => {
       {isFullscreen && (
         <div
           className="fixed inset-0 z-[99999] bg-black/95 flex items-center justify-center animate-in fade-in duration-300"
+          style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
           onClick={() => setIsFullscreen(false)}
         >
           <button
