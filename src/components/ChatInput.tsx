@@ -30,6 +30,8 @@ import { transcribeAudio, connectLiveSession } from "../services/geminiService";
 import { motion, AnimatePresence } from "framer-motion";
 import { InfinityMic } from "./Logos";
 import { Capacitor } from '@capacitor/core';
+import { Camera } from '@capacitor/camera';
+import { ActionSheet, ActionSheetButtonStyle } from '@capacitor/action-sheet';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { LiveVoiceOverlay } from "./LiveVoiceOverlay";
 
@@ -184,6 +186,66 @@ export const ChatInput = memo(
           if (fileInputRef.current) {
             fileInputRef.current.value = '';
           }
+        }
+      };
+
+      const handleAttachmentClick = async () => {
+        if (Capacitor.isNativePlatform()) {
+          try {
+            const result = await ActionSheet.showActions({
+              title: 'Add Attachment',
+              options: [
+                { title: 'Photos (Gemini Style)', style: ActionSheetButtonStyle.Default },
+                { title: 'Other Files (Full File Manager)', style: ActionSheetButtonStyle.Default },
+                { title: 'Cancel', style: ActionSheetButtonStyle.Cancel }
+              ]
+            });
+
+            if (result.index === 0) {
+              const limit = 10 - attachments.length;
+              if (limit <= 0) return;
+
+              const photoResult = await Camera.pickImages({
+                limit: limit,
+              });
+
+              if (photoResult && photoResult.photos && photoResult.photos.length > 0) {
+                const newAttachments = [...attachments];
+                for (const photo of photoResult.photos) {
+                  if (newAttachments.length >= 10) break;
+                  if (photo.webPath) {
+                     try {
+                       const response = await fetch(photo.webPath);
+                       const blob = await response.blob();
+                       const reader = new FileReader();
+                       reader.readAsDataURL(blob);
+                       await new Promise<void>((resolve) => {
+                         reader.onload = () => {
+                           const base64Data = (reader.result as string).split(',')[1];
+                           newAttachments.push({
+                             data: base64Data,
+                             mimeType: `image/${photo.format || 'jpeg'}`,
+                             url: photo.webPath as string
+                           });
+                           resolve();
+                         };
+                       });
+                     } catch (err) {
+                       console.error("Failed to read picked image:", err);
+                     }
+                  }
+                }
+                setAttachments(newAttachments);
+              }
+            } else if (result.index === 1) {
+              // Open file manager for all file types
+              fileInputRef.current?.click();
+            }
+          } catch (error) {
+            console.error("Error picking attachments via Capacitor:", error);
+          }
+        } else {
+          fileInputRef.current?.click();
         }
       };
       
@@ -870,7 +932,7 @@ export const ChatInput = memo(
                           multiple
                         />
                         <button
-                          onClick={() => fileInputRef.current?.click()}
+                          onClick={handleAttachmentClick}
                           className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-slate-500 dark:text-[#C4C7C5] hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-[#E3E3E3] transition-all"
                           title="Attach file"
                         >
