@@ -245,7 +245,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100000] flex items-center justify-center overflow-hidden">
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
           {/* Backdrop (Optional for full screen, but good for exit) */}
           <motion.div 
             initial={{ opacity: 0 }}

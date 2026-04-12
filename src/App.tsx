@@ -348,7 +348,7 @@ export default function App() {
 
   if (isBooting) {
     return (
-      <div className="fixed inset-0 w-full h-full bg-[#08080c] z-[9999] flex flex-col justify-between items-center transition-opacity duration-700 pb-12 pt-24">
+      <div className="fixed inset-0 w-full h-full bg-[#08080c] z-[9999] flex flex-col justify-between items-center transition-opacity duration-700 pb-12 pt-24" style={{ paddingTop: 'calc(6rem + env(safe-area-inset-top))', paddingBottom: 'calc(3rem + env(safe-area-inset-bottom))' }}>
          <div className="flex flex-col items-center justify-center gap-8 w-full max-w-[300px] my-auto mx-auto">
             <div className="w-full max-w-[240px] aspect-[2/1] relative flex justify-center items-center">
                <InfinityLogo />
@@ -393,7 +393,7 @@ export default function App() {
 
       {/* 2. Awakening Overlays */}
       {awakening && (
-        <div className="fixed inset-0 z-[100000] pointer-events-none flex justify-center items-center">
+        <div className="fixed inset-0 z-[100000] pointer-events-none flex justify-center items-center" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
           
           {/* Shockwave rendered strictly behind the avatar container */}
           {awakening.phase === 'shockwave' && <PremiumLiquidShockwave />}
