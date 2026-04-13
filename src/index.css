@@ -243,7 +243,7 @@
 
 html,
 body {
-  height: 100dvh;
+  height: 100%;
   width: 100%;
   overflow: hidden; /* Prevent scroll on body itself */
   overscroll-behavior-y: auto; /* Enable native bounce/stretch effect */
@@ -253,7 +253,7 @@ body {
 
 /* Base App Wrapper to handle native system bars */
 .app-wrapper-deleted {
-  height: 100dvh;
+  height: 100%;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -274,7 +274,7 @@ body {
 }
 
 #root {
-  height: 100dvh;
+  height: 100%;
   width: 100%;
   isolation: isolate;
   overscroll-behavior: auto; /* Enable native bounce/stretch effect */
@@ -1249,8 +1249,7 @@ html:not(.dark) .awakened-mode .glass-button:hover {
   padding-right: env(safe-area-inset-right, 0px);
 
   /* Ensure the main wrapper fills the entire viewport, including behind system bars */
-  min-height: 100vh;
-  min-height: 100dvh; /* Modern dynamic viewport support */
+  min-height: 100%;
   width: 100%;
   position: relative;
   overflow: hidden; /* Prevent scrolling body if content spills slightly */
@@ -1263,7 +1262,7 @@ html:not(.dark) .awakened-mode .glass-button:hover {
 /* Fix for dynamic viewport and safe area app wrapper */
 .app-wrapper {
 
-  height: 100dvh;
+  height: 100%;
   width: 100%;
   position: relative;
   overflow: hidden;
