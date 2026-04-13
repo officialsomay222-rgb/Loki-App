@@ -1242,12 +1242,6 @@ html:not(.dark) .awakened-mode .glass-button:hover {
 /* --- EDGE-TO-EDGE SAFE AREA IMPLEMENTATION --- */
 /* Required to push UI elements away from transparent status/navigation bars */
 .app-wrapper-deleted {
-  /* Use env() variables injected by Capacitor / standard webviews */
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
-
   /* Ensure the main wrapper fills the entire viewport, including behind system bars */
   min-height: 100%;
   width: 100%;
@@ -1261,15 +1255,12 @@ html:not(.dark) .awakened-mode .glass-button:hover {
 
 /* Fix for dynamic viewport and safe area app wrapper */
 .app-wrapper {
-
   height: 100%;
   width: 100%;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
 }
 
 /* Ensure absolute backgrounds stretch to true edges, ignoring safe area padding */
