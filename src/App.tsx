@@ -971,7 +971,8 @@ export default function App() {
           <div
             className={`shrink-0 z-20 w-full ${appWidthClass} mx-auto`}
             style={{
-              marginBottom: "8px",
+              paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
+              paddingTop: "8px"
             }}
           >
             <ChatInput

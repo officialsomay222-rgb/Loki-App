@@ -11,10 +11,10 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         // Enforce true edge-to-edge for API 35 (Android 15) and below.
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-
-        super.onCreate(savedInstanceState);
 
         Window window = getWindow();
 
