@@ -15,6 +15,17 @@ public class MainActivity extends BridgeActivity {
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
 
+        try {
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().hide();
+            }
+            if (getActionBar() != null) {
+                getActionBar().hide();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // Ensure the native WebView background is transparent so the web background shows through
         if (bridge != null && bridge.getWebView() != null) {
             bridge.getWebView().setBackgroundColor(Color.TRANSPARENT);
