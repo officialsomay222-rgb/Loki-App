@@ -171,6 +171,7 @@ const MarkdownImage = ({ node, ...props }: any) => {
           onClick={() => setIsFullscreen(false)}
         >
           <button
+            aria-label="Close fullscreen"
             className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
             onClick={(e) => {
               e.stopPropagation();
@@ -204,6 +205,7 @@ const MarkdownImage = ({ node, ...props }: any) => {
                 link.click();
                 document.body.removeChild(link);
               }}
+              aria-label="Download image"
               className="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-white/20 text-white hover:bg-white/40 hover:text-white border border-white/50 transition-all z-50 flex items-center gap-2 font-bold tracking-wider shadow-[0_0_20px_rgba(255,255,255,0.3)]"
             >
               <svg
@@ -628,6 +630,7 @@ export const MessageBubble = memo(
                   <span className="text-slate-500 dark:text-slate-400 mx-1">•</span>
                   <button
                     onClick={() => setIsThinkingOpen(!isThinkingOpen)}
+                    aria-label="Toggle thinking"
                     className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono tracking-wider text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors uppercase"
                   >
                     <Sparkles className="w-3 h-3 text-blue-500 dark:text-blue-400" />
@@ -749,6 +752,7 @@ export const MessageBubble = memo(
               <div className="absolute -right-2 sm:-right-4 top-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
                 <button
                   onClick={() => onCopy(message.content, message.id)}
+                  aria-label="Copy text"
                   className={`p-1.5 rounded-lg bg-white/80 dark:bg-black/80 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:${accentClass}`}
                   title="Copy text"
                 >
@@ -761,6 +765,7 @@ export const MessageBubble = memo(
                 {onDelete && (
                   <button
                     onClick={() => onDelete(message.id)}
+                    aria-label="Delete message"
                     className="p-1.5 rounded-lg bg-white/50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 backdrop-blur-sm"
                     title="Delete message"
                   >
@@ -847,6 +852,7 @@ export const MessageBubble = memo(
                   <>
                     <button
                       onClick={() => onCopy(message.content, message.id)}
+                      aria-label="Copy text"
                       className="p-1.5 rounded-lg bg-white/80 dark:bg-black/80 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-white"
                       title="Copy text"
                     >
@@ -859,6 +865,7 @@ export const MessageBubble = memo(
                     {onEdit && (
                       <button
                         onClick={() => onEdit(message.content)}
+                        aria-label="Edit message"
                         className="p-1.5 rounded-lg bg-white/80 dark:bg-black/80 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-white"
                         title="Edit message"
                       >
@@ -870,6 +877,7 @@ export const MessageBubble = memo(
                 {onDelete && (
                   <button
                     onClick={() => onDelete(message.id)}
+                    aria-label="Delete message"
                     className="p-1.5 rounded-lg bg-white/50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 backdrop-blur-sm"
                     title="Delete message"
                   >
