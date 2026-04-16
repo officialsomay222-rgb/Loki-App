@@ -809,11 +809,11 @@ export default function App() {
         </motion.div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0 relative h-full">
+        <div className={`flex-1 flex flex-col min-w-0 relative h-full ${isAwakened ? "dark awakened-content" : ""}`}>
 
           {/* Header */}
           <header
-            className="absolute top-0 left-0 right-0 flex items-center justify-between px-3 sm:px-8 border-b border-slate-200 dark:border-white/5 bg-[#08080c]/80 backdrop-blur-md premium-shadow z-30 shrink-0"
+            className={`absolute top-0 left-0 right-0 flex items-center justify-between px-3 sm:px-8 border-b border-slate-200 dark:border-white/5 backdrop-blur-md premium-shadow z-30 shrink-0 ${resolvedTheme === "light" && !isAwakened ? "bg-white/80" : "bg-[#08080c]/80"}`}
             style={{
               paddingTop: "clamp(24px, env(safe-area-inset-top, 0px), 48px)",
               height: "calc(var(--header-height, 4rem) + clamp(24px, env(safe-area-inset-top, 0px), 48px))",
