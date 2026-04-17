@@ -931,10 +931,7 @@ export default function App() {
                   <div
                     className={`relative flex justify-center items-center transition-all duration-700 ${isAwakened ? "w-full max-w-[480px] sm:max-w-[700px] aspect-[2/1]" : "w-full max-w-[200px] sm:max-w-[280px] aspect-[2/1]"}`}
                     style={{
-                      opacity: isKeyboardOpen ? 0 : 1,
-                      transform: isKeyboardOpen ? "scale(0.8)" : "scale(1)",
-                      pointerEvents: isKeyboardOpen ? "none" : "auto",
-                      maxHeight: isKeyboardOpen ? "0px" : "auto"
+                      transform: isKeyboardOpen ? "scale(0.85)" : "scale(1)",
                     }}
                   >
                     {isAwakened ? (
@@ -954,7 +951,16 @@ export default function App() {
                       <InfinityLogo />
                     )}
                   </div>
-                  <div className="relative" style={{ opacity: isKeyboardOpen ? 0 : 1, transition: 'opacity 0.3s ease' }}>
+                  <div
+                    className="relative"
+                    style={{
+                      opacity: isKeyboardOpen ? 0 : 1,
+                      transition: 'opacity 0.3s ease, max-height 0.3s ease',
+                      maxHeight: isKeyboardOpen ? '0px' : '50px',
+                      overflow: 'hidden',
+                      pointerEvents: isKeyboardOpen ? "none" : "auto"
+                    }}
+                  >
                     <p
                       className={`text-slate-500 dark:text-[#6b6b80] tracking-[4px] sm:tracking-[8px] text-[0.65rem] sm:text-xs font-montserrat font-bold uppercase drop-shadow-sm px-4 transition-all duration-1000 ${isAwakened ? "text-cyan-300 animate-pulse" : "opacity-80 hover:opacity-100"}`}
                       style={
