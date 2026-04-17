@@ -9,9 +9,9 @@ import React, {
 import { motion, AnimatePresence } from "framer-motion";
 import { NetworkStatusIndicator } from "./components/NetworkStatusIndicator";
 
-import { Capacitor } from "@capacitor/core";
-import { Keyboard } from "@capacitor/keyboard";
-import { StatusBar } from "@capacitor/status-bar";
+import { Capacitor } from '@capacitor/core';
+import { Keyboard } from '@capacitor/keyboard';
+import { StatusBar } from '@capacitor/status-bar';
 import { ChatInput, ChatInputHandle } from "./components/ChatInput";
 import { useAwakening } from "./hooks/useAwakening";
 import { AvatarShockwave } from "./components/AvatarShockwave";
@@ -198,7 +198,6 @@ export default function App() {
   } = useChat();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<ChatInputHandle>(null);
 
   useEffect(() => {
@@ -240,10 +239,10 @@ export default function App() {
         })
         .catch(console.warn);
 
-      Keyboard.addListener("keyboardWillShow", () => {
+      Keyboard.addListener('keyboardWillShow', () => {
         setIsKeyboardOpen(true);
       });
-      Keyboard.addListener("keyboardWillHide", () => {
+      Keyboard.addListener('keyboardWillHide', () => {
         setIsKeyboardOpen(false);
       });
 
@@ -335,25 +334,35 @@ export default function App() {
     }
   }, [currentSession?.messages.length, currentSessionId, autoScroll]);
 
-  const checkScrollPosition = useCallback(() => {
-    const target = scrollContainerRef.current;
-    if (!target) return;
-
-    // Check if there is enough content to scroll
-    if (target.scrollHeight <= target.clientHeight) {
-      setShowScrollToBottom(false);
-      return;
-    }
-
-    const isNearBottom =
-      target.scrollHeight - target.scrollTop - target.clientHeight < 400;
-    setShowScrollToBottom(!isNearBottom);
-  }, []);
-
-  // Check scroll position when messages change or session changes
+  // Debounce scroll events to prevent checkerboarding and lag
   useEffect(() => {
-    checkScrollPosition();
-  }, [currentSession?.messages.length, currentSessionId, checkScrollPosition]);
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.classList && target.classList.contains("overflow-y-auto")) {
+        const isNearBottom =
+          target.scrollHeight - target.scrollTop - target.clientHeight < 400;
+        setShowScrollToBottom(!isNearBottom);
+      }
+
+      // Removed DOM class manipulation on body during scroll to prevent layout thrashing and severe lag
+
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        // Debounce empty callback placeholder
+      }, 150); // 150ms debounce
+    };
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+      capture: true,
+    });
+    return () => {
+      window.removeEventListener("scroll", handleScroll, { capture: true });
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
 
   const handleSendMessage = useCallback(
     async (
@@ -409,15 +418,12 @@ export default function App() {
     }
   }, [createNewSession, modelMode]);
 
-  const handleSessionClick = useCallback(
-    (id: string) => {
-      setCurrentSessionId(id);
-      if (window.innerWidth < 768) {
-        setIsSidebarOpen(false);
-      }
-    },
-    [setCurrentSessionId, setIsSidebarOpen],
-  );
+  const handleSessionClick = useCallback((id: string) => {
+    setCurrentSessionId(id);
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  }, [setCurrentSessionId, setIsSidebarOpen]);
 
   const copyToClipboard = useCallback((text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -504,10 +510,8 @@ export default function App() {
       <div
         className={`fixed inset-0 w-full h-full z-[9999] flex flex-col justify-between items-center transition-opacity duration-700 pb-12 pt-24 ${resolvedTheme === "light" ? "bg-[#ffffff]" : "bg-[#08080c]"}`}
         style={{
-          paddingTop:
-            "calc(6rem + clamp(24px, env(safe-area-inset-top), 48px))",
-          paddingBottom:
-            "calc(3rem + clamp(0px, env(safe-area-inset-bottom), 32px))",
+          paddingTop: "calc(6rem + clamp(24px, env(safe-area-inset-top), 48px))",
+          paddingBottom: "calc(3rem + clamp(0px, env(safe-area-inset-bottom), 32px))",
         }}
       >
         <div className="flex flex-col items-center justify-center gap-8 w-full max-w-[300px] my-auto mx-auto">
@@ -672,10 +676,7 @@ export default function App() {
         >
           <div
             className="p-4 flex items-center justify-between border-b border-slate-200/50 dark:border-white/5 shrink-0"
-            style={{
-              paddingTop:
-                "calc(1rem + clamp(24px, env(safe-area-inset-top, 0px), 48px))",
-            }}
+            style={{ paddingTop: "calc(1rem + clamp(24px, env(safe-area-inset-top, 0px), 48px))" }}
           >
             <div
               className={`flex items-center gap-2 font-montserrat font-bold ${isAwakened && theme === "light" ? "text-slate-900" : "text-slate-900 dark:text-white"}`}
@@ -710,8 +711,7 @@ export default function App() {
               WebkitOverflowScrolling: "touch",
               transform: "translateZ(0)",
               willChange: "transform",
-              paddingBottom:
-                "calc(0.5rem + clamp(0px, env(safe-area-inset-bottom), 32px))",
+              paddingBottom: "calc(0.5rem + clamp(0px, env(safe-area-inset-bottom), 32px))",
             }}
           >
             <div className="text-[0.65rem] font-bold text-slate-500 dark:text-[#6b6b80] uppercase tracking-[0.3em] mb-3 px-4 mt-2">
@@ -766,10 +766,7 @@ export default function App() {
 
           <div
             className="p-4 border-t border-slate-200/50 dark:border-white/5 space-y-2 mt-auto"
-            style={{
-              paddingBottom:
-                "calc(1rem + clamp(16px, env(safe-area-inset-bottom, 0px), 32px))",
-            }}
+            style={{ paddingBottom: "calc(1rem + clamp(16px, env(safe-area-inset-bottom, 0px), 32px))" }}
           >
             {sessions.length > 0 && (
               <motion.button
@@ -812,16 +809,14 @@ export default function App() {
         </motion.div>
 
         {/* Main Content */}
-        <div
-          className={`flex-1 flex flex-col min-w-0 relative h-full ${isAwakened ? "awakened-mode" : ""} ${isAwakened && resolvedTheme === "dark" ? "dark" : ""}`}
-        >
+        <div className={`flex-1 flex flex-col min-w-0 relative h-full ${isAwakened ? "awakened-content" : ""} ${isAwakened && resolvedTheme === "dark" ? "dark" : ""}`}>
+
           {/* Header */}
           <header
-            className={`absolute top-0 left-0 right-0 flex items-center justify-between px-3 sm:px-8 border-b border-slate-200 dark:border-white/5 backdrop-blur-md premium-shadow z-30 shrink-0 ${resolvedTheme === "light" ? "bg-white/80" : "bg-[#08080c]/80"}`}
+            className={`absolute top-0 left-0 right-0 flex items-center justify-between px-3 sm:px-8 border-b border-slate-200 dark:border-white/5 backdrop-blur-md premium-shadow z-30 shrink-0 ${resolvedTheme === "light" && !isAwakened ? "bg-white/80" : "bg-[#08080c]/80"}`}
             style={{
               paddingTop: "clamp(24px, env(safe-area-inset-top, 0px), 48px)",
-              height:
-                "calc(var(--header-height, 4rem) + clamp(24px, env(safe-area-inset-top, 0px), 48px))",
+              height: "calc(var(--header-height, 4rem) + clamp(24px, env(safe-area-inset-top, 0px), 48px))",
             }}
           >
             <div className="flex items-center gap-2 sm:gap-4 flex-1">
@@ -911,8 +906,6 @@ export default function App() {
 
           {/* Chat Area - Scrollable */}
           <div
-            ref={scrollContainerRef}
-            onScroll={checkScrollPosition}
             className={`flex-1 overflow-x-hidden custom-scrollbar relative w-full transform-gpu ${!currentSession || currentSession.messages.length === 0 ? "overflow-hidden" : "overflow-y-auto overscroll-auto"}`}
             style={{
               WebkitOverflowScrolling: "touch",
@@ -921,25 +914,11 @@ export default function App() {
             }}
           >
             {/* Inner spacer for floating header */}
-            <div
-              style={{
-                height:
-                  "calc(var(--header-height, 4rem) + 16px + clamp(24px, env(safe-area-inset-top, 0px), 48px))",
-                width: "100%",
-                flexShrink: 0,
-              }}
-            ></div>
+            <div style={{ height: "calc(var(--header-height, 4rem) + 16px + clamp(24px, env(safe-area-inset-top, 0px), 48px))", width: "100%", flexShrink: 0 }}></div>
 
             <div
               className={`w-full ${appWidthClass} mx-auto px-3 sm:px-6 h-full flex flex-col ${!currentSession || currentSession.messages.length === 0 ? "justify-center items-center" : "pt-4 space-y-6 sm:space-y-8"}`}
-              style={
-                !currentSession || currentSession.messages.length === 0
-                  ? {
-                      height:
-                        "calc(100% - (var(--header-height, 4rem) + 16px + clamp(24px, env(safe-area-inset-top, 0px), 48px)))",
-                    }
-                  : {}
-              }
+              style={(!currentSession || currentSession.messages.length === 0) ? { height: "calc(100% - (var(--header-height, 4rem) + 16px + clamp(24px, env(safe-area-inset-top, 0px), 48px)))" } : {}}
             >
               {!currentSession || currentSession.messages.length === 0 ? (
                 <motion.div
@@ -952,7 +931,10 @@ export default function App() {
                   <div
                     className={`relative flex justify-center items-center transition-all duration-700 ${isAwakened ? "w-full max-w-[480px] sm:max-w-[700px] aspect-[2/1]" : "w-full max-w-[200px] sm:max-w-[280px] aspect-[2/1]"}`}
                     style={{
-                      transform: isKeyboardOpen ? "scale(0.85)" : "scale(1)",
+                      opacity: isKeyboardOpen ? 0 : 1,
+                      transform: isKeyboardOpen ? "scale(0.8)" : "scale(1)",
+                      pointerEvents: isKeyboardOpen ? "none" : "auto",
+                      maxHeight: isKeyboardOpen ? "0px" : "auto"
                     }}
                   >
                     {isAwakened ? (
@@ -972,18 +954,9 @@ export default function App() {
                       <InfinityLogo />
                     )}
                   </div>
-                  <div
-                    className="relative"
-                    style={{
-                      opacity: isKeyboardOpen ? 0 : 1,
-                      transition: "opacity 0.3s ease, max-height 0.3s ease",
-                      maxHeight: isKeyboardOpen ? "0px" : "50px",
-                      overflow: "hidden",
-                      pointerEvents: isKeyboardOpen ? "none" : "auto",
-                    }}
-                  >
+                  <div className="relative" style={{ opacity: isKeyboardOpen ? 0 : 1, transition: 'opacity 0.3s ease' }}>
                     <p
-                      className={`text-slate-500 dark:text-[#6b6b80] tracking-[4px] sm:tracking-[8px] text-[0.65rem] sm:text-xs font-montserrat font-bold uppercase drop-shadow-sm px-4 transition-all duration-1000 ${isAwakened ? (resolvedTheme === "light" ? "text-cyan-600 animate-pulse" : "text-cyan-300 animate-pulse") : "opacity-80 hover:opacity-100"}`}
+                      className={`text-slate-500 dark:text-[#6b6b80] tracking-[4px] sm:tracking-[8px] text-[0.65rem] sm:text-xs font-montserrat font-bold uppercase drop-shadow-sm px-4 transition-all duration-1000 ${isAwakened ? "text-cyan-300 animate-pulse" : "opacity-80 hover:opacity-100"}`}
                       style={
                         isAwakened
                           ? { textShadow: "0 0 15px rgba(0,242,255,0.6)" }
@@ -1008,37 +981,34 @@ export default function App() {
             </div>
           </div>
 
-          {/* Scroll to Bottom Button Container */}
-          <div className={`relative w-full ${appWidthClass} mx-auto z-30 pointer-events-none h-0`}>
-            <AnimatePresence>
-              {showScrollToBottom &&
-                currentSession &&
-                currentSession.messages.length > 0 && (
-                  <motion.button
-                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 20, scale: 0.8 }}
-                    onClick={() => {
-                      messagesEndRef.current?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "end",
-                      });
-                    }}
-                    className="absolute bottom-4 right-4 sm:right-8 p-3 rounded-full flex items-center justify-center bg-cyan-600/90 backdrop-blur-md text-white shadow-[0_0_15px_rgba(0,242,255,0.4)] hover:shadow-[0_0_25px_rgba(0,242,255,0.6)] hover:bg-cyan-500 transition-all duration-300 border-2 border-cyan-400/50 pointer-events-auto"
-                  >
-                    <ArrowDown className="w-5 h-5" />
-                  </motion.button>
-                )}
-            </AnimatePresence>
-          </div>
+          {/* Scroll to Bottom Button */}
+          <AnimatePresence>
+            {showScrollToBottom &&
+              currentSession &&
+              currentSession.messages.length > 0 && (
+                <motion.button
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 20, scale: 0.8 }}
+                  onClick={() => {
+                    messagesEndRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "end",
+                    });
+                  }}
+                  className="absolute bottom-32 sm:bottom-36 right-4 sm:right-8 z-30 p-3 rounded-full flex items-center justify-center bg-cyan-600/90 backdrop-blur-md text-white shadow-[0_0_15px_rgba(0,242,255,0.4)] hover:shadow-[0_0_25px_rgba(0,242,255,0.6)] hover:bg-cyan-500 transition-all duration-300 border-2 border-cyan-400/50"
+                >
+                  <ArrowDown className="w-5 h-5" />
+                </motion.button>
+              )}
+          </AnimatePresence>
 
           {/* Input Area - Flex Item (Not Absolute) */}
           <div
             className={`shrink-0 z-20 w-full ${appWidthClass} mx-auto`}
             style={{
-              paddingBottom:
-                "calc(16px + clamp(0px, env(safe-area-inset-bottom, 0px), 24px))",
-              paddingTop: "8px",
+              paddingBottom: "calc(16px + clamp(0px, env(safe-area-inset-bottom, 0px), 24px))",
+              paddingTop: "8px"
             }}
           >
             <ChatInput
