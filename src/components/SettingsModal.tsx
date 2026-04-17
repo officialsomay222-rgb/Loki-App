@@ -245,7 +245,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100000] flex items-center justify-center overflow-hidden" style={{ paddingTop: 'clamp(24px, env(safe-area-inset-top, 0px), 48px)', paddingBottom: 'clamp(0px, env(safe-area-inset-bottom, 0px), 32px)' }}>
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center overflow-hidden">
           {/* Backdrop (Optional for full screen, but good for exit) */}
           <motion.div 
             initial={{ opacity: 0 }}
@@ -265,7 +265,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
           >
             
             {/* Header */}
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 shrink-0 bg-white dark:bg-[#0a0a0a] sticky top-0 z-20">
+            <div
+              className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 shrink-0 bg-white dark:bg-[#0a0a0a] sticky top-0 z-20"
+              style={{ paddingTop: 'calc(1rem + clamp(24px, env(safe-area-inset-top, 0px), 48px))' }}
+            >
               <div className="flex items-center gap-4">
                 <motion.button 
                   whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
@@ -290,9 +293,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="flex-1 overflow-y-auto p-6 sm:p-12 custom-scrollbar min-h-0 overscroll-contain transform-gpu"
-                style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)' }}
+                style={{
+                  WebkitOverflowScrolling: 'touch',
+                  transform: 'translateZ(0)',
+                  paddingBottom: 'calc(3rem + clamp(0px, env(safe-area-inset-bottom, 0px), 32px))'
+                }}
               >
-              <div className="max-w-3xl mx-auto space-y-12 pb-32">
+              <div className="max-w-3xl mx-auto space-y-12">
             
                 {/* Profile Section - Centered */}
                 <motion.div 
