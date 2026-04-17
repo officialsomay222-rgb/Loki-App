@@ -996,14 +996,14 @@ body.awakened-mode-active:not(.dark) ::-webkit-scrollbar-thumb {
   text-shadow: none !important;
 }
 
-html:not(.dark) .awakened-mode .text-slate-700,
-html:not(.dark) .awakened-mode .text-slate-600 {
+html:not(.dark) .awakened-content-disabled .text-slate-700,
+html:not(.dark) .awakened-content-disabled .text-slate-600 {
   color: #0f172a !important;
   text-shadow: none !important;
 }
 
-html:not(.dark) .awakened-mode .text-slate-500,
-html:not(.dark) .awakened-mode .text-slate-400 {
+html:not(.dark) .awakened-content-disabled .text-slate-500,
+html:not(.dark) .awakened-content-disabled .text-slate-400 {
   color: #475569 !important;
   text-shadow: none !important;
 }
@@ -1023,7 +1023,7 @@ html:not(.dark) .awakened-mode .text-slate-400 {
 }
 
 /* Light Theme Awakened Mode Styles */
-html:not(.dark) .awakened-mode .glass-panel {
+html:not(.dark) .awakened-content-disabled .glass-panel {
   background: rgba(255, 255, 255, 0.8) !important;
   border: 1px solid rgba(0, 242, 255, 0.4) !important;
   box-shadow: 0 12px 48px rgba(0, 242, 255, 0.15), 0 0 15px rgba(0, 242, 255, 0.05) inset !important;
@@ -1032,13 +1032,13 @@ html:not(.dark) .awakened-mode .glass-panel {
   transform: translateZ(0);
 }
 
-html:not(.dark) .awakened-mode .glass-panel:hover {
+html:not(.dark) .awakened-content-disabled .glass-panel:hover {
   border-color: rgba(0, 242, 255, 0.6) !important;
   box-shadow: 0 12px 48px rgba(0, 242, 255, 0.25), 0 0 20px rgba(0, 242, 255, 0.1) inset !important;
 }
 
-html:not(.dark) .awakened-mode .border-slate-200,
-html:not(.dark) .awakened-mode .border-slate-100 {
+html:not(.dark) .awakened-content-disabled .border-slate-200,
+html:not(.dark) .awakened-content-disabled .border-slate-100 {
   border-color: rgba(0, 242, 255, 0.2) !important;
 }
 
@@ -1076,7 +1076,7 @@ html:not(.dark) .awakened-mode .border-slate-100 {
 }
 
 /* Light theme awakened button */
-html:not(.dark) .awakened-mode .glass-button {
+html:not(.dark) .awakened-content-disabled .glass-button {
   background: rgba(0, 242, 255, 0.1) !important;
   border: 1px solid rgba(0, 242, 255, 0.4) !important;
   color: #0f172a !important;
@@ -1084,7 +1084,7 @@ html:not(.dark) .awakened-mode .glass-button {
   backdrop-filter: none;
 }
 
-html:not(.dark) .awakened-mode .glass-button:hover {
+html:not(.dark) .awakened-content-disabled .glass-button:hover {
   background: rgba(0, 242, 255, 0.2) !important;
   border-color: rgba(0, 242, 255, 0.8) !important;
   box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
