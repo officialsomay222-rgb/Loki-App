@@ -624,7 +624,7 @@ export const MessageBubble = memo(
               </div>
             )}
             <div className="flex items-center gap-2 px-1.5 flex-wrap">
-              <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase font-mono">
+              <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-800 dark:text-slate-400 uppercase font-mono">
                 Loki Prime
               </span>
 
@@ -648,7 +648,7 @@ export const MessageBubble = memo(
               )}
 
             {!message.content && !message.audioUrl && (
-              <span className={`text-[9px] sm:text-[10px] font-mono ${accentClass} animate-pulse ml-1`}>
+              <span className={`text-[9px] sm:text-[10px] font-mono text-slate-800 dark:${accentClass} animate-pulse ml-1`}>
                 {message.isImage ? "GENERATING..." : "THINKING..."}
               </span>
             )}
@@ -734,16 +734,16 @@ export const MessageBubble = memo(
                 ) : !message.audioUrl ? (
                   <div className="flex items-center gap-1 h-4 sm:h-5">
                     <span
-                      className={`w-1 h-1 sm:w-1.5 sm:h-1.5 ${accentClass} rounded-full animate-bounce`}
-                      style={{ animationDelay: "0ms", backgroundColor: accentHex, boxShadow: `0 0 6px ${accentHex}80` }}
+                      className={`w-1 h-1 sm:w-1.5 sm:h-1.5 bg-slate-800 dark:${accentClass} rounded-full animate-bounce`}
+                      style={{ animationDelay: "0ms", backgroundColor: document.documentElement.classList.contains('dark') ? accentHex : '#1e293b', boxShadow: document.documentElement.classList.contains('dark') ? `0 0 6px ${accentHex}80` : 'none' }}
                     ></span>
                     <span
-                      className={`w-1 h-1 sm:w-1.5 sm:h-1.5 ${accentClass} rounded-full animate-bounce`}
-                      style={{ animationDelay: "150ms", backgroundColor: accentHex, boxShadow: `0 0 6px ${accentHex}80` }}
+                      className={`w-1 h-1 sm:w-1.5 sm:h-1.5 bg-slate-800 dark:${accentClass} rounded-full animate-bounce`}
+                      style={{ animationDelay: "150ms", backgroundColor: document.documentElement.classList.contains('dark') ? accentHex : '#1e293b', boxShadow: document.documentElement.classList.contains('dark') ? `0 0 6px ${accentHex}80` : 'none' }}
                     ></span>
                     <span
-                      className={`w-1 h-1 sm:w-1.5 sm:h-1.5 ${accentClass} rounded-full animate-bounce`}
-                      style={{ animationDelay: "300ms", backgroundColor: accentHex, boxShadow: `0 0 6px ${accentHex}80` }}
+                      className={`w-1 h-1 sm:w-1.5 sm:h-1.5 bg-slate-800 dark:${accentClass} rounded-full animate-bounce`}
+                      style={{ animationDelay: "300ms", backgroundColor: document.documentElement.classList.contains('dark') ? accentHex : '#1e293b', boxShadow: document.documentElement.classList.contains('dark') ? `0 0 6px ${accentHex}80` : 'none' }}
                     ></span>
                   </div>
                 ) : null}
