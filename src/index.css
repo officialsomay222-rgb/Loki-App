@@ -286,7 +286,7 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden; /* Prevent scroll on body itself */
-  overscroll-behavior-y: auto; /* Enable native bounce/stretch effect */
+  overscroll-behavior-y: contain; /* Enable native bounce/stretch effect */
   scroll-behavior: smooth;
   background-color: #08080c;
 }

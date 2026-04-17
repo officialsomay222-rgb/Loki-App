@@ -915,7 +915,7 @@ export default function App() {
           <div
             ref={scrollContainerRef}
             onScroll={checkScrollPosition}
-            className={`flex-1 overflow-x-hidden custom-scrollbar relative w-full transform-gpu ${!currentSession || currentSession.messages.length === 0 ? "overflow-hidden" : "overflow-y-auto overscroll-auto"}`}
+            className={`flex-1 overflow-x-hidden custom-scrollbar relative w-full transform-gpu ${!currentSession || currentSession.messages.length === 0 ? "overflow-hidden" : "overflow-y-auto overscroll-contain"}`}
             style={{
               WebkitOverflowScrolling: "touch",
               transform: "translateZ(0)",
