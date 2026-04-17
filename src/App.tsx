@@ -1037,7 +1037,7 @@ export default function App() {
             className={`shrink-0 z-20 w-full ${appWidthClass} mx-auto`}
             style={{
               paddingBottom:
-                "calc(16px + clamp(0px, env(safe-area-inset-bottom, 0px), 24px))",
+                "calc(16px + clamp(24px, env(safe-area-inset-bottom, 24px), 48px))",
               paddingTop: "8px",
             }}
           >
