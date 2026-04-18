@@ -959,29 +959,5 @@ export const MessageBubble = memo(
         </div>
       </motion.div>
     );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.message.id === nextProps.message.id &&
-      prevProps.message.content === nextProps.message.content &&
-      prevProps.message.status === nextProps.message.status &&
-      prevProps.message.isImage === nextProps.message.isImage &&
-      prevProps.message.audioUrl === nextProps.message.audioUrl &&
-      prevProps.message.attachments === nextProps.message.attachments &&
-      prevProps.message.isVoiceResponse === nextProps.message.isVoiceResponse &&
-      prevProps.commanderName === nextProps.commanderName &&
-      prevProps.avatarUrl === nextProps.avatarUrl &&
-      prevProps.isCopied === nextProps.isCopied &&
-      prevProps.bubbleStyle === nextProps.bubbleStyle &&
-      prevProps.fontSize === nextProps.fontSize &&
-      prevProps.messageAnimation === nextProps.messageAnimation &&
-      prevProps.textReveal === nextProps.textReveal &&
-      prevProps.animationSpeed === nextProps.animationSpeed &&
-      prevProps.accentColor === nextProps.accentColor &&
-      prevProps.messageDensity === nextProps.messageDensity &&
-      prevProps.showAvatars === nextProps.showAvatars &&
-      prevProps.isAwakened === nextProps.isAwakened &&
-      prevProps.resolvedTheme === nextProps.resolvedTheme
-    );
   }
 );
