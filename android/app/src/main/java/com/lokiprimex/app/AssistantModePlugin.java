@@ -28,7 +28,18 @@ public class AssistantModePlugin extends Plugin {
 
     @PluginMethod
     public void closeAssistantMode(PluginCall call) {
-        getActivity().finish();
+        // Move app to background instead of killing it
+        getActivity().moveTaskToBack(true);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void clearAssistantMode(PluginCall call) {
+        Intent intent = getActivity().getIntent();
+        if (intent != null) {
+            intent.removeExtra("assistant_mode");
+            intent.setAction(""); // clear ASSIST action
+        }
         call.resolve();
     }
 }

@@ -25,7 +25,7 @@ interface SettingsModalProps {
 }
 
 // Sub-component for Edit Profile to prevent lag
-const EditProfileOverlay = ({ name, email, onSave, onClose }: { name: string, email: string, onSave: (name: string, email: string) => void, onClose: () => void }) => {
+const EditProfileOverlay = ({ name, email, onSave, onClose }: { key?: string, name: string, email: string, onSave: (name: string, email: string) => void, onClose: () => void }) => {
   const [tempName, setTempName] = useState(name);
   const [tempEmail, setTempEmail] = useState(email);
 
