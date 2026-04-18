@@ -71,6 +71,8 @@ declare global {
 
 const AssistantModePlugin = registerPlugin("AssistantMode");
 
+const EMPTY_ATTACHMENTS: { data: string; mimeType: string; url: string }[] = [];
+
 export default function App() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [isAssistantMode, setIsAssistantMode] = useState<boolean | null>(null);
@@ -490,6 +492,13 @@ export default function App() {
     inputRef.current?.setInput(text);
     inputRef.current?.focus();
   }, []);
+
+  const handleSetModelMode = useCallback((mode: string) => {
+    setModelMode(mode as any);
+    if (currentSessionId) {
+      setSessionModelMode(currentSessionId, mode);
+    }
+  }, [setModelMode, currentSessionId, setSessionModelMode]);
 
   const handleDeleteMessage = useCallback((id: string) => {
     if (currentSessionId) {
@@ -1125,19 +1134,14 @@ export default function App() {
               isAwakened={isAwakened}
               isLoading={isLoading}
               modelMode={currentSession?.modelMode || modelMode}
-              setModelMode={(mode) => {
-                setModelMode(mode as any);
-                if (currentSessionId) {
-                  setSessionModelMode(currentSessionId, mode);
-                }
-              }}
+              setModelMode={handleSetModelMode}
               onSendMessage={handleSendMessage}
               onDeleteSession={handleDeleteSession}
               currentSessionId={currentSessionId}
               onStopGeneration={stopGeneration}
               enterToSend={enterToSend}
               draftText={currentSession?.draftText || ""}
-              draftAttachments={currentSession?.draftAttachments || []}
+              draftAttachments={currentSession?.draftAttachments || EMPTY_ATTACHMENTS}
               saveSessionDraft={saveSessionDraft}
             />
           </div>

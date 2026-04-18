@@ -8,3 +8,7 @@
 ## 2024-04-18 - React.memo Stale Closures & Callback Stability in Mapped Lists
 **Learning:** In highly memoized components mapping over large lists (like `MessageBubble` or `TimelineItem`), passing inline functions from the parent component (`App.tsx`) inherently breaks shallow equality checks. If `React.memo` utilizes a custom `arePropsEqual` function that incorrectly ignores those callback props to maintain O(1) update performance, it can lead to fatal stale closures where the callback refers to outdated state (like capturing old IDs or settings).
 **Action:** Always extract inline functions from render map loops using `useCallback` with complete dependency arrays. Then, strictly include those stable callback properties in the custom `arePropsEqual` memoization function. This resolves stale closures while preserving the O(1) performance benefit.
+
+## 2025-10-24 - [React.memo] Inline Functions and Array Literals Breaking Memoization
+**Learning:** Passing inline functions (like `setModelMode={(mode) => ...}`) or array literals (like `draftAttachments={... || []}`) as props to a `React.memo` wrapped component causes the memoization to fail on every render. This is extremely problematic for heavy components like `ChatInput` during rapid state updates like text streaming, causing severe UI lag.
+**Action:** Always extract inline functions using `useCallback` with complete dependency arrays, and use stable module-level constants for default array/object fallbacks (e.g., `const EMPTY_ARRAY = []`).
