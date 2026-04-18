@@ -73,7 +73,7 @@ const AssistantModePlugin = registerPlugin("AssistantMode");
 
 export default function App() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [isAssistantMode, setIsAssistantMode] = useState(false);
+  const [isAssistantMode, setIsAssistantMode] = useState<boolean | null>(null);
   const [isAvatarActive, setIsAvatarActive] = useState(false);
   const [isBooting, setIsBooting] = useState(true);
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
@@ -248,13 +248,27 @@ export default function App() {
         try {
           const plugin = AssistantModePlugin as any;
           const { isAssistantMode: nativeMode } = await plugin.checkAssistantMode();
-          if (nativeMode) setIsAssistantMode(true);
+          setIsAssistantMode(nativeMode);
         } catch (e) {
           console.warn("AssistantModePlugin not available");
+          setIsAssistantMode(false);
         }
+      } else {
+        setIsAssistantMode(false);
       }
     };
     checkAssistantMode();
+
+    // Re-check when app resumes
+    if (Capacitor.isNativePlatform()) {
+      import('@capacitor/app').then(({ App }) => {
+        const appStateListener = App.addListener('appStateChange', (state) => {
+          if (state.isActive) {
+            checkAssistantMode();
+          }
+        });
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -592,6 +606,12 @@ export default function App() {
         : "max-w-4xl";
   const glowOpacity =
     glowIntensity === "low" ? "0.2" : glowIntensity === "high" ? "0.8" : "0.5";
+
+  if (isAssistantMode === null) {
+    // Render an invisible layer while we check if it's assistant mode
+    // to prevent the entire main app from flashing into view briefly
+    return <div style={{ backgroundColor: 'transparent', width: '100%', height: '100%' }} />;
+  }
 
   if (isAssistantMode) {
     return (
