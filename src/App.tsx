@@ -760,6 +760,7 @@ export default function App() {
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
+              aria-label="Close Sidebar"
               className={`p-2 rounded-lg transition-colors ${isAwakened && theme === "light" ? "hover:bg-slate-200 text-slate-600" : "hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-white"}`}
             >
               <PanelLeftClose className="w-5 h-5" />
@@ -903,6 +904,7 @@ export default function App() {
               {!isSidebarOpen && (
                 <button
                   onClick={() => setIsSidebarOpen(true)}
+                  aria-label="Open Sidebar"
                   className="p-2 sm:p-2.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors text-slate-600 dark:text-white"
                 >
                   <PanelLeftOpen className="w-5 h-5 sm:w-6 sm:h-6" />
