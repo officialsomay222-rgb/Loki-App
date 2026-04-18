@@ -486,6 +486,17 @@ export default function App() {
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
+  const handleEditMessage = useCallback((text: string) => {
+    inputRef.current?.setInput(text);
+    inputRef.current?.focus();
+  }, []);
+
+  const handleDeleteMessage = useCallback((id: string) => {
+    if (currentSessionId) {
+      deleteMessage(currentSessionId, id);
+    }
+  }, [currentSessionId, deleteMessage]);
+
   const renderedMessages = useMemo(() => {
     return currentSession?.messages.map((message) => (
       <MessageBubble
@@ -495,17 +506,8 @@ export default function App() {
         avatarUrl={avatarUrl}
         isCopied={copiedId === message.id}
         onCopy={copyToClipboard}
-        onEdit={
-          message.role === "user"
-            ? (text) => {
-                inputRef.current?.setInput(text);
-                inputRef.current?.focus();
-              }
-            : undefined
-        }
-        onDelete={(id) =>
-          currentSessionId && deleteMessage(currentSessionId, id)
-        }
+        onEdit={message.role === "user" ? handleEditMessage : undefined}
+        onDelete={handleDeleteMessage}
         formatDate={formatDate}
         bubbleStyle={bubbleStyle}
         fontSize={fontSize}
@@ -542,8 +544,6 @@ export default function App() {
     accentColor,
     messageDensity,
     showAvatars,
-    currentSessionId,
-    deleteMessage,
     chatAlignment,
     blurIntensity,
     timestampFormat,
@@ -551,6 +551,8 @@ export default function App() {
     avatarShape,
     messageShadow,
     resolvedTheme,
+    handleEditMessage,
+    handleDeleteMessage,
   ]);
 
   if (isBooting) {

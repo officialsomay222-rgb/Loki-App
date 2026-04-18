@@ -45,13 +45,13 @@ const MarkdownCode = ({ node, inline, className, children, codeTheme = 'default'
       console.error('Failed to copy code: ', err);
     });
   };
-  
+
   const themeClasses = {
     default: "bg-black/80 text-slate-400 border-white/5",
     matrix: "bg-[#0d1a0d] text-[#00ff00] border-[#00ff00]/20",
     neon: "bg-[#0a0a1a] text-[#00f0ff] border-[#00f0ff]/20"
   };
-  
+
   const headerClass = themeClasses[codeTheme as keyof typeof themeClasses] || themeClasses.default;
   const bgClass = codeTheme === 'matrix' ? '#0d1a0d' : codeTheme === 'neon' ? '#0a0a1a' : '#0d0d12';
 
@@ -170,7 +170,7 @@ const MarkdownImage = ({ node, ...props }: any) => {
                 Loading Image
               </div>
               <div className="w-32 h-0.5 bg-white/10 rounded-full overflow-hidden">
-                <motion.div 
+                <motion.div
                   className="h-full bg-blue-500"
                   initial={{ width: "0%" }}
                   animate={{ width: "100%" }}
@@ -663,7 +663,7 @@ export const MessageBubble = memo(
     const densityClass = messageDensity === 'compact' ? 'py-1' : 'py-2';
     const gapClass = messageDensity === 'compact' ? 'gap-1' : 'gap-2';
     const bubblePadding = messageDensity === 'compact' ? 'px-3 py-1.5 sm:px-4 sm:py-2' : 'px-4 py-3 sm:px-5 sm:py-4';
-    
+
     const accentHex = resolvedTheme === 'light' ? '#0f172a' : '#ffffff';
     const accentClass = resolvedTheme === 'light' ? 'text-slate-900' : 'text-white';
     const bgAccentClass = 'bg-white/10';
@@ -981,17 +981,7 @@ export const MessageBubble = memo(
       prevProps.messageDensity === nextProps.messageDensity &&
       prevProps.showAvatars === nextProps.showAvatars &&
       prevProps.isAwakened === nextProps.isAwakened &&
-      prevProps.resolvedTheme === nextProps.resolvedTheme &&
-      prevProps.chatAlignment === nextProps.chatAlignment &&
-      prevProps.blurIntensity === nextProps.blurIntensity &&
-      prevProps.timestampFormat === nextProps.timestampFormat &&
-      prevProps.codeTheme === nextProps.codeTheme &&
-      prevProps.avatarShape === nextProps.avatarShape &&
-      prevProps.messageShadow === nextProps.messageShadow &&
-      prevProps.onCopy === nextProps.onCopy &&
-      prevProps.onEdit === nextProps.onEdit &&
-      prevProps.onDelete === nextProps.onDelete &&
-      prevProps.formatDate === nextProps.formatDate
+      prevProps.resolvedTheme === nextProps.resolvedTheme
     );
   }
 );
