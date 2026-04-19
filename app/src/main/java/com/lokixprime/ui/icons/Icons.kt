@@ -381,4 +381,39 @@ object LokiIcons {
                 lineToRelative(6f, -6f)
             }
         }.build()
+
+
+    // Lucide PanelLeftOpen
+    val PanelLeftOpen: ImageVector
+        get() = ImageVector.Builder(
+            name = "PanelLeftOpen",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                fill = null,
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(18f, 3f)
+                lineTo(6f, 3f)
+                arcTo(3f, 3f, 0f, isMoreThanHalf = false, isPositiveArc = false, 3f, 6f)
+                lineTo(3f, 18f)
+                arcTo(3f, 3f, 0f, isMoreThanHalf = false, isPositiveArc = false, 6f, 21f)
+                lineTo(18f, 21f)
+                arcTo(3f, 3f, 0f, isMoreThanHalf = false, isPositiveArc = false, 21f, 18f)
+                lineTo(21f, 6f)
+                arcTo(3f, 3f, 0f, isMoreThanHalf = false, isPositiveArc = false, 18f, 3f)
+                close()
+                moveTo(9f, 3f)
+                lineTo(9f, 21f)
+                moveTo(15f, 15f)
+                lineTo(18f, 12f)
+                lineTo(15f, 9f)
+            }
+        }.build()
 }
