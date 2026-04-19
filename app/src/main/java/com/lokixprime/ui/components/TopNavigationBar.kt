@@ -47,7 +47,7 @@ fun TopNavigationBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Left side: Menu / Side panel trigger
+        // Left side: Menu trigger
         IconButton(onClick = onMenuClick) {
             Icon(
                 imageVector = LokiIcons.Menu,
@@ -57,68 +57,58 @@ fun TopNavigationBar(
         }
 
         // Center: Title
-        if (!isAwakenedMode) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "LOKI",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontFamily = Montserrat,
+                fontSize = 18.sp,
+                letterSpacing = 4.sp
+            )
+
+            HeaderInfinityLogo(modifier = Modifier.size(width = 48.dp, height = 24.dp).padding(horizontal = 8.dp))
+
+            Surface(
+                color = LokiCyan.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(6.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, LokiCyan.copy(alpha = 0.5f)),
+                modifier = Modifier.shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(6.dp),
+                    spotColor = LokiCyan.copy(alpha = 0.3f)
+                )
             ) {
                 Text(
-                    text = "LOKI",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
+                    text = "PRIME",
+                    color = LokiCyan,
+                    fontWeight = FontWeight.Black,
                     fontFamily = Montserrat,
-                    fontSize = 20.sp,
-                    letterSpacing = 4.sp
+                    fontSize = 10.sp,
+                    letterSpacing = 2.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
-                Spacer(modifier = Modifier.width(12.dp))
-                // Infinity Logo placeholder
-                Text(
-                    text = "∞",
-                    color = Color.White,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 24.sp
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Surface(
-                    color = LokiCyan.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(8.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, LokiCyan.copy(alpha = 0.5f)),
-                    modifier = Modifier.shadow(
-                        elevation = 12.dp,
-                        shape = RoundedCornerShape(8.dp),
-                        spotColor = LokiCyan.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Text(
-                        text = "PRIME",
-                        color = LokiCyan,
-                        fontWeight = FontWeight.Black,
-                        fontFamily = Montserrat,
-                        fontSize = 12.sp,
-                        letterSpacing = 3.sp,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
-                }
             }
-        } else {
-            Spacer(modifier = Modifier.weight(1f))
         }
 
-        // Right side: Avatar and Settings
+        // Right side: Avatar
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val interactionSource = remember { MutableInteractionSource() }
             val isPressed by interactionSource.collectIsPressedAsState()
             val scale by animateFloatAsState(
-                targetValue = if (isPressed) 1.1f else 1f,
+                targetValue = if (isPressed) 1.15f else 1f,
                 animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
                 label = "avatarScale"
             )
 
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(44.dp)
                     .scale(scale)
                     .clickable(
                         interactionSource = interactionSource,
@@ -127,12 +117,11 @@ fun TopNavigationBar(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (isAwakenedMode || isPressed) {
+                if (isAwakenedMode) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .offset(x = (-2).dp, y = (-2).dp)
-                            .size(52.dp)
+                            .size(48.dp)
                             .clip(CircleShape)
                             .rgbAura()
                     )
@@ -140,7 +129,7 @@ fun TopNavigationBar(
 
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .border(
                             width = 2.dp,

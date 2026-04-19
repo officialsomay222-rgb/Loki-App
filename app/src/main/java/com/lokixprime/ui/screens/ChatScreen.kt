@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,9 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.lokixprime.ui.components.ChatInputBar
-import com.lokixprime.ui.components.MessageBubble
-import com.lokixprime.ui.components.TopNavigationBar
+import com.lokixprime.ui.components.*
 import com.lokixprime.ui.components.sidebar.AppSidebar
 import com.lokixprime.ui.icons.LokiIcons
 import com.lokixprime.ui.theme.*
@@ -47,7 +46,6 @@ fun ChatScreen(
         }
     }
 
-    // Scroll to bottom FAB logic
     val showScrollToBottom by remember {
         derivedStateOf {
             val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
@@ -74,22 +72,11 @@ fun ChatScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(BackgroundDark)
+                .background(if (isAwakenedMode) Color(0xFF050508) else BackgroundDark)
         ) {
             // Awakened mode dynamic background
             if (isAwakenedMode) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    LokiCyan.copy(alpha = 0.05f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                )
+                AwakenedBackground(isAwakened = true, bgStyle = "nebula")
             }
 
             Column(modifier = Modifier.fillMaxSize()) {
@@ -108,32 +95,14 @@ fun ChatScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            // Infinite logo logic switching
-                            if (isAwakenedMode) {
-                                // Placeholder for God-Level logo
-                                Text(
-                                    text = "∞",
-                                    color = LokiCyan,
-                                    fontSize = 120.sp,
-                                    fontWeight = FontWeight.Thin,
-                                    modifier = Modifier.padding(bottom = 24.dp)
-                                )
-                            } else {
-                                Text(
-                                    text = "∞",
-                                    color = Color.White.copy(alpha=0.8f),
-                                    fontSize = 80.sp,
-                                    fontWeight = FontWeight.Light,
-                                    modifier = Modifier.padding(bottom = 24.dp)
-                                )
-                            }
+                            InfinityLogo(modifier = Modifier.size(width = 240.dp, height = 120.dp).padding(bottom = 24.dp))
 
                             val infiniteTransition = rememberInfiniteTransition(label = "pulse")
                             val alpha by infiniteTransition.animateFloat(
                                 initialValue = 0.5f,
                                 targetValue = 1f,
                                 animationSpec = infiniteRepeatable(
-                                    animation = tween(1000, easing = LinearEasing),
+                                    animation = tween(1500, easing = LinearEasing),
                                     repeatMode = RepeatMode.Reverse
                                 ),
                                 label = "alphaPulse"
@@ -141,19 +110,13 @@ fun ChatScreen(
 
                             Text(
                                 text = if (isAwakenedMode) "SYSTEM AWAKENED. AWAITING INPUT." else "AWAITING COMMAND, COMMANDER.",
-                                color = (if (isAwakenedMode) LokiCyan else Color.Gray).copy(alpha = if (isAwakenedMode) 1f else alpha),
+                                color = (if (isAwakenedMode) Color(0xFF00F2FF) else Color.Gray).copy(alpha = if (isAwakenedMode) 1f else alpha),
                                 fontFamily = Montserrat,
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 4.sp,
+                                letterSpacing = 6.sp,
                                 fontSize = 12.sp,
                                 modifier = Modifier.padding(horizontal = 24.dp),
-                                textAlign = TextAlign.Center,
-                                style = androidx.compose.ui.text.TextStyle(
-                                    shadow = if (isAwakenedMode) androidx.compose.ui.graphics.Shadow(
-                                        color = LokiCyan.copy(alpha = 0.6f),
-                                        blurRadius = 15f
-                                    ) else null
-                                )
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -175,13 +138,14 @@ fun ChatScreen(
                         // Floating Scroll-to-Bottom Button
                         Box(
                             modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(end = 16.dp, bottom = 16.dp)
+                                .fillMaxSize()
+                                .padding(end = 16.dp, bottom = 16.dp),
+                            contentAlignment = Alignment.BottomEnd
                         ) {
                             androidx.compose.animation.AnimatedVisibility(
                                 visible = showScrollToBottom,
-                                enter = fadeIn() + slideInVertically(initialOffsetY = { 50 }),
-                                exit = fadeOut() + slideOutVertically(targetOffsetY = { 50 })
+                                enter = fadeIn() + scaleIn(initialScale = 0.8f),
+                                exit = fadeOut() + scaleOut(targetScale = 0.8f)
                             ) {
                                     FloatingActionButton(
                                         onClick = {
@@ -189,9 +153,9 @@ fun ChatScreen(
                                                 listState.animateScrollToItem(messages.size - 1)
                                             }
                                         },
-                                        containerColor = LokiCyan.copy(alpha = 0.9f),
+                                        containerColor = Color(0xFF00F2FF).copy(alpha = 0.9f),
                                         contentColor = Color.White,
-                                        shape = androidx.compose.foundation.shape.CircleShape,
+                                        shape = CircleShape,
                                         modifier = Modifier.size(48.dp)
                                     ) {
                                         Icon(

@@ -86,7 +86,7 @@ object LokiIcons {
                 arcToRelative(2f, 2f, 0f, false, false, -.73f, -2.73f)
                 lineToRelative(-.15f, -.08f)
                 arcToRelative(2f, 2f, 0f, false, true, -1f, -1.74f)
-                verticalLineToRelative(-.5f)
+                verticalLineTo(-.5f)
                 arcToRelative(2f, 2f, 0f, false, true, 1f, -1.74f)
                 lineToRelative(.15f, -.09f)
                 arcToRelative(2f, 2f, 0f, false, false, .73f, -2.73f)
@@ -336,6 +336,49 @@ object LokiIcons {
                 arcToRelative(5f, 5f, 0f, false, true, 0f, 7.07f)
                 moveTo(19.07f, 4.93f)
                 arcToRelative(10f, 10f, 0f, false, true, 0f, 14.14f)
+            }
+        }.build()
+
+    // Lucide Plus
+    val Plus: ImageVector
+        get() = ImageVector.Builder(
+            name = "Plus",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(12f, 5f)
+                lineTo(12f, 19f)
+                moveTo(5f, 12f)
+                lineTo(19f, 12f)
+            }
+        }.build()
+
+    // Lucide ChevronDown
+    val ChevronDown: ImageVector
+        get() = ImageVector.Builder(
+            name = "ChevronDown",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(6f, 9f)
+                lineToRelative(6f, 6f)
+                lineToRelative(6f, -6f)
             }
         }.build()
 }
