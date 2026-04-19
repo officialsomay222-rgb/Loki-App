@@ -35,6 +35,7 @@ fun ChatScreen(
     val inputText by viewModel.inputText.collectAsState()
     val isSettingsOpen by viewModel.isSettingsOpen.collectAsState()
     val isAwakenedMode by viewModel.isAwakenedMode.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     val listState = rememberLazyListState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -80,11 +81,21 @@ fun ChatScreen(
             }
 
             Column(modifier = Modifier.fillMaxSize()) {
+                val isGeneratingImage = remember(messages) {
+                    val isGenerating = isLoading
+                    val lastMessage = messages.lastOrNull()
+                    val secondLastMessage = if (messages.size > 1) messages[messages.size - 2] else null
+                    // Matches React's: isLoading && currentSession?.messages[currentSession.messages.length - 1]?.role === "model" && currentSession?.messages[currentSession.messages.length - 2]?.isImage
+                    isGenerating && lastMessage?.role == "model" && (secondLastMessage?.content?.contains("[Image]") == true) // Simplified image check
+                }
+
                 TopNavigationBar(
                     onSettingsClick = { viewModel.toggleSettings(true) },
                     onMenuClick = { scope.launch { drawerState.open() } },
                     isAwakenedMode = isAwakenedMode,
-                    onAvatarClick = { viewModel.toggleAwakenedMode() }
+                    onAvatarClick = { viewModel.toggleAwakenedMode() },
+                    isLoading = isLoading,
+                    isGeneratingImage = isGeneratingImage
                 )
 
                 if (messages.isEmpty()) {
