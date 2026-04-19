@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lokixprime.ui.components.ChatInputBar
 import com.lokixprime.ui.components.MessageBubble
@@ -52,7 +53,14 @@ fun ChatScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(LokiCyan.copy(alpha = 0.03f))
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                LokiCyan.copy(alpha = 0.1f),
+                                Color.Transparent
+                            )
+                        )
+                    )
             )
         }
 
