@@ -20,13 +20,20 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.lokixprime.ui.icons.LokiIcons
 import com.lokixprime.ui.theme.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.lokixprime.viewmodel.SettingsViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 @Composable
 fun SettingsScreen(
     isAwakenedMode: Boolean,
     onToggleAwakenedMode: () -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    settingsViewModel: SettingsViewModel = viewModel()
 ) {
+    val settings by settingsViewModel.settings.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -25,6 +25,9 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.lokixprime.ui.theme.*
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.layout.offset
+import kotlin.math.sin
 
 fun Modifier.glassmorphism(
     shape: Shape = RoundedCornerShape(16.dp),
@@ -62,6 +65,43 @@ fun Modifier.rgbAura(): Modifier = composed {
             }) {
                 drawRect(brush = sweepGradient)
             }
+        }
+    }
+}
+
+fun Modifier.animatedFloatSoft(): Modifier = composed {
+    val infiniteTransition = rememberInfiniteTransition(label = "floatSoft")
+    val translateY by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "floatTranslation"
+    )
+
+    this.offset(y = translateY.dp)
+}
+
+fun Modifier.glowPulse(color: Color = LokiCyan): Modifier = composed {
+    val infiniteTransition = rememberInfiniteTransition(label = "glowPulse")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glowAlpha"
+    )
+
+    this.drawWithCache {
+        onDrawBehind {
+            drawCircle(
+                color = color.copy(alpha = alpha),
+                radius = size.maxDimension / 2 + 40f
+            )
         }
     }
 }
