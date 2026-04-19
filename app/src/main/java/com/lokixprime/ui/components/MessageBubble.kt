@@ -19,17 +19,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.lokixprime.viewmodel.ChatMessage
+import com.lokixprime.data.db.entity.MessageEntity
 import com.lokixprime.ui.theme.*
 import com.lokixprime.ui.modifiers.glassmorphism
+import androidx.compose.ui.viewinterop.AndroidView
+import android.widget.TextView
+import io.noties.markwon.Markwon
+import io.noties.markwon.image.coil.CoilImagesPlugin
 
 @Composable
 fun MessageBubble(
-    message: ChatMessage,
+    message: MessageEntity,
     isAwakenedMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val isUser = message.isUser
+    val isUser = message.role == "user"
 
     val alignment = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
     val bubbleBg = if (isUser) BubbleUserBg else BubbleModelBg
@@ -101,14 +105,25 @@ fun MessageBubble(
                             }
                         }
                 ) {
-                    Text(
-                        text = message.content,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontFamily = Inter,
-                        lineHeight = 24.sp
-                    )
+                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                        val context = androidx.compose.ui.platform.LocalContext.current
+                        val markwon = androidx.compose.runtime.remember(context) {
+                            Markwon.builder(context)
+                                .usePlugin(CoilImagesPlugin.create(context))
+                                .build()
+                        }
+                        AndroidView(
+                            factory = { ctx ->
+                                TextView(ctx).apply {
+                                    setTextColor(if (isUser) android.graphics.Color.WHITE else android.graphics.Color.LTGRAY)
+                                    setLineSpacing(0f, 1.5f)
+                                }
+                            },
+                            update = { textView ->
+                                markwon.setMarkdown(textView, message.content)
+                            }
+                        )
+                    }
                 }
             }
 

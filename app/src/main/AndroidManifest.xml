@@ -12,7 +12,8 @@
         android:label="Loki Prime X"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LokiPrime">
+        android:theme="@style/Theme.LokiPrime"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".MainActivity"
@@ -26,4 +27,6 @@
         </activity>
     </application>
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
