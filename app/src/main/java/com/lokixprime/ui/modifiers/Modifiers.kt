@@ -33,10 +33,11 @@ fun Modifier.glassmorphism(
     shape: Shape = RoundedCornerShape(16.dp),
     backgroundColor: Color = GlassBackgroundDark,
     borderColor: Color = GlassBorderDark,
-    borderWidth: Dp = 1.dp
+    borderWidth: Dp = 1.dp,
+    color: Color? = null
 ): Modifier = this
     .clip(shape)
-    .background(backgroundColor)
+    .background(color ?: backgroundColor)
     .border(borderWidth, borderColor, shape)
     // Note: True blur backdrop-filter is API 31+ in Compose, using semi-transparent solid as reliable fallback.
 

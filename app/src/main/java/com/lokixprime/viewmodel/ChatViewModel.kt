@@ -6,11 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.lokixprime.data.db.AppDatabase
 import com.lokixprime.data.db.entity.ChatSessionEntity
 import com.lokixprime.data.db.entity.MessageEntity
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import com.lokixprime.data.db.entity.SettingsEntity
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.UUID
 import com.lokixprime.data.api.ApiClient
@@ -19,7 +16,9 @@ import com.lokixprime.data.api.MessageHistory
 import com.lokixprime.data.api.MessagePart
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
-    private val chatDao = AppDatabase.getDatabase(application).chatDao()
+    private val db = AppDatabase.getDatabase(application)
+    private val chatDao = db.chatDao()
+    private val settingsDao = db.settingsDao()
 
     private val _sessions = MutableStateFlow<List<ChatSessionEntity>>(emptyList())
     val sessions: StateFlow<List<ChatSessionEntity>> = _sessions.asStateFlow()
@@ -39,7 +38,23 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _isAwakenedMode = MutableStateFlow(false)
     val isAwakenedMode: StateFlow<Boolean> = _isAwakenedMode.asStateFlow()
 
+    private val _settings = MutableStateFlow(SettingsEntity())
+    val settings: StateFlow<SettingsEntity> = _settings.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     init {
+        // Load settings
+        viewModelScope.launch {
+            settingsDao.getSettingsFlow().collectLatest { loadedSettings ->
+                if (loadedSettings != null) {
+                    _settings.value = loadedSettings
+                    _isAwakenedMode.value = loadedSettings.isAwakened
+                }
+            }
+        }
+
         viewModelScope.launch {
             chatDao.getAllSessionsFlow().collectLatest { sessionList ->
                 _sessions.value = sessionList
@@ -70,7 +85,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         val newSessionId = UUID.randomUUID().toString()
         val newSession = ChatSessionEntity(
             id = newSessionId,
-            title = "New Chat",
+            title = "New Awakening",
             updatedAt = System.currentTimeMillis()
         )
         viewModelScope.launch {
@@ -88,15 +103,26 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleAwakenedMode() {
-        _isAwakenedMode.value = !_isAwakenedMode.value
+        val newVal = !_isAwakenedMode.value
+        _isAwakenedMode.value = newVal
+        viewModelScope.launch {
+            settingsDao.updateAwakenedStatus(newVal)
+        }
+    }
+
+    fun updateSettings(newSettings: SettingsEntity) {
+        viewModelScope.launch {
+            settingsDao.updateSettings(newSettings)
+        }
     }
 
     fun sendMessage() {
         val text = _inputText.value.trim()
-        if (text.isEmpty()) return
+        if (text.isEmpty() || _isLoading.value) return
 
         var sessionId = _currentSessionId.value
         viewModelScope.launch {
+            _isLoading.value = true
             if (sessionId == null) {
                 sessionId = UUID.randomUUID().toString()
                 val newSession = ChatSessionEntity(
@@ -126,12 +152,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     MessageHistory(role = it.role, parts = listOf(MessagePart(it.content)))
                 }
 
+                val currentSettings = _settings.value
                 val request = ChatRequest(
                     message = text,
                     history = history,
-                    mode = "pro", // TODO: hook up to settings
-                    systemInstruction = "You are LOKI PRIME", // TODO: hook up to settings
-                    temperature = 0.7f
+                    mode = currentSettings.modelMode,
+                    systemInstruction = currentSettings.systemInstruction,
+                    temperature = currentSettings.temperature
                 )
 
                 val response = ApiClient.apiService.generateChatResponse(request)
@@ -156,6 +183,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     timestamp = System.currentTimeMillis()
                 )
                 chatDao.insertMessage(errorMsg)
+            } finally {
+                _isLoading.value = false
             }
         }
     }

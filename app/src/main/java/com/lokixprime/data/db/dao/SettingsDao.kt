@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.lokixprime.data.db.entity.SettingsEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -14,4 +15,10 @@ interface SettingsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveSettings(settings: SettingsEntity)
+
+    @Update
+    suspend fun updateSettings(settings: SettingsEntity)
+
+    @Query("UPDATE settings SET isAwakened = :isAwakened WHERE id = 1")
+    suspend fun updateAwakenedStatus(isAwakened: Boolean)
 }
