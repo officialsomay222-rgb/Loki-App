@@ -26,6 +26,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lokixprime.viewmodel.ChatViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.draw.shadow
 import com.lokixprime.ui.components.HeaderInfinityLogo
 
 @Composable
@@ -36,6 +38,7 @@ fun SettingsScreen(
     viewModel: ChatViewModel = viewModel()
 ) {
     val settings by viewModel.settings.collectAsState()
+    val isDark = isSystemInDarkTheme() || isAwakenedMode
 
     Box(
         modifier = Modifier
@@ -125,18 +128,21 @@ fun SettingsScreen(
                 // AI CONFIGURATION
                 SettingsGroup(title = "AI CONFIGURATION") {
                     SettingItem(
+                    isDark = isDark,
                         icon = LokiIcons.Monitor,
                         title = "Model Mode",
                         value = settings.modelMode.uppercase(),
                         showChevron = true
                     )
                     SettingItem(
+                    isDark = isDark,
                         icon = LokiIcons.Zap,
                         title = "Tone",
                         value = settings.tone.uppercase(),
                         showChevron = true
                     )
                     SettingItemWithSwitch(
+                    isDark = isDark,
                         icon = LokiIcons.Zap,
                         title = "Awakened Mode",
                         checked = isAwakenedMode,
@@ -147,18 +153,21 @@ fun SettingsScreen(
                 // INTERFACE
                 SettingsGroup(title = "INTERFACE") {
                     SettingItem(
+                    isDark = isDark,
                         icon = LokiIcons.Monitor,
                         title = "Theme",
                         value = settings.theme.uppercase(),
                         showChevron = true
                     )
                     SettingItem(
+                    isDark = isDark,
                         icon = LokiIcons.Zap, // Placeholder for BubbleStyle
                         title = "Bubble Style",
                         value = settings.bubbleStyle.uppercase(),
                         showChevron = true
                     )
                     SettingItem(
+                    isDark = isDark,
                         icon = LokiIcons.Zap, // Placeholder for FontSize
                         title = "Font Size",
                         value = settings.fontSize.uppercase(),
@@ -169,12 +178,14 @@ fun SettingsScreen(
                 // SYSTEM
                 SettingsGroup(title = "SYSTEM") {
                     SettingItemWithSwitch(
+                    isDark = isDark,
                         icon = LokiIcons.Volume2,
                         title = "Sound Effects",
                         checked = settings.soundEnabled,
                         onCheckedChange = { viewModel.updateSettings(settings.copy(soundEnabled = it)) }
                     )
                     SettingItemWithSwitch(
+                    isDark = isDark,
                         icon = LokiIcons.Zap, // Placeholder for Animations
                         title = "Message Animations",
                         checked = settings.messageAnimation,
@@ -228,7 +239,8 @@ fun SettingItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     value: String = "",
-    showChevron: Boolean = false
+    showChevron: Boolean = false,
+    isDark: Boolean = isSystemInDarkTheme()
 ) {
     Row(
         modifier = Modifier
@@ -246,7 +258,7 @@ fun SettingItem(
 
         Text(
             text = title,
-            color = Color.White,
+            color = if (isDark) Color.White else Color(0xFF0F172A),
             fontFamily = Inter,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp,
@@ -256,7 +268,7 @@ fun SettingItem(
         if (value.isNotEmpty()) {
             Text(
                 text = value,
-                color = Color.Gray,
+                color = if (isDark) Color(0xFF717171) else Color(0xFF64748B),
                 fontFamily = Inter,
                 fontSize = 15.sp
             )
@@ -278,7 +290,8 @@ fun SettingItemWithSwitch(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    isDark: Boolean = isSystemInDarkTheme()
 ) {
     Row(
         modifier = Modifier
@@ -295,7 +308,7 @@ fun SettingItemWithSwitch(
 
         Text(
             text = title,
-            color = Color.White,
+            color = if (isDark) Color.White else Color(0xFF0F172A),
             fontFamily = Inter,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp,
@@ -307,9 +320,9 @@ fun SettingItemWithSwitch(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = Color.White,
+                checkedTrackColor = if (isDark) Color.White else Color(0xFF0F172A),
                 uncheckedThumbColor = Color.White,
-                uncheckedTrackColor = Color.DarkGray
+                uncheckedTrackColor = if (isDark) Color.DarkGray else Color.LightGray
             )
         )
     }
