@@ -29,5 +29,6 @@ data class SettingsEntity(
     val effectBackground: Boolean = true,
     val effectAvatar: Boolean = true,
     val sidebarPosition: String = "left",
-    val appWidth: String = "normal"
+    val appWidth: String = "normal",
+    val hasSeenWelcome: Boolean = false
 )

@@ -361,6 +361,72 @@ object LokiIcons {
             }
         }.build()
 
+    // Lucide Sparkles
+    val Sparkles: ImageVector
+        get() = ImageVector.Builder(
+            name = "Sparkles",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(9.937f, 15.5f)
+                arcTo(2f, 2f, 0f, false, false, 8.5f, 14.063f)
+                lineToRelative(-6.135f, -1.582f)
+                arcToRelative(0.5f, 0.5f, 0f, false, true, 0f, -0.962f)
+                lineTo(8.5f, 9.936f)
+                arcTo(2f, 2f, 0f, false, false, 9.937f, 8.5f)
+                lineToRelative(1.582f, -6.135f)
+                arcToRelative(0.5f, 0.5f, 0f, false, true, 0.963f, 0f)
+                lineTo(14.063f, 8.5f)
+                arcTo(2f, 2f, 0f, false, false, 15.5f, 9.937f)
+                lineToRelative(6.135f, 1.581f)
+                arcToRelative(0.5f, 0.5f, 0f, false, true, 0f, 0.964f)
+                lineTo(15.5f, 14.063f)
+                arcToRelative(2f, 2f, 0f, false, false, -1.437f, 1.437f)
+                lineToRelative(-1.582f, 6.135f)
+                arcToRelative(0.5f, 0.5f, 0f, false, true, -0.963f, 0f)
+                close()
+                moveTo(20f, 3f)
+                verticalLineToRelative(4f)
+                moveTo(22f, 5f)
+                horizontalLineToRelative(-4f)
+                moveTo(4f, 17f)
+                verticalLineToRelative(2f)
+                moveTo(5f, 18f)
+                horizontalLineTo(3f)
+            }
+        }.build()
+
+    // Lucide ArrowRight
+    val ArrowRight: ImageVector
+        get() = ImageVector.Builder(
+            name = "ArrowRight",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(5f, 12f)
+                horizontalLineToRelative(14f)
+                moveTo(12f, 5f)
+                lineToRelative(7f, 7f)
+                lineToRelative(-7f, 7f)
+            }
+        }.build()
+
     // Lucide ChevronDown
     val ChevronDown: ImageVector
         get() = ImageVector.Builder(

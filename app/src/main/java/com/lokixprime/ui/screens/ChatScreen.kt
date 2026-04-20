@@ -36,6 +36,7 @@ fun ChatScreen(
     val isSettingsOpen by viewModel.isSettingsOpen.collectAsState()
     val isAwakenedMode by viewModel.isAwakenedMode.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val settings by viewModel.settings.collectAsState()
 
     val listState = rememberLazyListState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -196,4 +197,11 @@ fun ChatScreen(
             onClose = { viewModel.toggleSettings(false) }
         )
     }
+
+    WelcomeModal(
+        isOpen = !settings.hasSeenWelcome,
+        onClose = { name ->
+            viewModel.markWelcomeSeen(name)
+        }
+    )
 }
