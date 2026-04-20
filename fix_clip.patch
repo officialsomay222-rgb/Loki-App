@@ -1,0 +1,11 @@
+--- app/src/main/java/com/lokixprime/ui/modifiers/Modifiers.kt
++++ app/src/main/java/com/lokixprime/ui/modifiers/Modifiers.kt
+@@ -107,7 +107,7 @@
+                     cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerPx, cornerPx)
+                 ))
+             }
+-            androidx.compose.ui.graphics.drawscope.clipPath(path = path) {
++            clipPath(path = path) {
+                  withTransform({
+                     rotate(degrees = rotation, pivot = Offset(size.width / 2, size.height / 2))
+                  }) {
