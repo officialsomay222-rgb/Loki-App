@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.lokixprime.data.db.entity.ChatSessionEntity
 import com.lokixprime.data.db.entity.MessageEntity
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,9 @@ interface ChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: ChatSessionEntity)
 
+    @Update
+    suspend fun updateSession(session: ChatSessionEntity)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMessage(message: MessageEntity)
 
@@ -40,4 +44,15 @@ interface ChatDao {
 
     @Query("DELETE FROM messages WHERE id = :messageId AND sessionId = :sessionId")
     suspend fun deleteMessage(sessionId: String, messageId: String)
+
+
+    @Query("SELECT * FROM sessions WHERE id = :sessionId LIMIT 1")
+    suspend fun getSessionById(sessionId: String): ChatSessionEntity?
+
+    @Transaction
+    suspend fun deleteSessionAndMessages(sessionId: String) {
+        deleteSession(sessionId)
+        deleteMessagesBySession(sessionId)
+    }
+
 }

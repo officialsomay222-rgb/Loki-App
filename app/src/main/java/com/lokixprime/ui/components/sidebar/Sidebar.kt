@@ -3,6 +3,8 @@ package com.lokixprime.ui.components.sidebar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lokixprime.data.db.entity.ChatSessionEntity
 import com.lokixprime.ui.icons.LokiIcons
 import com.lokixprime.ui.theme.Inter
 import com.lokixprime.ui.theme.LokiCyan
@@ -20,7 +23,15 @@ import com.lokixprime.ui.theme.SurfaceVariantDark
 
 @Composable
 fun AppSidebar(
+    sessions: List<ChatSessionEntity>,
+    currentSessionId: String?,
+    isAwakened: Boolean,
+    effectSidebar: Boolean,
     onCloseSidebar: () -> Unit,
+    onSessionClick: (String) -> Unit,
+    onDeleteSession: (String) -> Unit,
+    onPinSession: (String) -> Unit,
+    onRenameSession: (String, String) -> Unit,
     onSettingsClick: () -> Unit,
     onClearChatClick: () -> Unit
 ) {
@@ -69,21 +80,35 @@ fun AppSidebar(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Timeline Items List Placeholder (Future impl)
+            // Timeline Items List
             Column(modifier = Modifier.weight(1f)) {
-                Surface(
-                    color = Color.White.copy(alpha = 0.05f),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                if (sessions.isEmpty()) {
                     Text(
-                        text = "Current Session",
-                        color = LokiCyan,
+                        text = "No Timeline Available",
+                        color = Color.Gray,
                         fontFamily = Inter,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(16.dp)
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(vertical = 24.dp).align(Alignment.CenterHorizontally)
                     )
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        itemsIndexed(sessions, key = { _, s -> s.id }) { index, session ->
+                            TimelineItem(
+                                session = session,
+                                isActive = currentSessionId == session.id,
+                                isAwakened = isAwakened,
+                                effectSidebar = effectSidebar,
+                                onClick = onSessionClick,
+                                onDelete = onDeleteSession,
+                                onPin = onPinSession,
+                                onRename = onRenameSession,
+                                index = index
+                            )
+                        }
+                    }
                 }
             }
 

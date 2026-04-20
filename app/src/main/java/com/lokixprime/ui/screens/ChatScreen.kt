@@ -37,6 +37,8 @@ fun ChatScreen(
     val isAwakenedMode by viewModel.isAwakenedMode.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val hasSeenWelcome by viewModel.hasSeenWelcome.collectAsState()
+    val sessions by viewModel.sessions.collectAsState()
+    val currentSessionId by viewModel.currentSessionId.collectAsState()
 
     val listState = rememberLazyListState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -59,7 +61,15 @@ fun ChatScreen(
         drawerState = drawerState,
         drawerContent = {
             AppSidebar(
+                sessions = sessions,
+                currentSessionId = currentSessionId,
+                isAwakened = isAwakenedMode,
+                effectSidebar = false, // TODO: effectSidebar implementation
                 onCloseSidebar = { scope.launch { drawerState.close() } },
+                onSessionClick = { viewModel.setCurrentSession(it) },
+                onDeleteSession = { viewModel.deleteSession(it) },
+                onPinSession = { viewModel.togglePinSession(it) },
+                onRenameSession = { id, title -> viewModel.renameSession(id, title) },
                 onSettingsClick = {
                     scope.launch { drawerState.close() }
                     viewModel.toggleSettings(true)

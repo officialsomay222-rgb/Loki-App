@@ -89,6 +89,31 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         _currentSessionId.value = id
     }
 
+    fun deleteSession(sessionId: String) {
+        viewModelScope.launch {
+            chatDao.deleteSessionAndMessages(sessionId)
+        }
+    }
+
+    fun togglePinSession(sessionId: String) {
+        viewModelScope.launch {
+            val session = chatDao.getSessionById(sessionId)
+            if (session != null) {
+                chatDao.updateSession(session.copy(isPinned = !session.isPinned))
+            }
+        }
+    }
+
+    fun renameSession(sessionId: String, newTitle: String) {
+        viewModelScope.launch {
+            val session = chatDao.getSessionById(sessionId)
+            if (session != null) {
+                chatDao.updateSession(session.copy(title = newTitle))
+            }
+        }
+    }
+
+
     fun createNewSession() {
         val newSessionId = UUID.randomUUID().toString()
         val newSession = ChatSessionEntity(
