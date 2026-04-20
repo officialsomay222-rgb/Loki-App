@@ -110,6 +110,11 @@ fun AppSidebar(
             // Bottom Actions
             Column(modifier = Modifier.padding(top = 16.dp)) {
                 SidebarActionItem(
+                    icon = LokiIcons.Rocket,
+                    label = "Try Our Apps",
+                    onClick = onAppsClick
+                )
+                SidebarActionItem(
                     icon = LokiIcons.Settings,
                     label = "Settings",
                     onClick = onSettingsClick
