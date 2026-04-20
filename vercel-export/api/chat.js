@@ -6,6 +6,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Authentication check
+  const authToken = process.env.API_AUTH_TOKEN;
+  if (authToken && authToken !== "MY_API_AUTH_TOKEN" && !authToken.includes("YOUR_")) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${authToken}`) {
+      return res.status(401).json({ error: "Unauthorized: Invalid or missing API token." });
+    }
+  }
+
   const { message, slot } = req.body;
 
   if (!message || !slot) {

@@ -201,6 +201,14 @@ fun SettingsScreen(
                         checked = settings.messageAnimation,
                         onCheckedChange = { viewModel.updateSettings(settings.copy(messageAnimation = it)) }
                     )
+                    SettingItemWithText(
+                        isDark = isDark,
+                        icon = LokiIcons.Zap, // Placeholder for API Token
+                        title = "API Auth Token",
+                        value = settings.apiAuthToken,
+                        onValueChange = { viewModel.updateSettings(settings.copy(apiAuthToken = it)) },
+                        placeholder = "Enter API token"
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -334,6 +342,61 @@ fun SettingItem(
                 modifier = Modifier.padding(start = 8.dp).size(16.dp)
             )
         }
+    }
+}
+
+@Composable
+fun SettingItemWithText(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String = "",
+    isDark: Boolean = isSystemInDarkTheme()
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 14.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp)
+            )
+
+            Text(
+                text = title,
+                color = if (isDark) Color.White else Color(0xFF0F172A),
+                fontFamily = Inter,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(start = 16.dp).weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(placeholder, color = Color.Gray) },
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = if (isDark) Color.White else Color.Black,
+                unfocusedTextColor = if (isDark) Color.White else Color.Black,
+                focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
+                focusedIndicatorColor = Color.Cyan,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp)
+        )
     }
 }
 

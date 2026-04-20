@@ -20,6 +20,28 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Authentication Middleware
+const authenticate = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // Allow health check to be public
+  if (req.path === "/api/health") return next();
+
+  const authToken = process.env.API_AUTH_TOKEN;
+
+  // If no token is configured, we allow access but log a warning (transition period)
+  // In a strict production environment, you should always set this.
+  if (!authToken || authToken === "MY_API_AUTH_TOKEN" || authToken.includes("YOUR_")) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || authHeader !== `Bearer ${authToken}`) {
+    return res.status(401).json({ error: "Unauthorized: Invalid or missing API token." });
+  }
+  next();
+};
+
+app.use(authenticate);
+
 // API routes FIRST
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });

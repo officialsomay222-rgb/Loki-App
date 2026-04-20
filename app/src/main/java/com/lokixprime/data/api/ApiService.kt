@@ -3,6 +3,7 @@ package com.lokixprime.data.api
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.Header
 import retrofit2.http.POST
 
 data class ChatRequest(
@@ -32,7 +33,10 @@ data class ChatResponse(
 
 interface ApiService {
     @POST("/api/chat")
-    suspend fun generateChatResponse(@Body request: ChatRequest): ChatResponse
+    suspend fun generateChatResponse(
+        @Body request: ChatRequest,
+        @Header("Authorization") authToken: String? = null
+    ): ChatResponse
 }
 
 object ApiClient {

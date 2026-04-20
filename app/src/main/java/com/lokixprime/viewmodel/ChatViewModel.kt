@@ -161,7 +161,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     temperature = currentSettings.temperature
                 )
 
-                val response = ApiClient.apiService.generateChatResponse(request)
+                val authToken = if (currentSettings.apiAuthToken.isNotEmpty()) "Bearer ${currentSettings.apiAuthToken}" else null
+                val response = ApiClient.apiService.generateChatResponse(request, authToken)
 
                 val botMessage = MessageEntity(
                     id = UUID.randomUUID().toString(),

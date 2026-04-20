@@ -20,10 +20,16 @@ export const generateChatResponse = async (params: {
   topK?: number;
   attachments?: { data: string, mimeType: string }[];
 }) => {
+  const authToken = (import.meta as any).env?.VITE_API_AUTH_TOKEN;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (authToken && authToken !== "MY_API_AUTH_TOKEN" && !authToken.includes("YOUR_")) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
   // All chat responses are now routed through the backend to ensure security of API keys
   const response = await fetch('/api/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
       message: params.message,
       history: params.history?.map((msg) => ({
@@ -104,9 +110,15 @@ export const generateChatResponse = async (params: {
 };
 
 export const generateImage = async (prompt: string, _size: '1K' | '2K' | '4K' = '1K') => {
+  const authToken = (import.meta as any).env?.VITE_API_AUTH_TOKEN;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (authToken && authToken !== "MY_API_AUTH_TOKEN" && !authToken.includes("YOUR_")) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
   const response = await fetch('/api/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
       message: prompt,
       mode: 'image'
@@ -178,11 +190,15 @@ export const generateImage = async (prompt: string, _size: '1K' | '2K' | '4K' = 
 };
 
 export const transcribeAudio = async (audioBase64: string, mimeType: string) => {
+  const authToken = (import.meta as any).env?.VITE_API_AUTH_TOKEN;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (authToken && authToken !== "MY_API_AUTH_TOKEN" && !authToken.includes("YOUR_")) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
   const response = await fetch('/api/transcribe', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({ audioBase64, mimeType }),
   });
 
