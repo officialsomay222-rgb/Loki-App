@@ -44,7 +44,7 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
     val isDark = isSystemInDarkTheme() || isAwakenedMode
-    var showReportOverlay by remember { mutableStateOf(false) }
+    var showReportOverlay by androidx.compose.runtime.remember { mutableStateOf(false) }
 
     var showPrivacy by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var showTerms by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
