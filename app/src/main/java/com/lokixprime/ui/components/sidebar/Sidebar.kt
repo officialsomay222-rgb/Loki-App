@@ -3,6 +3,8 @@ package com.lokixprime.ui.components.sidebar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lokixprime.data.db.entity.ChatSessionEntity
 import com.lokixprime.ui.icons.LokiIcons
 import com.lokixprime.ui.theme.Inter
 import com.lokixprime.ui.theme.LokiCyan
@@ -28,6 +31,10 @@ fun AppSidebar(
     isAwakened: Boolean = false,
     effectSidebar: Boolean = false,
     onCloseSidebar: () -> Unit,
+    onSessionClick: (String) -> Unit,
+    onDeleteSession: (String) -> Unit,
+    onPinSession: (String) -> Unit,
+    onRenameSession: (String, String) -> Unit,
     onSettingsClick: () -> Unit,
     onClearChatClick: () -> Unit,
     onSessionClick: (String) -> Unit = {},
@@ -102,6 +109,24 @@ fun AppSidebar(
                         onRename = onSessionRename,
                         index = index
                     )
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        itemsIndexed(sessions, key = { _, s -> s.id }) { index, session ->
+                            TimelineItem(
+                                session = session,
+                                isActive = currentSessionId == session.id,
+                                isAwakened = isAwakened,
+                                effectSidebar = effectSidebar,
+                                onClick = onSessionClick,
+                                onDelete = onDeleteSession,
+                                onPin = onPinSession,
+                                onRename = onRenameSession,
+                                index = index
+                            )
+                        }
+                    }
                 }
             }
 
@@ -109,6 +134,11 @@ fun AppSidebar(
 
             // Bottom Actions
             Column(modifier = Modifier.padding(top = 16.dp)) {
+                SidebarActionItem(
+                    icon = LokiIcons.Rocket,
+                    label = "Try Our Apps",
+                    onClick = onAppsClick
+                )
                 SidebarActionItem(
                     icon = LokiIcons.Settings,
                     label = "Settings",

@@ -973,277 +973,169 @@ object LokiIcons {
                 horizontalLineToRelative(0.01f)
             }
         }.build()
-
-    // Lucide Pin
-    val Pin: ImageVector
+    val ExternalLink: ImageVector
         get() = ImageVector.Builder(
-            name = "Pin",
+            name = "ExternalLink",
             defaultWidth = 24.dp,
             defaultHeight = 24.dp,
             viewportWidth = 24f,
             viewportHeight = 24f
         ).apply {
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(12f, 17f)
-                lineTo(12f, 22f)
+                moveTo(15f, 3f)
+                lineTo(21f, 3f)
+                lineTo(21f, 9f)
             }
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(9f, 10.76f)
-                arcToRelative(2f, 2f, 0f, false, true, -1.11f, 1.79f)
-                lineToRelative(-1.78f, .9f)
-                arcTo(2f, 2f, 0f, false, false, 5f, 15.24f)
-                lineTo(5f, 16f)
-                arcToRelative(1f, 1f, 0f, false, false, 1f, 1f)
-                horizontalLineToRelative(12f)
-                arcToRelative(1f, 1f, 0f, false, false, 1f, -1f)
-                verticalLineToRelative(-.76f)
-                arcToRelative(2f, 2f, 0f, false, false, -1.11f, -1.79f)
-                lineToRelative(-1.78f, -.9f)
-                arcTo(2f, 2f, 0f, false, true, 15f, 10.76f)
-                lineTo(15f, 7f)
-                arcToRelative(1f, 1f, 0f, false, true, 1f, -1f)
-                arcToRelative(2f, 2f, 0f, false, false, 0f, -4f)
-                lineTo(8f, 2f)
-                arcToRelative(2f, 2f, 0f, false, false, 0f, 4f)
-                arcToRelative(1f, 1f, 0f, false, true, 1f, 1f)
-                close()
+                moveTo(10f, 14f)
+                lineTo(21f, 3f)
+            }
+            path(
+                fill = SolidColor(Color.Transparent),
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                moveTo(18f, 13f)
+                lineTo(18f, 19f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 16f, 21f)
+                lineTo(5f, 21f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 3f, 19f)
+                lineTo(3f, 8f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 5f, 6f)
+                lineTo(11f, 6f)
             }
         }.build()
 
-    // Lucide MessageSquare
-    val MessageSquare: ImageVector
+    val Rocket: ImageVector
         get() = ImageVector.Builder(
-            name = "MessageSquare",
+            name = "Rocket",
             defaultWidth = 24.dp,
             defaultHeight = 24.dp,
             viewportWidth = 24f,
             viewportHeight = 24f
         ).apply {
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(22f, 17f)
-                arcToRelative(2f, 2f, 0f, false, true, -2f, 2f)
-                lineTo(6.828f, 19f)
-                arcToRelative(2f, 2f, 0f, false, false, -1.414f, .586f)
-                lineToRelative(-2.202f, 2.202f)
-                arcTo(0.71f, 0.71f, 0f, false, true, 2f, 21.286f)
-                lineTo(2f, 5f)
-                arcToRelative(2f, 2f, 0f, false, true, 2f, -2f)
-                horizontalLineToRelative(16f)
-                arcToRelative(2f, 2f, 0f, false, true, 2f, 2f)
-                close()
-            }
-        }.build()
-
-    // Lucide Check
-    val Check: ImageVector
-        get() = ImageVector.Builder(
-            name = "Check",
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
-            viewportWidth = 24f,
-            viewportHeight = 24f
-        ).apply {
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(20f, 6f)
-                lineTo(9f, 17f)
-                lineToRelative(-5f, -5f)
-            }
-        }.build()
-
-    // Lucide MoreVertical
-    val MoreVertical: ImageVector
-        get() = ImageVector.Builder(
-            name = "MoreVertical",
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
-            viewportWidth = 24f,
-            viewportHeight = 24f
-        ).apply {
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(12f, 12f)
-                moveToRelative(-1f, 0f)
-                arcToRelative(1f, 1f, 0f, true, true, 2f, 0f)
-                arcToRelative(1f, 1f, 0f, true, true, -2f, 0f)
+                moveTo(12f, 15f)
+                lineTo(12f, 20f)
+                curveToRelative(0f, 0f, 3.03f, -0.55f, 4f, -2f)
+                curveToRelative(1.08f, -1.62f, 0f, -5f, 0f, -5f)
             }
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(12f, 5f)
-                moveToRelative(-1f, 0f)
-                arcToRelative(1f, 1f, 0f, true, true, 2f, 0f)
-                arcToRelative(1f, 1f, 0f, true, true, -2f, 0f)
+                moveTo(4.5f, 16.5f)
+                curveToRelative(-1.5f, 1.26f, -2f, 5f, -2f, 5f)
+                reflectiveCurveToRelative(3.74f, -0.5f, 5f, -2f)
+                curveToRelative(0.71f, -0.84f, 0.7f, -2.13f, -0.09f, -2.91f)
+                arcToRelative(2.18f, 2.18f, 0f, isMoreThanHalf = false, isPositiveArc = false, -2.91f, -0.09f)
             }
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(12f, 19f)
-                moveToRelative(-1f, 0f)
-                arcToRelative(1f, 1f, 0f, true, true, 2f, 0f)
-                arcToRelative(1f, 1f, 0f, true, true, -2f, 0f)
-            }
-        }.build()
-
-    // Lucide Edit2 (Pencil)
-    val Edit2: ImageVector
-        get() = ImageVector.Builder(
-            name = "Edit2",
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
-            viewportWidth = 24f,
-            viewportHeight = 24f
-        ).apply {
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(21.174f, 6.812f)
-                arcToRelative(1f, 1f, 0f, false, false, -3.986f, -3.987f)
-                lineTo(3.842f, 16.174f)
-                arcToRelative(2f, 2f, 0f, false, false, -.5f, .83f)
-                lineToRelative(-1.321f, 4.352f)
-                arcToRelative(0.5f, 0.5f, 0f, false, false, .623f, .622f)
-                lineToRelative(4.353f, -1.32f)
-                arcToRelative(2f, 2f, 0f, false, false, .83f, -.497f)
+                moveTo(9f, 12f)
+                arcToRelative(22f, 22f, 0f, isMoreThanHalf = false, isPositiveArc = true, 2f, -3.95f)
+                arcToRelative(12.88f, 12.88f, 0f, isMoreThanHalf = false, isPositiveArc = true, 11f, -6.05f)
+                curveToRelative(0f, 2.72f, -0.78f, 7.5f, -6f, 11f)
+                arcToRelative(22.4f, 22.4f, 0f, isMoreThanHalf = false, isPositiveArc = true, -4f, 2f)
                 close()
             }
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(15f, 5f)
-                lineToRelative(4f, 4f)
+                moveTo(9f, 12f)
+                lineTo(4f, 12f)
+                curveToRelative(0f, 0f, 0.55f, -3.03f, 2f, -4f)
+                curveToRelative(1.62f, -1.08f, 5f, 0.05f, 5f, 0.05f)
             }
         }.build()
 
-    // Lucide PinOff
-    val PinOff: ImageVector
+    val AppWindow: ImageVector
         get() = ImageVector.Builder(
-            name = "PinOff",
+            name = "AppWindow",
             defaultWidth = 24.dp,
             defaultHeight = 24.dp,
             viewportWidth = 24f,
             viewportHeight = 24f
         ).apply {
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(12f, 17f)
-                verticalLineToRelative(5f)
+                moveTo(4f, 4f)
+                lineTo(20f, 4f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 22f, 6f)
+                lineTo(22f, 18f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 20f, 20f)
+                lineTo(4f, 20f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 2f, 18f)
+                lineTo(2f, 6f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 4f, 4f)
+                close()
             }
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(15f, 9.34f)
-                lineTo(15f, 7f)
-                arcToRelative(1f, 1f, 0f, false, true, 1f, -1f)
-                arcToRelative(2f, 2f, 0f, false, false, 0f, -4f)
-                lineTo(7.89f, 2f)
+                moveTo(10f, 4f)
+                lineTo(10f, 8f)
             }
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(2f, 2f)
-                lineToRelative(20f, 20f)
+                moveTo(2f, 8f)
+                lineTo(22f, 8f)
             }
             path(
+                fill = SolidColor(Color.Transparent),
                 stroke = SolidColor(Color.White),
                 strokeLineWidth = 2f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round
             ) {
-                moveTo(9f, 9f)
-                verticalLineToRelative(1.76f)
-                arcToRelative(2f, 2f, 0f, false, true, -1.11f, 1.79f)
-                lineToRelative(-1.78f, .9f)
-                arcTo(2f, 2f, 0f, false, false, 5f, 15.24f)
-                lineTo(5f, 16f)
-                arcToRelative(1f, 1f, 0f, false, false, 1f, 1f)
-                horizontalLineToRelative(11f)
-            }
-        }.build()
-
-    // Lucide HelpCircle (CircleQuestionMark)
-    val HelpCircle: ImageVector
-        get() = ImageVector.Builder(
-            name = "HelpCircle",
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
-            viewportWidth = 24f,
-            viewportHeight = 24f
-        ).apply {
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(12f, 12f)
-                moveToRelative(-10f, 0f)
-                arcToRelative(10f, 10f, 0f, true, true, 20f, 0f)
-                arcToRelative(10f, 10f, 0f, true, true, -20f, 0f)
-            }
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(9.09f, 9f)
-                arcToRelative(3f, 3f, 0f, false, true, 5.83f, 1f)
-                curveToRelative(0f, 2f, -3f, 3f, -3f, 3f)
-            }
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(12f, 17f)
-                horizontalLineToRelative(.01f)
+                moveTo(6f, 4f)
+                lineTo(6f, 8f)
             }
         }.build()
 }

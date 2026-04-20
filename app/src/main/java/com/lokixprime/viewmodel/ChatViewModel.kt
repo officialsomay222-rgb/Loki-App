@@ -38,6 +38,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _isSettingsOpen = MutableStateFlow(false)
     val isSettingsOpen: StateFlow<Boolean> = _isSettingsOpen.asStateFlow()
 
+    private val _isAppsOpen = MutableStateFlow(false)
+    val isAppsOpen: StateFlow<Boolean> = _isAppsOpen.asStateFlow()
+
     private val _isAwakenedMode = MutableStateFlow(false)
     val isAwakenedMode: StateFlow<Boolean> = _isAwakenedMode.asStateFlow()
 
@@ -89,6 +92,31 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         _currentSessionId.value = id
     }
 
+    fun deleteSession(sessionId: String) {
+        viewModelScope.launch {
+            chatDao.deleteSessionAndMessages(sessionId)
+        }
+    }
+
+    fun togglePinSession(sessionId: String) {
+        viewModelScope.launch {
+            val session = chatDao.getSessionById(sessionId)
+            if (session != null) {
+                chatDao.updateSession(session.copy(isPinned = !session.isPinned))
+            }
+        }
+    }
+
+    fun renameSession(sessionId: String, newTitle: String) {
+        viewModelScope.launch {
+            val session = chatDao.getSessionById(sessionId)
+            if (session != null) {
+                chatDao.updateSession(session.copy(title = newTitle, updatedAt = System.currentTimeMillis()))
+            }
+        }
+    }
+
+
     fun createNewSession() {
         val newSessionId = UUID.randomUUID().toString()
         val newSession = ChatSessionEntity(
@@ -108,6 +136,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleSettings(isOpen: Boolean) {
         _isSettingsOpen.value = isOpen
+    }
+
+    fun toggleAppsModal(isOpen: Boolean) {
+        _isAppsOpen.value = isOpen
     }
 
     fun submitWelcome(commanderName: String) {
