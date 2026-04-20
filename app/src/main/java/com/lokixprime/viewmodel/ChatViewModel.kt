@@ -14,9 +14,12 @@ import com.lokixprime.data.api.ApiClient
 import com.lokixprime.data.api.ChatRequest
 import com.lokixprime.data.api.MessageHistory
 import com.lokixprime.data.api.MessagePart
+import android.content.Context
+import android.content.SharedPreferences
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application)
+    private val sharedPrefs: SharedPreferences = application.getSharedPreferences("loki_prefs", Context.MODE_PRIVATE)
     private val chatDao = db.chatDao()
     private val settingsDao = db.settingsDao()
 
@@ -44,7 +47,12 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _hasSeenWelcome = MutableStateFlow(true)
+    val hasSeenWelcome: StateFlow<Boolean> = _hasSeenWelcome.asStateFlow()
+
     init {
+        _hasSeenWelcome.value = sharedPrefs.getBoolean("loki_hasSeenWelcome", false)
+
         // Load settings
         viewModelScope.launch {
             settingsDao.getSettingsFlow().collectLatest { loadedSettings ->
@@ -100,6 +108,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleSettings(isOpen: Boolean) {
         _isSettingsOpen.value = isOpen
+    }
+
+    fun submitWelcome(commanderName: String) {
+        sharedPrefs.edit().putBoolean("loki_hasSeenWelcome", true).apply()
+        _hasSeenWelcome.value = true
+
+        val currentSettings = _settings.value
+        val newSettings = currentSettings.copy(commanderName = commanderName)
+        updateSettings(newSettings)
     }
 
     fun toggleAwakenedMode() {

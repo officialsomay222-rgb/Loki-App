@@ -29,6 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.draw.shadow
 import com.lokixprime.ui.components.HeaderInfinityLogo
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import com.lokixprime.ui.components.ReportOverlay
+import com.lokixprime.ui.components.TermsOverlay
+import com.lokixprime.ui.components.PrivacyOverlay
 
 @Composable
 fun SettingsScreen(
@@ -39,6 +44,11 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
     val isDark = isSystemInDarkTheme() || isAwakenedMode
+
+    var showPrivacy by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showTerms by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showReport by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
 
     Box(
         modifier = Modifier
@@ -195,6 +205,33 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.height(40.dp))
 
+                                // ABOUT
+                SettingsGroup(title = "ABOUT") {
+                    SettingItem(
+                        icon = LokiIcons.Zap, // Using Zap as placeholder for Shield
+                        title = "Privacy Policy",
+                        showChevron = true,
+                        isDark = isDark,
+                        onClick = { showPrivacy = true }
+                    )
+                    SettingItem(
+                        icon = LokiIcons.Zap, // Using Zap as placeholder for FileText
+                        title = "Terms of Service",
+                        showChevron = true,
+                        isDark = isDark,
+                        onClick = { showTerms = true }
+                    )
+                    SettingItem(
+                        icon = LokiIcons.Zap, // Using Zap as placeholder for HelpCircle
+                        title = "Report a Problem",
+                        showChevron = true,
+                        isDark = isDark,
+                        onClick = { showReport = true }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 // Version Info
                 Text(
                     text = "LOKI PRIME X VERSION 1.0.0",
@@ -206,6 +243,20 @@ fun SettingsScreen(
                     letterSpacing = 2.sp
                 )
             }
+
+        // Overlays
+        PrivacyOverlay(
+            visible = showPrivacy,
+            onClose = { showPrivacy = false }
+        )
+        TermsOverlay(
+            visible = showTerms,
+            onClose = { showTerms = false }
+        )
+        ReportOverlay(
+            visible = showReport,
+            onClose = { showReport = false }
+        )
         }
     }
 }
@@ -240,12 +291,13 @@ fun SettingItem(
     title: String,
     value: String = "",
     showChevron: Boolean = false,
-    isDark: Boolean = isSystemInDarkTheme()
+    isDark: Boolean = isSystemInDarkTheme(),
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { }
+            .clickable { onClick?.invoke() }
             .padding(horizontal = 20.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
