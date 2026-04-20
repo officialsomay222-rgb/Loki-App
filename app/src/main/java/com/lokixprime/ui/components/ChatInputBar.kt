@@ -22,7 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lokixprime.ui.icons.LokiIcons
 import com.lokixprime.ui.modifiers.glassmorphism
+import com.lokixprime.ui.modifiers.pulsingGlowShadow
+import com.lokixprime.ui.modifiers.rgbSpinningBorder
 import com.lokixprime.ui.theme.*
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun ChatInputBar(
@@ -31,10 +35,18 @@ fun ChatInputBar(
     onSendClick: () -> Unit,
     isAwakenedMode: Boolean,
     modelMode: String = "fast",
-    onModelModeChange: (String) -> Unit = {}
+    onModelModeChange: (String) -> Unit = {},
+    attachments: List<String> = emptyList(),
+    onAddAttachmentClick: () -> Unit = {},
+    onRemoveAttachment: (Int) -> Unit = {}
 ) {
     val context = LocalContext.current
     var isFocused by remember { mutableStateOf(false) }
+    var isOptionsOpen by remember { mutableStateOf(false) }
+    var isModelMenuOpen by remember { mutableStateOf(false) }
+    var isImageMode by remember { mutableStateOf(false) }
+    var thinkingMode by remember { mutableStateOf(false) }
+    var searchGrounding by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -49,7 +61,7 @@ fun ChatInputBar(
                 .fillMaxWidth()
                 .let {
                     if (isAwakenedMode) {
-                        it.padding(2.dp) // Space for the RGB border if we had a custom modifier for it
+                        it.padding(2.dp).pulsingGlowShadow() // Space for the RGB border and glow
                     } else it
                 }
         ) {
@@ -62,7 +74,8 @@ fun ChatInputBar(
                             it.glassmorphism(
                                 shape = outerShape,
                                 backgroundColor = Color(0xFF050505).copy(alpha = 0.9f)
-                            ).border(1.dp, Color(0xFF00F2FF).copy(alpha = 0.3f), outerShape)
+                            )
+                            .rgbSpinningBorder(shape = outerShape)
                         } else {
                             it.background(Color.White.copy(alpha = 0.05f), outerShape)
                               .border(1.dp, Color.White.copy(alpha = 0.1f), outerShape)
@@ -72,6 +85,47 @@ fun ChatInputBar(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Column(modifier = Modifier.weight(1f)) {
+                    if (attachments.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            attachments.take(10).forEachIndexed { index, url ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                                ) {
+                                    AsyncImage(
+                                        model = url,
+                                        contentDescription = "Attachment",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(4.dp)
+                                            .size(20.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.Black.copy(alpha = 0.5f))
+                                            .align(Alignment.TopEnd)
+                                            .clickable { onRemoveAttachment(index) },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = LokiIcons.Trash2,
+                                            contentDescription = "Remove",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                     // Text Field
                     TextField(
                         value = text,
@@ -106,7 +160,7 @@ fun ChatInputBar(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Plus Icon
-                        IconButton(onClick = { /* File Picker */ }) {
+                        IconButton(onClick = { onAddAttachmentClick() }) {
                             Icon(
                                 imageVector = LokiIcons.Plus,
                                 contentDescription = "Actions",
@@ -115,28 +169,93 @@ fun ChatInputBar(
                             )
                         }
 
-                        // Model Selector
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                .clickable { /* Toggle Model Menu */ }
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = modelMode.replaceFirstChar { it.uppercase() },
-                                    color = Color.LightGray,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    fontFamily = Inter
-                                )
+                        Box {
+                            IconButton(onClick = { isOptionsOpen = !isOptionsOpen }) {
                                 Icon(
-                                    imageVector = LokiIcons.ChevronDown,
-                                    contentDescription = null,
-                                    tint = Color.Gray,
-                                    modifier = Modifier.size(14.dp).padding(start = 4.dp)
+                                    imageVector = LokiIcons.SlidersHorizontal,
+                                    contentDescription = "Advanced Options",
+                                    tint = if (isOptionsOpen || isImageMode || thinkingMode || searchGrounding) Color.White else Color.Gray,
+                                    modifier = Modifier.size(20.dp)
                                 )
+                            }
+
+                            DropdownMenu(
+                                expanded = isOptionsOpen,
+                                onDismissRequest = { isOptionsOpen = false },
+                                modifier = Modifier
+                                    .background(Color(0xFF1E1F20))
+                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                    .padding(8.dp)
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Deep Search", color = if(thinkingMode) Color.White else Color.Gray, fontFamily = Inter, fontSize = 12.sp, fontWeight = FontWeight.Bold) },
+                                    onClick = { thinkingMode = !thinkingMode },
+                                    leadingIcon = { Icon(LokiIcons.Sparkles, contentDescription = null, modifier = Modifier.size(16.dp), tint = if(thinkingMode) Color.White else Color.Gray) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Web Grounding", color = if(searchGrounding) Color.White else Color.Gray, fontFamily = Inter, fontSize = 12.sp, fontWeight = FontWeight.Bold) },
+                                    onClick = { searchGrounding = !searchGrounding },
+                                    leadingIcon = { Icon(LokiIcons.Globe, contentDescription = null, modifier = Modifier.size(16.dp), tint = if(searchGrounding) Color.White else Color.Gray) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Image Mode", color = if(isImageMode) Color.White else Color.Gray, fontFamily = Inter, fontSize = 12.sp, fontWeight = FontWeight.Bold) },
+                                    onClick = { isImageMode = !isImageMode },
+                                    leadingIcon = { Icon(LokiIcons.ImageIcon, contentDescription = null, modifier = Modifier.size(16.dp), tint = if(isImageMode) Color.White else Color.Gray) }
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // Model Selector
+                        Box {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                    .clickable { isModelMenuOpen = !isModelMenuOpen }
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = modelMode.replaceFirstChar { it.uppercase() },
+                                        color = Color.LightGray,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        fontFamily = Inter
+                                    )
+                                    Icon(
+                                        imageVector = LokiIcons.ChevronDown,
+                                        contentDescription = null,
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(14.dp).padding(start = 4.dp)
+                                    )
+                                }
+                            }
+
+                            DropdownMenu(
+                                expanded = isModelMenuOpen,
+                                onDismissRequest = { isModelMenuOpen = false },
+                                modifier = Modifier
+                                    .background(Color(0xFF1E1F20))
+                                    .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                    .padding(8.dp)
+                            ) {
+                                val models = listOf(
+                                    Triple("fast", "Fast", LokiIcons.Zap),
+                                    Triple("pro", "Pro", LokiIcons.Brain),
+                                    Triple("happy", "Happy", LokiIcons.Smile)
+                                )
+                                models.forEach { (id, label, icon) ->
+                                    DropdownMenuItem(
+                                        text = { Text(label, color = if(modelMode == id) Color.White else Color.Gray, fontFamily = Inter, fontSize = 12.sp, fontWeight = FontWeight.Bold) },
+                                        onClick = {
+                                            onModelModeChange(id)
+                                            isModelMenuOpen = false
+                                        },
+                                        leadingIcon = { Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = if(modelMode == id) Color.White else Color.Gray) }
+                                    )
+                                }
                             }
                         }
                     }
