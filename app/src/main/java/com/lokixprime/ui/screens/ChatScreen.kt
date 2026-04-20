@@ -42,6 +42,8 @@ fun ChatScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    var isCommandPaletteOpen by remember { mutableStateOf(false) }
+
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
@@ -95,6 +97,7 @@ fun ChatScreen(
                     onMenuClick = { scope.launch { drawerState.open() } },
                     isAwakenedMode = isAwakenedMode,
                     onAvatarClick = { viewModel.toggleAwakenedMode() },
+                    onTitleLongClick = { isCommandPaletteOpen = true },
                     isLoading = isLoading,
                     isGeneratingImage = isGeneratingImage
                 )
@@ -192,6 +195,13 @@ fun ChatScreen(
             Box(modifier = Modifier.align(Alignment.TopCenter)) {
                 NetworkStatusIndicator()
             }
+
+            // Command Palette overlay
+            CommandPalette(
+                isOpen = isCommandPaletteOpen,
+                onClose = { isCommandPaletteOpen = false },
+                viewModel = viewModel
+            )
         }
     }
 

@@ -30,12 +30,17 @@ import com.lokixprime.ui.theme.BackgroundDark
 import com.lokixprime.ui.theme.LokiCyan
 import com.lokixprime.ui.theme.Montserrat
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TopNavigationBar(
     onSettingsClick: () -> Unit,
     onMenuClick: () -> Unit,
     isAwakenedMode: Boolean,
     onAvatarClick: () -> Unit,
+    onTitleLongClick: () -> Unit = {},
     isLoading: Boolean = false,
     isGeneratingImage: Boolean = false // Matches web condition: isLoading && lastMessage.role == model && secondToLastMessage.isImage
 ) {
@@ -73,7 +78,12 @@ fun TopNavigationBar(
 
         // Center: Title (shrink-0 in web)
         Box(
-            modifier = Modifier.wrapContentWidth(),
+            modifier = Modifier
+                .wrapContentWidth()
+                .combinedClickable(
+                    onLongClick = onTitleLongClick,
+                    onClick = {}
+                ),
             contentAlignment = Alignment.Center
         ) {
             if (isLoading && isGeneratingImage) {
