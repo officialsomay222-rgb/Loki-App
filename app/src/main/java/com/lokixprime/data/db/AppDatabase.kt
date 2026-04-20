@@ -10,7 +10,7 @@ import com.lokixprime.data.db.entity.ChatSessionEntity
 import com.lokixprime.data.db.entity.MessageEntity
 import com.lokixprime.data.db.entity.SettingsEntity
 
-@Database(entities = [ChatSessionEntity::class, MessageEntity::class, SettingsEntity::class], version = 1, exportSchema = false)
+@Database(entities = [ChatSessionEntity::class, MessageEntity::class, SettingsEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
     abstract fun settingsDao(): SettingsDao
@@ -25,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "loki_chat_database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }

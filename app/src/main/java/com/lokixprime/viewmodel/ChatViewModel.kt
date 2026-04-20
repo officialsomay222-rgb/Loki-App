@@ -133,6 +133,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun markWelcomeSeen(name: String) {
+        viewModelScope.launch {
+            val current = _settings.value
+            val updated = current.copy(commanderName = name, hasSeenWelcome = true)
+            settingsDao.updateSettings(updated)
+            _settings.value = updated
+        }
+    }
+
     fun sendMessage() {
         val text = _inputText.value.trim()
         if (text.isEmpty() || _isLoading.value) return
