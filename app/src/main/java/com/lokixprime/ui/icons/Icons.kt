@@ -416,6 +416,79 @@ object LokiIcons {
                 lineTo(15f, 9f)
             }
         }.build()
+    // Lucide Sparkles
+    val Sparkles: ImageVector
+        get() = ImageVector.Builder(
+            name = "Sparkles",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                // M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z
+                moveTo(9.937f, 15.5f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = false, 8.5f, 14.063f)
+                lineTo(2.365f, 12.481f)
+                arcTo(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 2.365f, 11.519f)
+                lineTo(8.5f, 9.936f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = false, 9.937f, 8.5f)
+                lineTo(11.519f, 2.365f)
+                arcTo(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 12.482f, 2.365f)
+                lineTo(14.063f, 8.5f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = false, 15.5f, 9.937f)
+                lineTo(21.635f, 11.518f)
+                arcTo(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 21.635f, 12.482f)
+                lineTo(15.5f, 14.063f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = false, 14.063f, 15.5f)
+                lineTo(12.481f, 21.635f)
+                arcTo(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 11.518f, 21.635f)
+                close()
+                // M20 3v4
+                moveTo(20f, 3f)
+                lineTo(20f, 7f)
+                // M22 5h-4
+                moveTo(22f, 5f)
+                lineTo(18f, 5f)
+                // M4 17v2
+                moveTo(4f, 17f)
+                lineTo(4f, 19f)
+                // M5 18H3
+                moveTo(5f, 18f)
+                lineTo(3f, 18f)
+            }
+        }.build()
+
+    // Lucide ArrowRight
+    val ArrowRight: ImageVector
+        get() = ImageVector.Builder(
+            name = "ArrowRight",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                // M5 12h14
+                moveTo(5f, 12f)
+                lineTo(19f, 12f)
+                // M12 5l7 7-7 7
+                moveTo(12f, 5f)
+                lineTo(19f, 12f)
+                lineTo(12f, 19f)
+            }
+        }.build()
+
     val Trash2: ImageVector
         get() = ImageVector.Builder(
             name = "Trash2",

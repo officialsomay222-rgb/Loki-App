@@ -36,6 +36,7 @@ fun ChatScreen(
     val isSettingsOpen by viewModel.isSettingsOpen.collectAsState()
     val isAwakenedMode by viewModel.isAwakenedMode.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val hasSeenWelcome by viewModel.hasSeenWelcome.collectAsState()
 
     val listState = rememberLazyListState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -196,4 +197,12 @@ fun ChatScreen(
             onClose = { viewModel.toggleSettings(false) }
         )
     }
+
+    // Removing the explicit if condition lets AnimatedVisibility within WelcomeModal
+    // handle its own enter/exit transitions smoothly based on the isOpen state.
+    WelcomeModal(
+        isOpen = !hasSeenWelcome,
+        onClose = { name -> viewModel.submitWelcome(name) },
+        isDarkTheme = isAwakenedMode // Matches the web app's theme-aware nature or defaults to true
+    )
 }
