@@ -36,7 +36,7 @@ fun ChatScreen(
     val isSettingsOpen by viewModel.isSettingsOpen.collectAsState()
     val isAwakenedMode by viewModel.isAwakenedMode.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val settings by viewModel.settings.collectAsState()
+    val hasSeenWelcome by viewModel.hasSeenWelcome.collectAsState()
 
     val listState = rememberLazyListState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -59,6 +59,10 @@ fun ChatScreen(
         drawerState = drawerState,
         drawerContent = {
             AppSidebar(
+                sessions = viewModel.sessions.collectAsState().value,
+                currentSessionId = viewModel.currentSessionId.collectAsState().value,
+                isAwakened = isAwakenedMode,
+                effectSidebar = false,
                 onCloseSidebar = { scope.launch { drawerState.close() } },
                 onSettingsClick = {
                     scope.launch { drawerState.close() }
@@ -67,7 +71,14 @@ fun ChatScreen(
                 onClearChatClick = {
                     scope.launch { drawerState.close() }
                     viewModel.clearChat()
-                }
+                },
+                onSessionClick = { id ->
+                    viewModel.switchSession(id)
+                    scope.launch { drawerState.close() }
+                },
+                onSessionDelete = { id -> viewModel.deleteSession(id) },
+                onSessionPin = { id -> viewModel.togglePinSession(id) },
+                onSessionRename = { id, title -> viewModel.renameSession(id, title) }
             )
         }
     ) {
@@ -187,6 +198,11 @@ fun ChatScreen(
                     isAwakenedMode = isAwakenedMode
                 )
             }
+
+            // Top-level network indicator overlay
+            Box(modifier = Modifier.align(Alignment.TopCenter)) {
+                NetworkStatusIndicator()
+            }
         }
     }
 
@@ -198,10 +214,11 @@ fun ChatScreen(
         )
     }
 
+    // Removing the explicit if condition lets AnimatedVisibility within WelcomeModal
+    // handle its own enter/exit transitions smoothly based on the isOpen state.
     WelcomeModal(
-        isOpen = !settings.hasSeenWelcome,
-        onClose = { name ->
-            viewModel.markWelcomeSeen(name)
-        }
+        isOpen = !hasSeenWelcome,
+        onClose = { name -> viewModel.submitWelcome(name) },
+        isDarkTheme = isAwakenedMode // Matches the web app's theme-aware nature or defaults to true
     )
 }

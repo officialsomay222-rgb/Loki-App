@@ -1,0 +1,63 @@
+--- app/src/main/java/com/lokixprime/ui/modifiers/Modifiers.kt
++++ app/src/main/java/com/lokixprime/ui/modifiers/Modifiers.kt
+@@ -101,17 +101,14 @@
+         )
+         onDrawWithContent {
+             drawContent()
+-            // To properly draw a gradient border without overwriting the content,
+-            // we draw the border as a stroke over the content.
+-            // We use the rotation parameter in the sweepBrush or rotate the canvas just for the border.
+-            withTransform({
+-                rotate(degrees = rotation, pivot = Offset(size.width / 2, size.height / 2))
+-                scale(scaleX = 3f, scaleY = 3f, pivot = Offset(size.width / 2, size.height / 2))
+-            }) {
+-                drawRoundRect(
+-                    brush = sweepBrush,
+-                    size = size,
+-                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = borderWidth.toPx()),
+-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(32.dp.toPx())
+-                )
++            val cornerPx = 32.dp.toPx()
++            val path = androidx.compose.ui.graphics.Path().apply {
++                addRoundRect(androidx.compose.ui.geometry.RoundRect(
++                    left = 0f, top = 0f, right = size.width, bottom = size.height,
++                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerPx, cornerPx)
++                ))
++            }
++            clipPath(path = path) {
++                 withTransform({
++                    rotate(degrees = rotation, pivot = Offset(size.width / 2, size.height / 2))
++                 }) {
++                    drawRoundRect(
++                        brush = sweepBrush,
++                        size = size,
++                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = borderWidth.toPx() * 2), // * 2 because stroke is centered on edge
++                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerPx, cornerPx)
++                    )
++                 }
+             }
+         }
+     }
+@@ -128,12 +125,12 @@
+
+     // We can simulate a shadow by drawing behind the content.
+     this.drawWithCache {
+         onDrawBehind {
+-            // Very simple shadow using drawRoundRect if it's a rounded rect shape.
+-            drawRoundRect(
+-                color = color.copy(alpha = alpha),
+-                size = size,
+-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(32.dp.toPx()) // hardcoded match for ChatInput
+-            )
+-            // A true blurred shadow is API 31+ or requires RenderScript.
+-            // For older devices, drawing multiple alpha rects simulates blur.
++             val expansionPx = 8.dp.toPx()
++             drawRoundRect(
++                 color = color.copy(alpha = alpha * 0.5f),
++                 topLeft = Offset(-expansionPx, -expansionPx),
++                 size = androidx.compose.ui.geometry.Size(size.width + expansionPx * 2, size.height + expansionPx * 2),
++                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(32.dp.toPx() + expansionPx)
++             )
+         }
+     }
+ }

@@ -1,0 +1,10 @@
+--- app/src/main/java/com/lokixprime/ui/modifiers/Modifiers.kt
++++ app/src/main/java/com/lokixprime/ui/modifiers/Modifiers.kt
+@@ -14,6 +14,7 @@
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.graphics.Shape
+ import androidx.compose.ui.graphics.drawscope.clipRect
++import androidx.compose.ui.graphics.drawscope.clipPath
+ import androidx.compose.ui.graphics.drawscope.withTransform
+ import androidx.compose.ui.unit.Dp
+ import androidx.compose.ui.unit.dp
