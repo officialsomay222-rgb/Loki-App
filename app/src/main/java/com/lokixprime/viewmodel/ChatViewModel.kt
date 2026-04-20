@@ -133,6 +133,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun markWelcomeSeen(name: String) {
+        viewModelScope.launch {
+            val current = _settings.value
+            val updated = current.copy(commanderName = name, hasSeenWelcome = true)
+            settingsDao.updateSettings(updated)
+            _settings.value = updated
+        }
+    }
+
     fun sendMessage() {
         val text = _inputText.value.trim()
         if (text.isEmpty() || _isLoading.value) return
@@ -217,6 +226,40 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         val sessionId = _currentSessionId.value ?: return
         viewModelScope.launch {
             chatDao.deleteMessagesBySession(sessionId)
+        }
+    }
+
+    fun switchSession(id: String) {
+        _currentSessionId.value = id
+        // You would typically load messages for the session here
+    }
+
+    fun deleteSession(id: String) {
+        viewModelScope.launch {
+            chatDao.deleteSession(id)
+
+        }
+    }
+
+    fun togglePinSession(id: String) {
+        viewModelScope.launch {
+            val session = _sessions.value.find { it.id == id }
+            if (session != null) {
+                val updated = session.copy(isPinned = !session.isPinned)
+                chatDao.insertSession(updated)
+
+            }
+        }
+    }
+
+    fun renameSession(id: String, newTitle: String) {
+        viewModelScope.launch {
+            val session = _sessions.value.find { it.id == id }
+            if (session != null) {
+                val updated = session.copy(title = newTitle)
+                chatDao.insertSession(updated)
+
+            }
         }
     }
 }
