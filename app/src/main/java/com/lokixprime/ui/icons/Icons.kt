@@ -692,61 +692,6 @@ object LokiIcons {
             }
         }.build()
 
-    val Sparkles: ImageVector
-        get() = ImageVector.Builder(
-            name = "Sparkles",
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
-            viewportWidth = 24f,
-            viewportHeight = 24f
-        ).apply {
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(11.017f, 2.814f)
-                arcToRelative(1f, 1f, 0f, false, true, 1.966f, 0f)
-                lineToRelative(1.051f, 5.558f)
-                arcToRelative(2f, 2f, 0f, false, false, 1.594f, 1.594f)
-                lineToRelative(5.558f, 1.051f)
-                arcToRelative(1f, 1f, 0f, false, true, 0f, 1.966f)
-                lineToRelative(-5.558f, 1.051f)
-                arcToRelative(2f, 2f, 0f, false, false, -1.594f, 1.594f)
-                lineToRelative(-1.051f, 5.558f)
-                arcToRelative(1f, 1f, 0f, false, true, -1.966f, 0f)
-                lineToRelative(-1.051f, -5.558f)
-                arcToRelative(2f, 2f, 0f, false, false, -1.594f, -1.594f)
-                lineToRelative(-5.558f, -1.051f)
-                arcToRelative(1f, 1f, 0f, false, true, 0f, -1.966f)
-                lineToRelative(5.558f, -1.051f)
-                arcToRelative(2f, 2f, 0f, false, false, 1.594f, -1.594f)
-                close()
-            }
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(20f, 2f)
-                lineTo(20f, 6f)
-                moveTo(22f, 4f)
-                lineTo(18f, 4f)
-            }
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                moveTo(4f, 20f)
-                moveToRelative(-2f, 0f)
-                arcToRelative(2f, 2f, 0f, true, true, 4f, 0f)
-                arcToRelative(2f, 2f, 0f, true, true, -4f, 0f)
-            }
-        }.build()
 
 
     // Lucide PanelLeftOpen
@@ -949,31 +894,6 @@ object LokiIcons {
                 lineTo(3f, 8f)
                 arcToRelative(2f, 2f, 0f, false, true, 2f, -2f)
                 lineTo(11f, 6f)
-            }
-        }.build()
-
-    // Lucide ArrowRight
-    val ArrowRight: ImageVector
-        get() = ImageVector.Builder(
-            name = "ArrowRight",
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
-            viewportWidth = 24f,
-            viewportHeight = 24f
-        ).apply {
-            path(
-                stroke = SolidColor(Color.White),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
-            ) {
-                // M5 12h14
-                moveTo(5f, 12f)
-                lineTo(19f, 12f)
-                // M12 5l7 7-7 7
-                moveTo(12f, 5f)
-                lineTo(19f, 12f)
-                lineTo(12f, 19f)
             }
         }.build()
 
