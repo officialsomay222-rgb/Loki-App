@@ -44,6 +44,7 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
     val isDark = isSystemInDarkTheme() || isAwakenedMode
+    var showReportOverlay by remember { mutableStateOf(false) }
 
     var showPrivacy by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     var showTerms by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
@@ -203,6 +204,17 @@ fun SettingsScreen(
                     )
                 }
 
+                // LEGAL & SUPPORT
+                SettingsGroup(title = "LEGAL & SUPPORT") {
+                    SettingItem(
+                        isDark = isDark,
+                        icon = LokiIcons.HelpCircle,
+                        title = "Report a Problem",
+                        showChevron = false,
+                        onClick = { showReportOverlay = true }
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(40.dp))
 
                                 // ABOUT
@@ -258,6 +270,11 @@ fun SettingsScreen(
             onClose = { showReport = false }
         )
         }
+
+        ReportOverlay(
+            visible = showReportOverlay,
+            onClose = { showReportOverlay = false }
+        )
     }
 }
 
