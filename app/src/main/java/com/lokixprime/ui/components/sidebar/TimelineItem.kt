@@ -136,7 +136,7 @@ fun TimelineItem(
             .border(1.dp, borderColor, RoundedCornerShape(8.dp))
             .clip(RoundedCornerShape(8.dp))
             .hoverable(interactionSource)
-            .pointerInput(Unit) {
+            .pointerInput(session.id, isEditing, isMenuOpen, onClick) {
                 detectTapGestures(
                     onTap = {
                         if (!isEditing && !isMenuOpen) onClick(session.id)
