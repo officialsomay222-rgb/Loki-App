@@ -34,6 +34,7 @@ fun ChatScreen(
     val messages by viewModel.messages.collectAsState()
     val inputText by viewModel.inputText.collectAsState()
     val isSettingsOpen by viewModel.isSettingsOpen.collectAsState()
+    val isAppsOpen by viewModel.isAppsOpen.collectAsState()
     val isAwakenedMode by viewModel.isAwakenedMode.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val hasSeenWelcome by viewModel.hasSeenWelcome.collectAsState()
@@ -63,6 +64,10 @@ fun ChatScreen(
                 onSettingsClick = {
                     scope.launch { drawerState.close() }
                     viewModel.toggleSettings(true)
+                },
+                onAppsClick = {
+                    scope.launch { drawerState.close() }
+                    viewModel.toggleAppsModal(true)
                 },
                 onClearChatClick = {
                     scope.launch { drawerState.close() }
@@ -209,5 +214,11 @@ fun ChatScreen(
         isOpen = !hasSeenWelcome,
         onClose = { name -> viewModel.submitWelcome(name) },
         isDarkTheme = isAwakenedMode // Matches the web app's theme-aware nature or defaults to true
+    )
+
+    AppsModal(
+        isOpen = isAppsOpen,
+        onClose = { viewModel.toggleAppsModal(false) },
+        commanderName = "Commander" // Using default fallback since commander name is not stored locally in ChatScreen context, just as web app fallback handles.
     )
 }
