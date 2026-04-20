@@ -38,6 +38,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _isSettingsOpen = MutableStateFlow(false)
     val isSettingsOpen: StateFlow<Boolean> = _isSettingsOpen.asStateFlow()
 
+    private val _isAppsOpen = MutableStateFlow(false)
+    val isAppsOpen: StateFlow<Boolean> = _isAppsOpen.asStateFlow()
+
     private val _isAwakenedMode = MutableStateFlow(false)
     val isAwakenedMode: StateFlow<Boolean> = _isAwakenedMode.asStateFlow()
 
@@ -135,6 +138,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         _isSettingsOpen.value = isOpen
     }
 
+    fun toggleAppsModal(isOpen: Boolean) {
+        _isAppsOpen.value = isOpen
+    }
+
     fun submitWelcome(commanderName: String) {
         sharedPrefs.edit().putBoolean("loki_hasSeenWelcome", true).apply()
         _hasSeenWelcome.value = true
@@ -155,6 +162,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun updateSettings(newSettings: SettingsEntity) {
         viewModelScope.launch {
             settingsDao.updateSettings(newSettings)
+        }
+    }
+
+    fun markWelcomeSeen(name: String) {
+        viewModelScope.launch {
+            val current = _settings.value
+            val updated = current.copy(commanderName = name, hasSeenWelcome = true)
+            settingsDao.updateSettings(updated)
+            _settings.value = updated
         }
     }
 
@@ -242,6 +258,40 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         val sessionId = _currentSessionId.value ?: return
         viewModelScope.launch {
             chatDao.deleteMessagesBySession(sessionId)
+        }
+    }
+
+    fun switchSession(id: String) {
+        _currentSessionId.value = id
+        // You would typically load messages for the session here
+    }
+
+    fun deleteSession(id: String) {
+        viewModelScope.launch {
+            chatDao.deleteSession(id)
+
+        }
+    }
+
+    fun togglePinSession(id: String) {
+        viewModelScope.launch {
+            val session = _sessions.value.find { it.id == id }
+            if (session != null) {
+                val updated = session.copy(isPinned = !session.isPinned)
+                chatDao.insertSession(updated)
+
+            }
+        }
+    }
+
+    fun renameSession(id: String, newTitle: String) {
+        viewModelScope.launch {
+            val session = _sessions.value.find { it.id == id }
+            if (session != null) {
+                val updated = session.copy(title = newTitle)
+                chatDao.insertSession(updated)
+
+            }
         }
     }
 }

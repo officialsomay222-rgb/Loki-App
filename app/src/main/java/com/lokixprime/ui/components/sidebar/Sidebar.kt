@@ -20,20 +20,27 @@ import com.lokixprime.ui.theme.Inter
 import com.lokixprime.ui.theme.LokiCyan
 import com.lokixprime.ui.theme.Montserrat
 import com.lokixprime.ui.theme.SurfaceVariantDark
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import com.lokixprime.data.db.entity.ChatSessionEntity
 
 @Composable
 fun AppSidebar(
-    sessions: List<ChatSessionEntity>,
-    currentSessionId: String?,
-    isAwakened: Boolean,
-    effectSidebar: Boolean,
+    sessions: List<ChatSessionEntity> = emptyList(),
+    currentSessionId: String? = null,
+    isAwakened: Boolean = false,
+    effectSidebar: Boolean = false,
     onCloseSidebar: () -> Unit,
     onSessionClick: (String) -> Unit,
     onDeleteSession: (String) -> Unit,
     onPinSession: (String) -> Unit,
     onRenameSession: (String, String) -> Unit,
     onSettingsClick: () -> Unit,
-    onClearChatClick: () -> Unit
+    onClearChatClick: () -> Unit,
+    onSessionClick: (String) -> Unit = {},
+    onSessionDelete: (String) -> Unit = {},
+    onSessionPin: (String) -> Unit = {},
+    onSessionRename: (String, String) -> Unit = { _, _ -> }
 ) {
     ModalDrawerSheet(
         drawerContainerColor = SurfaceVariantDark,
@@ -81,15 +88,26 @@ fun AppSidebar(
             )
 
             // Timeline Items List
-            Column(modifier = Modifier.weight(1f)) {
-                if (sessions.isEmpty()) {
-                    Text(
-                        text = "No Timeline Available",
-                        color = Color.Gray,
-                        fontFamily = Inter,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(vertical = 24.dp).align(Alignment.CenterHorizontally)
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                itemsIndexed(
+                    items = sessions,
+                    key = { _, session -> session.id }
+                ) { index, session ->
+                    TimelineItem(
+                        session = session,
+                        isActive = session.id == currentSessionId,
+                        isAwakened = isAwakened,
+                        effectSidebar = effectSidebar,
+                        onClick = onSessionClick,
+                        onDelete = onSessionDelete,
+                        onPin = onSessionPin,
+                        onRename = onSessionRename,
+                        index = index
                     )
                 } else {
                     LazyColumn(
@@ -117,12 +135,17 @@ fun AppSidebar(
             // Bottom Actions
             Column(modifier = Modifier.padding(top = 16.dp)) {
                 SidebarActionItem(
+                    icon = LokiIcons.Rocket,
+                    label = "Try Our Apps",
+                    onClick = onAppsClick
+                )
+                SidebarActionItem(
                     icon = LokiIcons.Settings,
                     label = "Settings",
                     onClick = onSettingsClick
                 )
                 SidebarActionItem(
-                    icon = LokiIcons.X, // Using X for "Clear" as placeholder
+                    icon = LokiIcons.Trash2,
                     label = "Clear Chat",
                     onClick = onClearChatClick,
                     tint = Color(0xFFFF4A4A)
