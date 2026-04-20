@@ -456,4 +456,36 @@ object LokiIcons {
             }
         }.build()
 
+    // Lucide HelpCircle
+    val HelpCircle: ImageVector
+        get() = ImageVector.Builder(
+            name = "HelpCircle",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                // Circle M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z
+                moveTo(12f, 22f)
+                arcTo(10f, 10f, 0f, isMoreThanHalf = false, isPositiveArc = false, 22f, 12f)
+                arcTo(10f, 10f, 0f, isMoreThanHalf = false, isPositiveArc = false, 12f, 2f)
+                arcTo(10f, 10f, 0f, isMoreThanHalf = false, isPositiveArc = false, 2f, 12f)
+                arcTo(10f, 10f, 0f, isMoreThanHalf = false, isPositiveArc = false, 12f, 22f)
+                close()
+                // path M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3
+                moveTo(9.09f, 9f)
+                arcToRelative(3f, 3f, 0f, isMoreThanHalf = false, isPositiveArc = true, 5.83f, 1f)
+                curveToRelative(0f, 2f, -3f, 3f, -3f, 3f)
+                // line M12 17h.01
+                moveTo(12f, 17f)
+                horizontalLineToRelative(0.01f)
+            }
+        }.build()
+
 }

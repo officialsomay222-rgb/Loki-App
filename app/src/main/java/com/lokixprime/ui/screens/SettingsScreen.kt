@@ -29,6 +29,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.draw.shadow
 import com.lokixprime.ui.components.HeaderInfinityLogo
+import com.lokixprime.ui.components.ReportOverlay
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun SettingsScreen(
@@ -39,6 +43,7 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsState()
     val isDark = isSystemInDarkTheme() || isAwakenedMode
+    var showReportOverlay by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -193,6 +198,17 @@ fun SettingsScreen(
                     )
                 }
 
+                // LEGAL & SUPPORT
+                SettingsGroup(title = "LEGAL & SUPPORT") {
+                    SettingItem(
+                        isDark = isDark,
+                        icon = LokiIcons.HelpCircle,
+                        title = "Report a Problem",
+                        showChevron = false,
+                        onClick = { showReportOverlay = true }
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(40.dp))
 
                 // Version Info
@@ -207,6 +223,11 @@ fun SettingsScreen(
                 )
             }
         }
+
+        ReportOverlay(
+            visible = showReportOverlay,
+            onClose = { showReportOverlay = false }
+        )
     }
 }
 
@@ -240,12 +261,13 @@ fun SettingItem(
     title: String,
     value: String = "",
     showChevron: Boolean = false,
-    isDark: Boolean = isSystemInDarkTheme()
+    isDark: Boolean = isSystemInDarkTheme(),
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { }
+            .clickable { onClick() }
             .padding(horizontal = 20.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
