@@ -22,8 +22,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lokixprime.ui.components.*
 import com.lokixprime.ui.components.sidebar.AppSidebar
 import com.lokixprime.ui.icons.LokiIcons
+import androidx.compose.ui.platform.LocalContext
 import com.lokixprime.ui.theme.*
 import com.lokixprime.viewmodel.ChatViewModel
+import com.lokixprime.utils.NetworkMonitor
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +38,10 @@ fun ChatScreen(
     val isSettingsOpen by viewModel.isSettingsOpen.collectAsState()
     val isAwakenedMode by viewModel.isAwakenedMode.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    val context = LocalContext.current
+    val networkMonitor = remember { NetworkMonitor(context) }
+    val isNetworkConnected by networkMonitor.isConnected.collectAsState(initial = true)
 
     val listState = rememberLazyListState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -75,6 +81,8 @@ fun ChatScreen(
                 .fillMaxSize()
                 .background(if (isAwakenedMode) Color(0xFF050508) else BackgroundDark)
         ) {
+            NetworkStatusIndicator(connected = isNetworkConnected)
+
             // Awakened mode dynamic background
             if (isAwakenedMode) {
                 AwakenedBackground(isAwakened = true, bgStyle = "nebula")
