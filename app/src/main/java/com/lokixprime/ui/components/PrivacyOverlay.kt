@@ -1,6 +1,5 @@
 package com.lokixprime.ui.components
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,45 +22,32 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lokixprime.ui.icons.LokiIcons
 
 @Composable
-fun ReportOverlay(
+fun PrivacyOverlay(
     visible: Boolean,
     onClose: () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
-    val context = LocalContext.current
 
     val bgColor = if (isDark) Color(0xFF0A0A0A) else Color.White
     val borderColor = if (isDark) Color(0x1AFFFFFF) else Color(0xFFE2E8F0)
     val titleColor = if (isDark) Color.White else Color(0xFF0F172A)
     val textColor = if (isDark) Color(0xFF717171) else Color(0xFF64748B)
-    val inputBgColor = if (isDark) Color(0xFF161616) else Color(0xFFF8FAFC)
-
-    var reportText by remember { mutableStateOf("") }
 
     AnimatedVisibility(
         visible = visible,
@@ -104,7 +90,7 @@ fun ReportOverlay(
                 }
 
                 Text(
-                    text = "Report a Problem",
+                    text = "Privacy Policy",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = titleColor,
@@ -121,69 +107,70 @@ fun ReportOverlay(
                     .padding(24.dp)
                     .verticalScroll(rememberScrollState())
             ) {
+                Section(
+                    title = "1. Data Collection",
+                    content = "We collect minimal data required to provide the AI service. This includes chat history (stored locally by default) and basic settings.",
+                    titleColor = titleColor,
+                    textColor = textColor
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Section(
+                    title = "2. Data Usage",
+                    content = "Your data is used solely to improve your experience with Loki Prime X. We do not sell your personal information to third parties.",
+                    titleColor = titleColor,
+                    textColor = textColor
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Section(
+                    title = "3. Local Storage",
+                    content = "Most of your settings and chat data are stored directly on your device using local storage for maximum privacy.",
+                    titleColor = titleColor,
+                    textColor = textColor
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Section(
+                    title = "4. Security",
+                    content = "We implement industry-standard security measures to protect your data during transmission and storage.",
+                    titleColor = titleColor,
+                    textColor = textColor
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
                 Text(
-                    text = "Describe the issue you're experiencing. Our team will look into it as soon as possible.",
-                    fontSize = 14.sp,
-                    color = textColor
+                    text = "LAST UPDATED: MARCH 2026",
+                    fontSize = 10.sp,
+                    color = textColor,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                    letterSpacing = 1.5.sp
                 )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                BasicTextField(
-                    value = reportText,
-                    onValueChange = { reportText = it },
-                    textStyle = TextStyle(
-                        color = titleColor,
-                        fontSize = 14.sp
-                    ),
-                    cursorBrush = SolidColor(titleColor),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(192.dp)
-                                .background(inputBgColor, RoundedCornerShape(16.dp))
-                                .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-                                .padding(16.dp)
-                        ) {
-                            if (reportText.isEmpty()) {
-                                Text(
-                                    text = "Type your message here...",
-                                    color = textColor.copy(alpha = 0.5f),
-                                    fontSize = 14.sp
-                                )
-                            }
-                            innerTextField()
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        Toast.makeText(context, "Thank you for your report!", Toast.LENGTH_SHORT).show()
-                        reportText = ""
-                        onClose()
-                    },
-                    enabled = reportText.isNotBlank(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF2563EB),
-                        disabledContainerColor = Color(0xFF2563EB).copy(alpha = 0.5f)
-                    )
-                ) {
-                    Text(
-                        text = "Submit Report",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
             }
         }
+    }
+}
+
+@Composable
+private fun Section(title: String, content: String, titleColor: Color, textColor: Color) {
+    Column {
+        Text(
+            text = title,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = titleColor
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = content,
+            fontSize = 14.sp,
+            color = textColor,
+            lineHeight = 22.sp
+        )
     }
 }

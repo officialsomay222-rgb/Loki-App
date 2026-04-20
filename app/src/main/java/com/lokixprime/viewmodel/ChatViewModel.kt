@@ -14,9 +14,12 @@ import com.lokixprime.data.api.ApiClient
 import com.lokixprime.data.api.ChatRequest
 import com.lokixprime.data.api.MessageHistory
 import com.lokixprime.data.api.MessagePart
+import android.content.Context
+import android.content.SharedPreferences
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application)
+    private val sharedPrefs: SharedPreferences = application.getSharedPreferences("loki_prefs", Context.MODE_PRIVATE)
     private val chatDao = db.chatDao()
     private val settingsDao = db.settingsDao()
 
@@ -44,7 +47,12 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _hasSeenWelcome = MutableStateFlow(true)
+    val hasSeenWelcome: StateFlow<Boolean> = _hasSeenWelcome.asStateFlow()
+
     init {
+        _hasSeenWelcome.value = sharedPrefs.getBoolean("loki_hasSeenWelcome", false)
+
         // Load settings
         viewModelScope.launch {
             settingsDao.getSettingsFlow().collectLatest { loadedSettings ->
@@ -102,6 +110,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         _isSettingsOpen.value = isOpen
     }
 
+    fun submitWelcome(commanderName: String) {
+        sharedPrefs.edit().putBoolean("loki_hasSeenWelcome", true).apply()
+        _hasSeenWelcome.value = true
+
+        val currentSettings = _settings.value
+        val newSettings = currentSettings.copy(commanderName = commanderName)
+        updateSettings(newSettings)
+    }
+
     fun toggleAwakenedMode() {
         val newVal = !_isAwakenedMode.value
         _isAwakenedMode.value = newVal
@@ -113,6 +130,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun updateSettings(newSettings: SettingsEntity) {
         viewModelScope.launch {
             settingsDao.updateSettings(newSettings)
+        }
+    }
+
+    fun markWelcomeSeen(name: String) {
+        viewModelScope.launch {
+            val current = _settings.value
+            val updated = current.copy(commanderName = name, hasSeenWelcome = true)
+            settingsDao.updateSettings(updated)
+            _settings.value = updated
         }
     }
 
@@ -200,6 +226,40 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         val sessionId = _currentSessionId.value ?: return
         viewModelScope.launch {
             chatDao.deleteMessagesBySession(sessionId)
+        }
+    }
+
+    fun switchSession(id: String) {
+        _currentSessionId.value = id
+        // You would typically load messages for the session here
+    }
+
+    fun deleteSession(id: String) {
+        viewModelScope.launch {
+            chatDao.deleteSession(id)
+
+        }
+    }
+
+    fun togglePinSession(id: String) {
+        viewModelScope.launch {
+            val session = _sessions.value.find { it.id == id }
+            if (session != null) {
+                val updated = session.copy(isPinned = !session.isPinned)
+                chatDao.insertSession(updated)
+
+            }
+        }
+    }
+
+    fun renameSession(id: String, newTitle: String) {
+        viewModelScope.launch {
+            val session = _sessions.value.find { it.id == id }
+            if (session != null) {
+                val updated = session.copy(title = newTitle)
+                chatDao.insertSession(updated)
+
+            }
         }
     }
 }
