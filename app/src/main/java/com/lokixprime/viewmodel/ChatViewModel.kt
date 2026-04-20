@@ -108,7 +108,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val session = chatDao.getSessionById(sessionId)
             if (session != null) {
-                chatDao.updateSession(session.copy(title = newTitle))
+                chatDao.updateSession(session.copy(title = newTitle, updatedAt = System.currentTimeMillis()))
             }
         }
     }
