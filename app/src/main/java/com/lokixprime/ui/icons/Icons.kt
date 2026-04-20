@@ -416,4 +416,44 @@ object LokiIcons {
                 lineTo(15f, 9f)
             }
         }.build()
+    val Trash2: ImageVector
+        get() = ImageVector.Builder(
+            name = "Trash2",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                // M3 6h18
+                moveTo(3f, 6f)
+                lineTo(21f, 6f)
+                // M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6
+                moveTo(19f, 6f)
+                lineTo(19f, 20f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = false, 17f, 22f)
+                lineTo(7f, 22f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = false, 5f, 20f)
+                lineTo(5f, 6f)
+                // M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2
+                moveTo(8f, 6f)
+                lineTo(8f, 4f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 10f, 2f)
+                lineTo(14f, 2f)
+                arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 16f, 4f)
+                lineTo(16f, 6f)
+                // M10 11v6
+                moveTo(10f, 11f)
+                lineTo(10f, 17f)
+                // M14 11v6
+                moveTo(14f, 11f)
+                lineTo(14f, 17f)
+            }
+        }.build()
+
 }
