@@ -17,12 +17,23 @@ import com.lokixprime.ui.theme.Inter
 import com.lokixprime.ui.theme.LokiCyan
 import com.lokixprime.ui.theme.Montserrat
 import com.lokixprime.ui.theme.SurfaceVariantDark
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import com.lokixprime.data.db.entity.ChatSessionEntity
 
 @Composable
 fun AppSidebar(
+    sessions: List<ChatSessionEntity> = emptyList(),
+    currentSessionId: String? = null,
+    isAwakened: Boolean = false,
+    effectSidebar: Boolean = false,
     onCloseSidebar: () -> Unit,
     onSettingsClick: () -> Unit,
-    onClearChatClick: () -> Unit
+    onClearChatClick: () -> Unit,
+    onSessionClick: (String) -> Unit = {},
+    onSessionDelete: (String) -> Unit = {},
+    onSessionPin: (String) -> Unit = {},
+    onSessionRename: (String, String) -> Unit = { _, _ -> }
 ) {
     ModalDrawerSheet(
         drawerContainerColor = SurfaceVariantDark,
@@ -69,20 +80,27 @@ fun AppSidebar(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Timeline Items List Placeholder (Future impl)
-            Column(modifier = Modifier.weight(1f)) {
-                Surface(
-                    color = Color.White.copy(alpha = 0.05f),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Current Session",
-                        color = LokiCyan,
-                        fontFamily = Inter,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(16.dp)
+            // Timeline Items List
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                itemsIndexed(
+                    items = sessions,
+                    key = { _, session -> session.id }
+                ) { index, session ->
+                    TimelineItem(
+                        session = session,
+                        isActive = session.id == currentSessionId,
+                        isAwakened = isAwakened,
+                        effectSidebar = effectSidebar,
+                        onClick = onSessionClick,
+                        onDelete = onSessionDelete,
+                        onPin = onSessionPin,
+                        onRename = onSessionRename,
+                        index = index
                     )
                 }
             }
@@ -97,7 +115,7 @@ fun AppSidebar(
                     onClick = onSettingsClick
                 )
                 SidebarActionItem(
-                    icon = LokiIcons.X, // Using X for "Clear" as placeholder
+                    icon = LokiIcons.Trash2,
                     label = "Clear Chat",
                     onClick = onClearChatClick,
                     tint = Color(0xFFFF4A4A)
