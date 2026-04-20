@@ -829,4 +829,40 @@ object LokiIcons {
             }
         }.build()
 
+    // Lucide WifiOff
+    val WifiOff: ImageVector
+        get() = ImageVector.Builder(
+            name = "WifiOff",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                stroke = SolidColor(Color.White),
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round
+            ) {
+                // <path d="M2 2l20 20" />
+                moveTo(2f, 2f)
+                lineTo(22f, 22f)
+                // <path d="M8.53 8.53a10 10 0 0 1 12.02 2.37" />
+                moveTo(8.53f, 8.53f)
+                arcToRelative(10f, 10f, 0f, false, true, 12.02f, 2.37f)
+                // <path d="M4.93 4.93A14 14 0 0 1 12 3a14.07 14.07 0 0 1 3.55.45" />
+                moveTo(4.93f, 4.93f)
+                arcToRelative(14f, 14f, 0f, false, true, 7.07f, -1.93f)
+                arcToRelative(14.07f, 14.07f, 0f, false, true, 3.55f, 0.45f)
+                // <path d="M4.93 19.07A10 10 0 0 1 2 15" />
+                moveTo(4.93f, 19.07f)
+                arcToRelative(10f, 10f, 0f, false, true, -2.93f, -4.07f)
+                // <path d="M15.54 15.54a5 5 0 0 0-7.08 0" />
+                moveTo(15.54f, 15.54f)
+                arcToRelative(5f, 5f, 0f, false, false, -7.08f, 0f)
+                // <path d="M12 20h.01" />
+                moveTo(12f, 20f)
+                horizontalLineToRelative(0.01f)
+            }
+        }.build()
 }

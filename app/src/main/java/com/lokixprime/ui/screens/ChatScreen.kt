@@ -187,6 +187,11 @@ fun ChatScreen(
                     isAwakenedMode = isAwakenedMode
                 )
             }
+
+            // Top-level network indicator overlay
+            Box(modifier = Modifier.align(Alignment.TopCenter)) {
+                NetworkStatusIndicator()
+            }
         }
     }
 
