@@ -1,1 +1,4 @@
 ## 2024-04-16 - Initial Setup\n**Learning:** Just starting to analyze this codebase for UX improvements. Noticed that aria-labels are missing on almost all icon-only buttons across the app.\n**Action:** Add aria-labels to the most critical interactive elements to improve accessibility.
+## 2024-05-24 - Accessibility improvements in CommandPalette and SettingsModal
+**Learning:** Added `id` and `htmlFor` to form elements in `SettingsModal` which makes inputs focusable by clicking their labels, improving basic usability. Found that `CommandPalette` lacked an empty state when no sessions matched the search query.
+**Action:** Always ensure that `<label>` elements are programmatically tied to their respective `<input>` elements. Check list rendering for empty states to provide visual feedback when filtering yields no results.
