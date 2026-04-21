@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 import { GoogleGenAI } from "@google/genai";
 import Groq from "groq-sdk";
 import { HfInference } from "@huggingface/inference";
@@ -12,11 +14,32 @@ const getTodayDateString = () => {
   return today.toISOString().split('T')[0];
 };
 
+// Trust proxy if we are behind a reverse proxy (like Vercel or Cloud Run) for accurate rate limiting IPs
+app.set('trust proxy', 1);
+
+// Apply Helmet for basic security headers first
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabled to prevent blocking SSE/external resources for this specific app
+  crossOriginEmbedderPolicy: false // Disabled to avoid breaking CORS for frontend
+}));
+
+// Apply CORS before rate limit so 429 errors contain proper CORS headers
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Apply rate limiter after CORS
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window`
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." }
+});
+app.use('/api/', limiter);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
