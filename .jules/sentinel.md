@@ -1,4 +1,4 @@
-## 2025-04-16 - Prevent Path Injection in File Creation
-**Vulnerability:** Constructing a file extension based directly on a user-provided `mimeType` in `api/index.ts` can open up path traversal and server-side logic exploitation risks.
-**Learning:** Even trivial string matching or interpolation using user inputs (like `mimeType?.includes('mp4') ? 'mp4' : ...`) into system paths introduces unnecessary complexity and potential vulnerabilities if the logic is flawed or the parameter is heavily manipulated.
-**Prevention:** Hardcode the extension or enforce an extremely strict validation whitelist independent of the raw user input when generating file names dynamically on the server.
+## 2024-05-24 - [CRITICAL] Prevent Global Cleartext Traffic
+**Vulnerability:** Android application explicitly allowed all HTTP traffic globally via `android:usesCleartextTraffic="true"`.
+**Learning:** This exposes the app to MITM attacks for all network communication.
+**Prevention:** Use a `network_security_config.xml` to globally enforce HTTPS (`cleartextTrafficPermitted="false"`) while maintaining explicit exceptions for local development domains (e.g., `10.0.2.2`, `localhost`).
