@@ -20,9 +20,6 @@ import com.lokixprime.ui.theme.Inter
 import com.lokixprime.ui.theme.LokiCyan
 import com.lokixprime.ui.theme.Montserrat
 import com.lokixprime.ui.theme.SurfaceVariantDark
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import com.lokixprime.data.db.entity.ChatSessionEntity
 
 @Composable
 fun AppSidebar(
@@ -36,11 +33,8 @@ fun AppSidebar(
     onPinSession: (String) -> Unit,
     onRenameSession: (String, String) -> Unit,
     onSettingsClick: () -> Unit,
-    onClearChatClick: () -> Unit,
-    onSessionClick: (String) -> Unit = {},
-    onSessionDelete: (String) -> Unit = {},
-    onSessionPin: (String) -> Unit = {},
-    onSessionRename: (String, String) -> Unit = { _, _ -> }
+    onAppsClick: () -> Unit,
+    onClearChatClick: () -> Unit
 ) {
     ModalDrawerSheet(
         drawerContainerColor = SurfaceVariantDark,
@@ -104,29 +98,11 @@ fun AppSidebar(
                         isAwakened = isAwakened,
                         effectSidebar = effectSidebar,
                         onClick = onSessionClick,
-                        onDelete = onSessionDelete,
-                        onPin = onSessionPin,
-                        onRename = onSessionRename,
+                        onDelete = onDeleteSession,
+                        onPin = onPinSession,
+                        onRename = onRenameSession,
                         index = index
                     )
-                } else {
-                    LazyColumn(
-                        contentPadding = PaddingValues(bottom = 16.dp)
-                    ) {
-                        itemsIndexed(sessions, key = { _, s -> s.id }) { index, session ->
-                            TimelineItem(
-                                session = session,
-                                isActive = currentSessionId == session.id,
-                                isAwakened = isAwakened,
-                                effectSidebar = effectSidebar,
-                                onClick = onSessionClick,
-                                onDelete = onDeleteSession,
-                                onPin = onPinSession,
-                                onRename = onRenameSession,
-                                index = index
-                            )
-                        }
-                    }
                 }
             }
 
