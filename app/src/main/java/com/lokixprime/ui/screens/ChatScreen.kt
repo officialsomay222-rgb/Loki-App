@@ -67,10 +67,13 @@ fun ChatScreen(
                 isAwakened = isAwakenedMode,
                 effectSidebar = false,
                 onCloseSidebar = { scope.launch { drawerState.close() } },
-                onSessionClick = { viewModel.setCurrentSession(it) },
-                onDeleteSession = { viewModel.deleteSession(it) },
-                onPinSession = { viewModel.togglePinSession(it) },
-                onRenameSession = { id, title -> viewModel.renameSession(id, title) },
+                onSessionClick = { id ->
+                    viewModel.switchSession(id)
+                    scope.launch { drawerState.close() }
+                },
+                onDeleteSession = { viewModel.deleteSessionById(it) },
+                onPinSession = { viewModel.togglePinSessionById(it) },
+                onRenameSession = { id, title -> viewModel.renameSessionById(id, title) },
                 onSettingsClick = {
                     scope.launch { drawerState.close() }
                     viewModel.toggleSettings(true)
@@ -82,14 +85,7 @@ fun ChatScreen(
                 onClearChatClick = {
                     scope.launch { drawerState.close() }
                     viewModel.clearChat()
-                },
-                onSessionClick = { id ->
-                    viewModel.switchSession(id)
-                    scope.launch { drawerState.close() }
-                },
-                onSessionDelete = { id -> viewModel.deleteSession(id) },
-                onSessionPin = { id -> viewModel.togglePinSession(id) },
-                onSessionRename = { id, title -> viewModel.renameSession(id, title) }
+                }
             )
         }
     ) {
