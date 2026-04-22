@@ -77,6 +77,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) =
                 <div className="relative">
                   <input
                     type="text"
+                    aria-label="Name"
                     value={tempName}
                     onChange={(e) => setTempName(e.target.value)}
                     onKeyDown={handleKeyDown}
