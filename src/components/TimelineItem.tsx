@@ -228,4 +228,24 @@ export const TimelineItem = React.memo(({
       </AnimatePresence>
     </motion.div>
   );
+}, (prevProps, nextProps) => {
+  // ⚡ Bolt Optimization:
+  // Dexie useLiveQuery recreates the session objects on every update, causing O(N) re-renders
+  // across the entire sidebar on every message chunk stream.
+  // Custom equality check ensures TimelineItem only re-renders if its specific primitives change.
+  // Includes strict callback checking to prevent stale closures.
+  // Impact: Reduces TimelineItem re-renders from O(N) to O(1) during active chat streaming.
+  return (
+    prevProps.session.id === nextProps.session.id &&
+    prevProps.session.title === nextProps.session.title &&
+    prevProps.session.isPinned === nextProps.session.isPinned &&
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.isAwakened === nextProps.isAwakened &&
+    prevProps.effectSidebar === nextProps.effectSidebar &&
+    prevProps.index === nextProps.index &&
+    prevProps.onClick === nextProps.onClick &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onPin === nextProps.onPin &&
+    prevProps.onRename === nextProps.onRename
+  );
 });
