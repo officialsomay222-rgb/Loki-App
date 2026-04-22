@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { rateLimit } from "express-rate-limit";
 import { GoogleGenAI } from "@google/genai";
 import Groq from "groq-sdk";
 import { HfInference } from "@huggingface/inference";
@@ -12,6 +13,8 @@ const getTodayDateString = () => {
   return today.toISOString().split('T')[0];
 };
 
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -19,6 +22,17 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Apply rate limiting to all requests
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  message: { error: "Too many requests from this IP, please try again after 15 minutes" }
+});
+
+app.use("/api/", limiter);
 
 // API routes FIRST
 app.get("/api/health", (req, res) => {
