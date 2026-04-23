@@ -1168,3 +1168,75 @@ object LokiIcons {
             }
         }.build()
 }
+
+// Lucide Smartphone
+val Smartphone: ImageVector
+    get() = ImageVector.Builder(
+        name = "Smartphone",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(
+            stroke = SolidColor(Color.Black),
+            strokeLineWidth = 2f,
+            strokeLineCap = StrokeCap.Round,
+            strokeLineJoin = StrokeJoin.Round
+        ) {
+            // M5 2h14v20H5z with rx 2 ry 2 translates to:
+            moveTo(7f, 2f)
+            lineTo(17f, 2f)
+            arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 19f, y1 = 4f)
+            lineTo(19f, 20f)
+            arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 17f, y1 = 22f)
+            lineTo(7f, 22f)
+            arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 5f, y1 = 20f)
+            lineTo(5f, 4f)
+            arcTo(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 7f, y1 = 2f)
+            close()
+        }
+        path(
+            stroke = SolidColor(Color.Black),
+            strokeLineWidth = 2f,
+            strokeLineCap = StrokeCap.Round,
+            strokeLineJoin = StrokeJoin.Round
+        ) {
+            moveTo(12f, 18f)
+            lineTo(12.01f, 18f)
+        }
+    }.build()
+
+// Lucide CircleCheck
+val CheckCircle: ImageVector
+    get() = ImageVector.Builder(
+        name = "CheckCircle",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(
+            stroke = SolidColor(Color.Black),
+            strokeLineWidth = 2f,
+            strokeLineCap = StrokeCap.Round,
+            strokeLineJoin = StrokeJoin.Round
+        ) {
+            // circle cx 12 cy 12 r 10
+            moveTo(12f, 2f)
+            arcTo(10f, 10f, 0f, isMoreThanHalf = true, isPositiveArc = false, x1 = 12f, y1 = 22f)
+            arcTo(10f, 10f, 0f, isMoreThanHalf = true, isPositiveArc = false, x1 = 12f, y1 = 2f)
+            close()
+        }
+        path(
+            stroke = SolidColor(Color.Black),
+            strokeLineWidth = 2f,
+            strokeLineCap = StrokeCap.Round,
+            strokeLineJoin = StrokeJoin.Round
+        ) {
+            // m9 12 2 2 4-4
+            moveTo(9f, 12f)
+            lineTo(11f, 14f)
+            lineTo(15f, 10f)
+        }
+    }.build()
