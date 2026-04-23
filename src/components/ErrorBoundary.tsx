@@ -37,6 +37,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             )}
           </div>
           <button 
+            aria-label="Reload application"
             className="px-6 py-3 bg-white text-black rounded-xl font-bold hover:bg-slate-200 transition-all"
             onClick={() => window.location.reload()}
           >

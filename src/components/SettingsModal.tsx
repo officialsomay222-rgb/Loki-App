@@ -429,6 +429,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
                           {['pro', 'fast', 'happy'].map((m) => (
                             <motion.button
                               key={m}
+                              aria-label={`Select ${m} mode`}
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                               onClick={() => setModelMode(m as any)}
