@@ -228,4 +228,29 @@ export const TimelineItem = React.memo(({
       </AnimatePresence>
     </motion.div>
   );
+}, (prevProps, nextProps) => {
+  // ⚡ Bolt Performance Optimization:
+  // We only compare specific primitive properties of the `session` object (`id`, `title`, `isPinned`)
+  // that actually affect the rendering of this item in the sidebar.
+  // This explicitly prevents O(N) re-renders of the entire timeline list when the global `session`
+  // object references are recreated by `useLiveQuery` in `ChatContext` during chat streaming or
+  // background updates that alter other non-rendered session properties (like `updatedAt` or `messages`).
+  //
+  // We also rigorously compare all callback props (`onClick`, `onDelete`, etc.) to prevent stale closures.
+  //
+  // Expected Impact: Prevents O(N) React fiber reconciliation passes for the entire sidebar list
+  // on every single incoming stream chunk, significantly reducing main thread blocking during active chat.
+  return (
+    prevProps.session.id === nextProps.session.id &&
+    prevProps.session.title === nextProps.session.title &&
+    prevProps.session.isPinned === nextProps.session.isPinned &&
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.isAwakened === nextProps.isAwakened &&
+    prevProps.effectSidebar === nextProps.effectSidebar &&
+    prevProps.index === nextProps.index &&
+    prevProps.onClick === nextProps.onClick &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onPin === nextProps.onPin &&
+    prevProps.onRename === nextProps.onRename
+  );
 });
