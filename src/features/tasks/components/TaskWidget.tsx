@@ -35,6 +35,7 @@ export const TaskWidget: React.FC = () => {
         />
         <button
           type="submit"
+          aria-label="Add task"
           disabled={!newTaskTitle.trim()}
           className="bg-white hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed text-black rounded-lg p-2 transition-colors flex items-center justify-center"
         >
@@ -67,6 +68,7 @@ export const TaskWidget: React.FC = () => {
               >
                 <button
                   onClick={() => toggleTask(task.id)}
+                  aria-label={task.completed ? "Mark task as incomplete" : "Mark task as complete"}
                   className={`shrink-0 transition-colors ${task.completed ? 'text-white' : 'text-slate-400 hover:text-white'}`}
                 >
                   {task.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
@@ -78,6 +80,7 @@ export const TaskWidget: React.FC = () => {
 
                 <button
                   onClick={() => deleteTask(task.id)}
+                  aria-label="Delete task"
                   className="shrink-0 text-slate-500 hover:text-red-400 transition-colors p-1"
                 >
                   <Trash2 className="w-4 h-4" />
