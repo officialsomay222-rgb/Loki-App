@@ -228,4 +228,24 @@ export const TimelineItem = React.memo(({
       </AnimatePresence>
     </motion.div>
   );
+}, (prevProps, nextProps) => {
+  // ⚡ Bolt Optimization:
+  // Dexie's useLiveQuery reconstructs the array and recreates all object references on every update.
+  // This causes O(N) list re-renders. We prevent this by explicitly comparing primitive properties
+  // instead of relying on React.memo's default shallow reference comparison.
+  // Expected impact: Eliminates O(N) TimelineItem re-renders when a message is added or other
+  // sessions update, significantly reducing CPU load during active chat.
+  return (
+    prevProps.session.id === nextProps.session.id &&
+    prevProps.session.title === nextProps.session.title &&
+    prevProps.session.isPinned === nextProps.session.isPinned &&
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.isAwakened === nextProps.isAwakened &&
+    prevProps.effectSidebar === nextProps.effectSidebar &&
+    prevProps.index === nextProps.index &&
+    prevProps.onClick === nextProps.onClick &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onPin === nextProps.onPin &&
+    prevProps.onRename === nextProps.onRename
+  );
 });
