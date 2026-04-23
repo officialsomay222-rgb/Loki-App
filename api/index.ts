@@ -4,6 +4,7 @@ import { GoogleGenAI } from "@google/genai";
 import Groq from "groq-sdk";
 import { HfInference } from "@huggingface/inference";
 import { performDuckDuckGoSearch } from "./ddg_search.js";
+import { rateLimit } from "express-rate-limit";
 
 const app = express();
 
@@ -19,6 +20,18 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+app.set('trust proxy', 1); // Trust first proxy for accurate IP resolution behind Vercel/Cloud Run
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  message: { error: "Too many requests from this IP, please try again after 15 minutes" }
+});
+
+app.use('/api/', apiLimiter);
 
 // API routes FIRST
 app.get("/api/health", (req, res) => {
