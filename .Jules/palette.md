@@ -1,5 +1,3 @@
-## 2024-04-16 - Initial Setup\n**Learning:** Just starting to analyze this codebase for UX improvements. Noticed that aria-labels are missing on almost all icon-only buttons across the app.\n**Action:** Add aria-labels to the most critical interactive elements to improve accessibility.
-
-## 2024-05-18 - Missing ARIA Labels on Overlay Buttons
-**Learning:** Found a recurring pattern where icon-only buttons in modal/overlay components (like `CommandPalette` and `LiveVoiceOverlay`) lack `aria-label` attributes, making them inaccessible to screen readers. Even when a text label exists visually nearby (e.g., outside the button element), the button itself still needs an accessible name.
-**Action:** Always ensure `aria-label` is applied to `<button>` elements that only contain SVG icons, especially in interactive overlays like dialogs or call controls.
+## 2026-04-23 - Adding ARIA labels to Icon-Only Buttons
+**Learning:** For interactive icon-only components (like checkboxes and trash cans in a task list), it's important to provide `aria-label` attributes to ensure screen readers can announce the action. Specifically for toggle buttons, dynamically updating the label (e.g., 'Mark task as complete' vs 'Mark task as incomplete') provides clear state context to the user.
+**Action:** Always check icon-only buttons for missing `aria-label`s and verify if dynamic labels are needed for toggle states.
